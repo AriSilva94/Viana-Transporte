@@ -12,6 +12,7 @@ import { MachineFormPage } from './pages/machines/MachineFormPage'
 import { OperatorsListPage } from './pages/operators'
 import { OperatorFormPage } from './pages/operators/OperatorFormPage'
 import { DailyLogsPage } from './pages/dailylogs'
+import { DailyLogFormPage } from './pages/dailylogs/DailyLogFormPage'
 import { CostsPage } from './pages/costs'
 import { RevenuesPage } from './pages/revenues'
 import { ReportsPage } from './pages/reports'
@@ -43,6 +44,8 @@ export default function App(): JSX.Element {
           <Route path="operators/:id/edit" element={<OperatorFormPage />} />
 
           <Route path="daily-logs" element={<DailyLogsPage />} />
+          <Route path="daily-logs/new" element={<DailyLogFormPage />} />
+          <Route path="daily-logs/:id/edit" element={<DailyLogFormPage />} />
           <Route path="costs" element={<CostsPage />} />
           <Route path="revenues" element={<RevenuesPage />} />
           <Route path="reports" element={<ReportsPage />} />
