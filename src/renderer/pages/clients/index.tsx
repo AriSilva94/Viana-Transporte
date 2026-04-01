@@ -13,10 +13,16 @@ export function ClientsListPage(): JSX.Element {
   const [clients, setClients] = useState<Client[]>([])
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   async function loadClients(q?: string): Promise<void> {
-    const data = await api.clients.list(q ? { search: q } : undefined)
-    setClients(data)
+    setIsLoading(true)
+    try {
+      const data = await api.clients.list(q ? { search: q } : undefined)
+      setClients(data)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -72,7 +78,9 @@ export function ClientsListPage(): JSX.Element {
         title="Clientes"
         action={{ label: 'Novo Cliente', onClick: () => navigate('/clients/new') }}
       />
-      {clients.length === 0 && !search ? (
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Carregando...</div>
+      ) : clients.length === 0 && !search ? (
         <EmptyState
           message="Nenhum cliente cadastrado"
           action={{

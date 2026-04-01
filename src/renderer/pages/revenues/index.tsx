@@ -26,11 +26,17 @@ export function RevenuesPage(): JSX.Element {
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<RevenueFilters>({})
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   async function loadRevenues(activeFilters: RevenueFilters): Promise<void> {
-    const hasFilters = Object.values(activeFilters).some((v) => v !== undefined && v !== '')
-    const data = await api.revenues.list(hasFilters ? activeFilters : undefined)
-    setRevenues(data)
+    setIsLoading(true)
+    try {
+      const hasFilters = Object.values(activeFilters).some((v) => v !== undefined && v !== '')
+      const data = await api.revenues.list(hasFilters ? activeFilters : undefined)
+      setRevenues(data)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -190,7 +196,9 @@ export function RevenuesPage(): JSX.Element {
         )}
       </FilterPanel>
 
-      {revenues.length === 0 && !hasActiveFilters ? (
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Carregando...</div>
+      ) : revenues.length === 0 && !hasActiveFilters ? (
         <EmptyState
           message="Nenhuma receita registrada"
           action={{

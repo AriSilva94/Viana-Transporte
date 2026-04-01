@@ -14,10 +14,16 @@ export function OperatorsListPage(): JSX.Element {
   const [operators, setOperators] = useState<Operator[]>([])
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   async function loadOperators(q?: string): Promise<void> {
-    const data = await api.operators.list(q ? { search: q } : undefined)
-    setOperators(data)
+    setIsLoading(true)
+    try {
+      const data = await api.operators.list(q ? { search: q } : undefined)
+      setOperators(data)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -58,7 +64,9 @@ export function OperatorsListPage(): JSX.Element {
         title="Operadores"
         action={{ label: 'Novo Operador', onClick: () => navigate('/operators/new') }}
       />
-      {operators.length === 0 && !search ? (
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Carregando...</div>
+      ) : operators.length === 0 && !search ? (
         <EmptyState
           message="Nenhum operador cadastrado"
           action={{ label: 'Cadastrar primeiro operador', onClick: () => navigate('/operators/new') }}

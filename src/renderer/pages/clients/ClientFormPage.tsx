@@ -5,12 +5,14 @@ import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
+import { useToast } from '@renderer/context/ToastContext'
 import type { Client } from '../../../shared/types'
 
 export function ClientFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
+  const { showToast } = useToast()
 
   const [name, setName] = useState('')
   const [document, setDocument] = useState('')
@@ -53,8 +55,10 @@ export function ClientFormPage(): JSX.Element {
       } else {
         await api.clients.create(data)
       }
+      showToast('Salvo com sucesso!')
       navigate('/clients')
     } catch {
+      showToast('Erro ao salvar. Tente novamente.', 'error')
       setError('Erro ao salvar cliente. Tente novamente.')
     } finally {
       setIsLoading(false)

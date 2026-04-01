@@ -14,10 +14,16 @@ export function MachinesListPage(): JSX.Element {
   const [machines, setMachines] = useState<Machine[]>([])
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   async function loadMachines(q?: string): Promise<void> {
-    const data = await api.machines.list(q ? { search: q } : undefined)
-    setMachines(data)
+    setIsLoading(true)
+    try {
+      const data = await api.machines.list(q ? { search: q } : undefined)
+      setMachines(data)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -55,7 +61,9 @@ export function MachinesListPage(): JSX.Element {
         title="Máquinas"
         action={{ label: 'Nova Máquina', onClick: () => navigate('/machines/new') }}
       />
-      {machines.length === 0 && !search ? (
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Carregando...</div>
+      ) : machines.length === 0 && !search ? (
         <EmptyState
           message="Nenhuma máquina cadastrada"
           action={{ label: 'Cadastrar primeira máquina', onClick: () => navigate('/machines/new') }}

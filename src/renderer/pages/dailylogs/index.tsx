@@ -18,11 +18,17 @@ export function DailyLogsPage(): JSX.Element {
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<DailyLogFilters>({})
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   async function loadLogs(activeFilters: DailyLogFilters): Promise<void> {
-    const hasFilters = Object.values(activeFilters).some((v) => v !== undefined && v !== '')
-    const data = await api.dailylogs.list(hasFilters ? activeFilters : undefined)
-    setLogs(data)
+    setIsLoading(true)
+    try {
+      const hasFilters = Object.values(activeFilters).some((v) => v !== undefined && v !== '')
+      const data = await api.dailylogs.list(hasFilters ? activeFilters : undefined)
+      setLogs(data)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -166,7 +172,9 @@ export function DailyLogsPage(): JSX.Element {
         )}
       </FilterPanel>
 
-      {logs.length === 0 && !hasActiveFilters ? (
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Carregando...</div>
+      ) : logs.length === 0 && !hasActiveFilters ? (
         <EmptyState
           message="Nenhum diário de operação registrado"
           action={{

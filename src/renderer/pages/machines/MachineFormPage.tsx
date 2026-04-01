@@ -6,12 +6,14 @@ import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Select } from '@renderer/components/ui/select'
 import { Label } from '@renderer/components/ui/label'
+import { useToast } from '@renderer/context/ToastContext'
 import type { Machine } from '../../../shared/types'
 
 export function MachineFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
+  const { showToast } = useToast()
 
   const [name, setName] = useState('')
   const [type, setType] = useState('')
@@ -55,8 +57,10 @@ export function MachineFormPage(): JSX.Element {
       } else {
         await api.machines.create(data)
       }
+      showToast('Salvo com sucesso!')
       navigate('/machines')
     } catch {
+      showToast('Erro ao salvar. Tente novamente.', 'error')
       setError('Erro ao salvar máquina. Tente novamente.')
     } finally {
       setIsLoading(false)

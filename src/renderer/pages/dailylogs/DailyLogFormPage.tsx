@@ -7,12 +7,14 @@ import { Textarea } from '@renderer/components/ui/textarea'
 import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
+import { useToast } from '@renderer/context/ToastContext'
 import type { DailyLogWithRelations, ProjectWithClient, Machine, Operator } from '../../../shared/types'
 
 export function DailyLogFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
+  const { showToast } = useToast()
 
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [machines, setMachines] = useState<Machine[]>([])
@@ -77,8 +79,10 @@ export function DailyLogFormPage(): JSX.Element {
       } else {
         await api.dailylogs.create(data)
       }
+      showToast('Salvo com sucesso!')
       navigate('/daily-logs')
     } catch {
+      showToast('Erro ao salvar. Tente novamente.', 'error')
       setError('Erro ao salvar diário. Tente novamente.')
     } finally {
       setIsLoading(false)
