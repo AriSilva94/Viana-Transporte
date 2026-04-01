@@ -5,6 +5,7 @@ import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Select } from '@renderer/components/ui/select'
+import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import type { DailyLogWithRelations, ProjectWithClient, Machine, Operator } from '../../../shared/types'
 
@@ -87,6 +88,7 @@ export function DailyLogFormPage(): JSX.Element {
   return (
     <FormCard
       title={isEdit ? 'Editar Diário de Operação' : 'Novo Diário de Operação'}
+      description="Registre a rotina do dia com horas, máquina, operador e ocorrências de forma clara e auditável."
       onSubmit={handleSubmit}
       onCancel={() => navigate('/daily-logs')}
       isLoading={isLoading}
@@ -94,15 +96,10 @@ export function DailyLogFormPage(): JSX.Element {
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {/* Row 1: Data, Projeto */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="date">Data *</Label>
-          <Input
-            id="date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          <DatePicker id="date" value={date} onChange={setDate} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="projectId">Projeto *</Label>
@@ -122,7 +119,7 @@ export function DailyLogFormPage(): JSX.Element {
       </div>
 
       {/* Row 2: Máquina, Operador */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="machineId">Máquina</Label>
           <Select
@@ -156,7 +153,7 @@ export function DailyLogFormPage(): JSX.Element {
       </div>
 
       {/* Row 3: Horas Trabalhadas, Combustível */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="hoursWorked">Horas Trabalhadas *</Label>
           <Input
@@ -195,7 +192,7 @@ export function DailyLogFormPage(): JSX.Element {
       </div>
 
       {/* Row 5: Observações de Parada, Observações Gerais */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="downtimeNotes">Observações de Parada</Label>
           <Textarea

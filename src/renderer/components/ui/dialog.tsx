@@ -12,10 +12,10 @@ function Dialog({ open, onOpenChange, children }: DialogProps): JSX.Element | nu
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/50"
+        className="fixed inset-0 bg-brand-deep/45 backdrop-blur-sm"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative z-50 w-full max-w-lg rounded-lg bg-background p-6 shadow-lg">
+      <div className="relative z-50 w-full max-w-lg rounded-3xl border border-border/70 bg-white/95 p-6 shadow-[0_24px_60px_rgba(34,49,95,0.24)]">
         {children}
       </div>
     </div>

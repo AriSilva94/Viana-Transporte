@@ -2,16 +2,16 @@ import * as React from 'react'
 import { cn } from '@renderer/lib/utils'
 
 const statusColors: Record<string, string> = {
-  planned: 'bg-gray-100 text-gray-800',
-  active: 'bg-green-100 text-green-800',
-  completed: 'bg-blue-100 text-blue-800',
-  canceled: 'bg-red-100 text-red-800',
-  available: 'bg-green-100 text-green-800',
-  allocated: 'bg-yellow-100 text-yellow-800',
-  under_maintenance: 'bg-orange-100 text-orange-800',
-  inactive: 'bg-gray-100 text-gray-800',
-  billed: 'bg-blue-100 text-blue-800',
-  received: 'bg-green-100 text-green-800',
+  planned: 'bg-brand-sand/25 text-brand-ink',
+  active: 'bg-brand-deep text-white',
+  completed: 'bg-brand-sky/18 text-brand-deep',
+  canceled: 'bg-brand-orange/18 text-brand-orange',
+  available: 'bg-brand-sky/18 text-brand-deep',
+  allocated: 'bg-brand-sand/35 text-brand-ink',
+  under_maintenance: 'bg-brand-orange/18 text-brand-orange',
+  inactive: 'bg-muted text-muted-foreground',
+  billed: 'bg-brand-sand/35 text-brand-ink',
+  received: 'bg-brand-deep/12 text-brand-deep',
 }
 
 const statusLabels: Record<string, string> = {
@@ -33,12 +33,12 @@ interface StatusBadgeProps {
 }
 
 function StatusBadge({ status, className }: StatusBadgeProps): JSX.Element {
-  const colorClass = statusColors[status] ?? 'bg-gray-100 text-gray-800'
+  const colorClass = statusColors[status] ?? 'bg-muted text-muted-foreground'
   const label = statusLabels[status] ?? status
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+        'inline-flex items-center rounded-full border border-black/5 px-2.5 py-1 text-xs font-medium shadow-sm',
         colorClass,
         className
       )}

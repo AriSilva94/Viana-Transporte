@@ -5,6 +5,7 @@ import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Select } from '@renderer/components/ui/select'
+import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import type { ProjectCostWithRelations, ProjectWithClient, Machine, Operator, ProjectCost } from '../../../shared/types'
 
@@ -97,6 +98,7 @@ export function CostFormPage(): JSX.Element {
   return (
     <FormCard
       title={isEdit ? 'Editar Custo' : 'Novo Custo'}
+      description="Registre despesas com contexto suficiente para leitura financeira e rastreabilidade operacional."
       onSubmit={handleSubmit}
       onCancel={() => navigate('/costs')}
       isLoading={isLoading}
@@ -104,15 +106,10 @@ export function CostFormPage(): JSX.Element {
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {/* Row 1: Data, Projeto */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="date">Data *</Label>
-          <Input
-            id="date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          <DatePicker id="date" value={date} onChange={setDate} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="projectId">Projeto *</Label>
@@ -132,7 +129,7 @@ export function CostFormPage(): JSX.Element {
       </div>
 
       {/* Row 2: Categoria, Descrição */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="category">Categoria *</Label>
           <Select
@@ -161,7 +158,7 @@ export function CostFormPage(): JSX.Element {
       </div>
 
       {/* Row 3: Valor, Máquina */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="amount">Valor (R$) *</Label>
           <Input
@@ -192,7 +189,7 @@ export function CostFormPage(): JSX.Element {
       </div>
 
       {/* Row 4: Operador */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="operatorId">Operador</Label>
           <Select

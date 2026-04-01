@@ -39,7 +39,7 @@ function TabsList({
   return (
     <div
       className={cn(
-        'flex items-center border-b mb-4',
+        'mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-border/80 bg-white/75 p-2 shadow-sm backdrop-blur-sm',
         className
       )}
     >
@@ -61,10 +61,10 @@ function TabsTrigger({ value, children, className }: TabsTriggerProps): JSX.Elem
     <button
       type="button"
       className={cn(
-        'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+        'rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200',
         isActive
-          ? 'border-primary text-primary'
-          : 'border-transparent text-muted-foreground hover:text-foreground',
+          ? 'bg-brand-deep text-white shadow-sm'
+          : 'text-muted-foreground hover:bg-brand-sand/20 hover:text-foreground',
         className
       )}
       onClick={() => setActiveTab(value)}
