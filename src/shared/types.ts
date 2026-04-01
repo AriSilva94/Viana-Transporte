@@ -25,6 +25,10 @@ export interface Project {
   updatedAt: Date
 }
 
+export interface ProjectWithClient extends Project {
+  clientName: string | null
+}
+
 export interface Machine {
   id: number
   name: string
@@ -150,8 +154,8 @@ export interface ElectronAPI {
     delete: (id: number) => Promise<void>
   }
   projects: {
-    list: (filters?: ProjectFilters) => Promise<Project[]>
-    get: (id: number) => Promise<Project | null>
+    list: (filters?: ProjectFilters) => Promise<ProjectWithClient[]>
+    get: (id: number) => Promise<ProjectWithClient | null>
     create: (data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Project>
     update: (id: number, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>) => Promise<Project>
     delete: (id: number) => Promise<void>
