@@ -14,7 +14,9 @@ import { OperatorFormPage } from './pages/operators/OperatorFormPage'
 import { DailyLogsPage } from './pages/dailylogs'
 import { DailyLogFormPage } from './pages/dailylogs/DailyLogFormPage'
 import { CostsPage } from './pages/costs'
+import { CostFormPage } from './pages/costs/CostFormPage'
 import { RevenuesPage } from './pages/revenues'
+import { RevenueFormPage } from './pages/revenues/RevenueFormPage'
 import { ReportsPage } from './pages/reports'
 
 export default function App(): JSX.Element {
@@ -47,7 +49,11 @@ export default function App(): JSX.Element {
           <Route path="daily-logs/new" element={<DailyLogFormPage />} />
           <Route path="daily-logs/:id/edit" element={<DailyLogFormPage />} />
           <Route path="costs" element={<CostsPage />} />
+          <Route path="costs/new" element={<CostFormPage />} />
+          <Route path="costs/:id/edit" element={<CostFormPage />} />
           <Route path="revenues" element={<RevenuesPage />} />
+          <Route path="revenues/new" element={<RevenueFormPage />} />
+          <Route path="revenues/:id/edit" element={<RevenueFormPage />} />
           <Route path="reports" element={<ReportsPage />} />
         </Route>
       </Routes>
