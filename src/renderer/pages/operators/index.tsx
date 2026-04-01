@@ -1,4 +1,4 @@
-export function OperatorsPage(): JSX.Element {
+export function OperatorsListPage(): JSX.Element {
   return (
     <div>
       <h1 className="text-2xl font-semibold mb-4">Operadores</h1>
