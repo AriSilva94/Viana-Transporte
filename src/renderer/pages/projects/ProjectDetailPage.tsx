@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '@renderer/lib/api'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
+import { DataTable } from '@renderer/components/shared/DataTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/ui/tabs'
 import { StatusBadge } from '@renderer/components/ui/badge'
-import type { ProjectWithClient, ProjectSummary } from '../../../shared/types'
+import { Button } from '@renderer/components/ui/button'
+import type { ProjectWithClient, ProjectSummary, DailyLogWithRelations } from '../../../shared/types'
 
 export function ProjectDetailPage(): JSX.Element {
   const navigate = useNavigate()
@@ -16,11 +18,13 @@ export function ProjectDetailPage(): JSX.Element {
     profit: 0,
     totalHours: 0,
   })
+  const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
 
   useEffect(() => {
     const numId = Number(id)
     api.projects.get(numId).then(setProject)
     api.projects.summary(numId).then(setSummary)
+    api.dailylogs.list({ projectId: numId }).then(setLogs)
   }, [id])
 
   if (!project) {
@@ -85,7 +89,26 @@ export function ProjectDetailPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="logs">
-          <p className="text-muted-foreground">Registros diários disponíveis na Fase 3.</p>
+          <div className="flex justify-end mb-3">
+            <Button size="sm" onClick={() => navigate(`/daily-logs/new`)}>Novo Registro</Button>
+          </div>
+          {logs.length === 0 ? (
+            <p className="text-muted-foreground text-sm">Nenhum registro diário para este projeto.</p>
+          ) : (
+            <DataTable
+              columns={[
+                { key: 'date', label: 'Data', render: (row: DailyLogWithRelations) => new Date(row.date).toLocaleDateString('pt-BR') },
+                { key: 'machineName', label: 'Máquina', render: (row: DailyLogWithRelations) => row.machineName ?? '—' },
+                { key: 'operatorName', label: 'Operador', render: (row: DailyLogWithRelations) => row.operatorName ?? '—' },
+                { key: 'hoursWorked', label: 'Horas', render: (row: DailyLogWithRelations) => String(row.hoursWorked) },
+                { key: 'workDescription', label: 'Serviço', render: (row: DailyLogWithRelations) => row.workDescription ?? '—' },
+                { key: 'actions', label: 'Ações', render: (row: DailyLogWithRelations) => (
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/daily-logs/${row.id}/edit`)}>Editar</Button>
+                )},
+              ]}
+              data={logs}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="custos">

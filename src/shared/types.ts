@@ -67,6 +67,12 @@ export interface DailyLog {
   updatedAt: Date
 }
 
+export interface DailyLogWithRelations extends DailyLog {
+  projectName: string | null
+  machineName: string | null
+  operatorName: string | null
+}
+
 export interface ProjectCost {
   id: number
   date: Date
@@ -125,8 +131,8 @@ export interface DailyLogFilters {
   projectId?: number
   machineId?: number
   operatorId?: number
-  dateFrom?: Date
-  dateTo?: Date
+  dateFrom?: string
+  dateTo?: string
 }
 
 export interface CostFilters {
@@ -176,8 +182,8 @@ export interface ElectronAPI {
     delete: (id: number) => Promise<void>
   }
   dailylogs: {
-    list: (filters?: DailyLogFilters) => Promise<DailyLog[]>
-    get: (id: number) => Promise<DailyLog | null>
+    list: (filters?: DailyLogFilters) => Promise<DailyLogWithRelations[]>
+    get: (id: number) => Promise<DailyLogWithRelations | null>
     create: (data: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>) => Promise<DailyLog>
     update: (id: number, data: Partial<Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>>) => Promise<DailyLog>
     delete: (id: number) => Promise<void>
