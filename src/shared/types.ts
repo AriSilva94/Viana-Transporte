@@ -87,6 +87,12 @@ export interface ProjectCost {
   updatedAt: Date
 }
 
+export interface ProjectCostWithRelations extends ProjectCost {
+  projectName: string | null
+  machineName: string | null
+  operatorName: string | null
+}
+
 export interface ProjectRevenue {
   id: number
   date: Date
@@ -97,6 +103,10 @@ export interface ProjectRevenue {
   notes: string | null
   createdAt: Date
   updatedAt: Date
+}
+
+export interface ProjectRevenueWithRelations extends ProjectRevenue {
+  projectName: string | null
 }
 
 // ─── Computed Result Types ────────────────────────────────────────────────────
@@ -138,15 +148,15 @@ export interface DailyLogFilters {
 export interface CostFilters {
   projectId?: number
   category?: ProjectCost['category']
-  dateFrom?: Date
-  dateTo?: Date
+  dateFrom?: string
+  dateTo?: string
 }
 
 export interface RevenueFilters {
   projectId?: number
   status?: ProjectRevenue['status']
-  dateFrom?: Date
-  dateTo?: Date
+  dateFrom?: string
+  dateTo?: string
 }
 
 // ─── ElectronAPI ──────────────────────────────────────────────────────────────
@@ -189,15 +199,15 @@ export interface ElectronAPI {
     delete: (id: number) => Promise<void>
   }
   costs: {
-    list: (filters?: CostFilters) => Promise<ProjectCost[]>
-    get: (id: number) => Promise<ProjectCost | null>
+    list: (filters?: CostFilters) => Promise<ProjectCostWithRelations[]>
+    get: (id: number) => Promise<ProjectCostWithRelations | null>
     create: (data: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>) => Promise<ProjectCost>
     update: (id: number, data: Partial<Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>>) => Promise<ProjectCost>
     delete: (id: number) => Promise<void>
   }
   revenues: {
-    list: (filters?: RevenueFilters) => Promise<ProjectRevenue[]>
-    get: (id: number) => Promise<ProjectRevenue | null>
+    list: (filters?: RevenueFilters) => Promise<ProjectRevenueWithRelations[]>
+    get: (id: number) => Promise<ProjectRevenueWithRelations | null>
     create: (data: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>) => Promise<ProjectRevenue>
     update: (id: number, data: Partial<Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>>) => Promise<ProjectRevenue>
     delete: (id: number) => Promise<void>

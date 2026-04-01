@@ -6,7 +6,17 @@ import { DataTable } from '@renderer/components/shared/DataTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/ui/tabs'
 import { StatusBadge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
-import type { ProjectWithClient, ProjectSummary, DailyLogWithRelations } from '../../../shared/types'
+import type { ProjectWithClient, ProjectSummary, DailyLogWithRelations, ProjectCostWithRelations, ProjectRevenueWithRelations } from '../../../shared/types'
+
+const categoryLabels: Record<string, string> = {
+  fuel: 'Combustível',
+  labor: 'Mão de obra',
+  maintenance: 'Manutenção',
+  transport: 'Transporte',
+  outsourced_service: 'Serviço terceirizado',
+  outsourced: 'Serviço terceirizado',
+  miscellaneous: 'Diversos',
+}
 
 export function ProjectDetailPage(): JSX.Element {
   const navigate = useNavigate()
@@ -19,12 +29,16 @@ export function ProjectDetailPage(): JSX.Element {
     totalHours: 0,
   })
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
+  const [costs, setCosts] = useState<ProjectCostWithRelations[]>([])
+  const [revenues, setRevenues] = useState<ProjectRevenueWithRelations[]>([])
 
   useEffect(() => {
     const numId = Number(id)
     api.projects.get(numId).then(setProject)
     api.projects.summary(numId).then(setSummary)
     api.dailylogs.list({ projectId: numId }).then(setLogs)
+    api.costs.list({ projectId: numId }).then(setCosts)
+    api.revenues.list({ projectId: numId }).then(setRevenues)
   }, [id])
 
   if (!project) {
@@ -112,11 +126,47 @@ export function ProjectDetailPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="custos">
-          <p className="text-muted-foreground">Custos disponíveis na Fase 4.</p>
+          <div className="flex justify-end mb-3">
+            <Button size="sm" onClick={() => navigate('/costs/new')}>Novo Custo</Button>
+          </div>
+          {costs.length === 0 ? (
+            <p className="text-muted-foreground text-sm">Nenhum custo registrado para este projeto.</p>
+          ) : (
+            <DataTable
+              columns={[
+                { key: 'date', label: 'Data', render: (row: ProjectCostWithRelations) => new Date(row.date).toLocaleDateString('pt-BR') },
+                { key: 'category', label: 'Categoria', render: (row: ProjectCostWithRelations) => categoryLabels[row.category] ?? row.category },
+                { key: 'description', label: 'Descrição', render: (row: ProjectCostWithRelations) => row.description },
+                { key: 'amount', label: 'Valor', render: (row: ProjectCostWithRelations) => formatCurrency(Number(row.amount)) },
+                { key: 'actions', label: 'Ações', render: (row: ProjectCostWithRelations) => (
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/costs/${row.id}/edit`)}>Editar</Button>
+                )},
+              ]}
+              data={costs}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="receitas">
-          <p className="text-muted-foreground">Receitas disponíveis na Fase 4.</p>
+          <div className="flex justify-end mb-3">
+            <Button size="sm" onClick={() => navigate('/revenues/new')}>Nova Receita</Button>
+          </div>
+          {revenues.length === 0 ? (
+            <p className="text-muted-foreground text-sm">Nenhuma receita registrada para este projeto.</p>
+          ) : (
+            <DataTable
+              columns={[
+                { key: 'date', label: 'Data', render: (row: ProjectRevenueWithRelations) => new Date(row.date).toLocaleDateString('pt-BR') },
+                { key: 'description', label: 'Descrição', render: (row: ProjectRevenueWithRelations) => row.description },
+                { key: 'amount', label: 'Valor', render: (row: ProjectRevenueWithRelations) => formatCurrency(Number(row.amount)) },
+                { key: 'status', label: 'Status', render: (row: ProjectRevenueWithRelations) => <StatusBadge status={row.status} /> },
+                { key: 'actions', label: 'Ações', render: (row: ProjectRevenueWithRelations) => (
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/revenues/${row.id}/edit`)}>Editar</Button>
+                )},
+              ]}
+              data={revenues}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="resumo">
