@@ -17,15 +17,21 @@ export function ProjectsListPage(): JSX.Element {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<Project['status'] | ''>('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   async function loadProjects(q?: string, s?: Project['status'] | ''): Promise<void> {
-    const filters: Record<string, unknown> = {}
-    if (q) filters.search = q
-    if (s) filters.status = s
-    const data = await api.projects.list(
-      Object.keys(filters).length ? (filters as Parameters<typeof api.projects.list>[0]) : undefined
-    )
-    setProjects(data)
+    setIsLoading(true)
+    try {
+      const filters: Record<string, unknown> = {}
+      if (q) filters.search = q
+      if (s) filters.status = s
+      const data = await api.projects.list(
+        Object.keys(filters).length ? (filters as Parameters<typeof api.projects.list>[0]) : undefined
+      )
+      setProjects(data)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -88,7 +94,9 @@ export function ProjectsListPage(): JSX.Element {
           <option value="canceled">Cancelado</option>
         </Select>
       </FilterPanel>
-      {projects.length === 0 ? (
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Carregando...</div>
+      ) : projects.length === 0 ? (
         <EmptyState
           message="Nenhum projeto cadastrado"
           action={{ label: 'Criar primeiro projeto', onClick: () => navigate('/projects/new') }}

@@ -5,12 +5,14 @@ import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
+import { useToast } from '@renderer/context/ToastContext'
 import type { Operator } from '../../../shared/types'
 
 export function OperatorFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
+  const { showToast } = useToast()
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -50,8 +52,10 @@ export function OperatorFormPage(): JSX.Element {
       } else {
         await api.operators.create(data)
       }
+      showToast('Salvo com sucesso!')
       navigate('/operators')
     } catch {
+      showToast('Erro ao salvar. Tente novamente.', 'error')
       setError('Erro ao salvar operador. Tente novamente.')
     } finally {
       setIsLoading(false)
