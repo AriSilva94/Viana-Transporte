@@ -9,8 +9,10 @@ import { ProjectFormPage } from './pages/projects/ProjectFormPage'
 import { ProjectDetailPage } from './pages/projects/ProjectDetailPage'
 import { MachinesListPage } from './pages/machines'
 import { MachineFormPage } from './pages/machines/MachineFormPage'
+import { MachineDetailPage } from './pages/machines/MachineDetailPage'
 import { OperatorsListPage } from './pages/operators'
 import { OperatorFormPage } from './pages/operators/OperatorFormPage'
+import { OperatorDetailPage } from './pages/operators/OperatorDetailPage'
 import { DailyLogsPage } from './pages/dailylogs'
 import { DailyLogFormPage } from './pages/dailylogs/DailyLogFormPage'
 import { CostsPage } from './pages/costs'
@@ -39,10 +41,12 @@ export default function App(): JSX.Element {
 
           <Route path="machines" element={<MachinesListPage />} />
           <Route path="machines/new" element={<MachineFormPage />} />
+          <Route path="machines/:id" element={<MachineDetailPage />} />
           <Route path="machines/:id/edit" element={<MachineFormPage />} />
 
           <Route path="operators" element={<OperatorsListPage />} />
           <Route path="operators/new" element={<OperatorFormPage />} />
+          <Route path="operators/:id" element={<OperatorDetailPage />} />
           <Route path="operators/:id/edit" element={<OperatorFormPage />} />
 
           <Route path="daily-logs" element={<DailyLogsPage />} />
