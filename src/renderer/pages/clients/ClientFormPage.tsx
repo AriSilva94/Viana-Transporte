@@ -5,6 +5,7 @@ import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
+import type { Client } from '../../../shared/types'
 
 export function ClientFormPage(): JSX.Element {
   const navigate = useNavigate()
@@ -21,7 +22,7 @@ export function ClientFormPage(): JSX.Element {
 
   useEffect(() => {
     if (!isEdit) return
-    api.clients.get(Number(id)).then((client) => {
+    api.clients.get(Number(id)).then((client: Client | null) => {
       if (!client) return
       setName(client.name)
       setDocument(client.document ?? '')

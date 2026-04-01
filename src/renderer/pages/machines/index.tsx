@@ -1,4 +1,4 @@
-export function MachinesPage(): JSX.Element {
+export function MachinesListPage(): JSX.Element {
   return (
     <div>
       <h1 className="text-2xl font-semibold mb-4">Máquinas</h1>
