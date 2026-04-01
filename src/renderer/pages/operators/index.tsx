@@ -51,6 +51,7 @@ export function OperatorsListPage(): JSX.Element {
       label: 'Ações',
       render: (row: Operator) => (
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => navigate(`/operators/${row.id}`)}>Ver</Button>
           <Button size="sm" variant="outline" onClick={() => navigate(`/operators/${row.id}/edit`)}>Editar</Button>
           <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>Excluir</Button>
         </div>

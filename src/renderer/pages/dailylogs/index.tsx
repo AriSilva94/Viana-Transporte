@@ -10,12 +10,14 @@ import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
 import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
-import type { DailyLogWithRelations, ProjectWithClient, DailyLogFilters } from '../../../shared/types'
+import type { DailyLogWithRelations, ProjectWithClient, Machine, Operator, DailyLogFilters } from '../../../shared/types'
 
 export function DailyLogsPage(): JSX.Element {
   const navigate = useNavigate()
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
+  const [machines, setMachines] = useState<Machine[]>([])
+  const [operators, setOperators] = useState<Operator[]>([])
   const [filters, setFilters] = useState<DailyLogFilters>({})
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -33,6 +35,8 @@ export function DailyLogsPage(): JSX.Element {
 
   useEffect(() => {
     api.projects.list().then(setProjects)
+    api.machines.list().then(setMachines)
+    api.operators.list().then(setOperators)
     loadLogs({})
   }, [])
 
@@ -57,6 +61,8 @@ export function DailyLogsPage(): JSX.Element {
 
   const hasActiveFilters =
     filters.projectId !== undefined ||
+    filters.machineId !== undefined ||
+    filters.operatorId !== undefined ||
     (filters.dateFrom !== undefined && filters.dateFrom !== '') ||
     (filters.dateTo !== undefined && filters.dateTo !== '')
 
@@ -140,6 +146,46 @@ export function DailyLogsPage(): JSX.Element {
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-foreground">Máquina</label>
+          <Select
+            value={filters.machineId !== undefined ? String(filters.machineId) : ''}
+            onChange={(e) =>
+              handleFilterChange({
+                machineId: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
+            className="w-48"
+          >
+            <option value="">Todas as máquinas</option>
+            {machines.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-foreground">Operador</label>
+          <Select
+            value={filters.operatorId !== undefined ? String(filters.operatorId) : ''}
+            onChange={(e) =>
+              handleFilterChange({
+                operatorId: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
+            className="w-48"
+          >
+            <option value="">Todos os operadores</option>
+            {operators.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.name}
               </option>
             ))}
           </Select>

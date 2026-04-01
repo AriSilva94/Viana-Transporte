@@ -48,6 +48,7 @@ export function MachinesListPage(): JSX.Element {
       label: 'Ações',
       render: (row: Machine) => (
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => navigate(`/machines/${row.id}`)}>Ver</Button>
           <Button size="sm" variant="outline" onClick={() => navigate(`/machines/${row.id}/edit`)}>Editar</Button>
           <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>Excluir</Button>
         </div>
