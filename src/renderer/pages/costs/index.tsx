@@ -5,9 +5,10 @@ import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { EmptyState } from '@renderer/components/shared/EmptyState'
 import { ConfirmDialog } from '@renderer/components/shared/ConfirmDialog'
+import { FilterPanel } from '@renderer/components/shared/FilterPanel'
 import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
 import { Select } from '@renderer/components/ui/select'
+import { DatePicker } from '@renderer/components/ui/date-picker'
 import type { ProjectCostWithRelations, ProjectWithClient, CostFilters, ProjectCost } from '../../../shared/types'
 
 type CostCategory = ProjectCost['category']
@@ -137,7 +138,7 @@ export function CostsPage(): JSX.Element {
         action={{ label: 'Novo Custo', onClick: () => navigate('/costs/new') }}
       />
 
-      <div className="flex flex-wrap gap-4 mb-4 items-end">
+      <FilterPanel>
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">Projeto</label>
           <Select
@@ -180,25 +181,21 @@ export function CostsPage(): JSX.Element {
 
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">Data inicial</label>
-          <Input
-            type="date"
+          <DatePicker
             value={filters.dateFrom ?? ''}
-            onChange={(e) =>
-              handleFilterChange({ dateFrom: e.target.value || undefined })
-            }
+            onChange={(value) => handleFilterChange({ dateFrom: value || undefined })}
             className="w-40"
+            allowClear
           />
         </div>
 
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">Data final</label>
-          <Input
-            type="date"
+          <DatePicker
             value={filters.dateTo ?? ''}
-            onChange={(e) =>
-              handleFilterChange({ dateTo: e.target.value || undefined })
-            }
+            onChange={(value) => handleFilterChange({ dateTo: value || undefined })}
             className="w-40"
+            allowClear
           />
         </div>
 
@@ -207,7 +204,7 @@ export function CostsPage(): JSX.Element {
             Limpar filtros
           </Button>
         )}
-      </div>
+      </FilterPanel>
 
       {costs.length === 0 && !hasActiveFilters ? (
         <EmptyState

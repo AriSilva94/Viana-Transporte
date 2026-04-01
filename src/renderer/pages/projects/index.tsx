@@ -5,6 +5,7 @@ import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { EmptyState } from '@renderer/components/shared/EmptyState'
 import { ConfirmDialog } from '@renderer/components/shared/ConfirmDialog'
+import { FilterPanel } from '@renderer/components/shared/FilterPanel'
 import { Button } from '@renderer/components/ui/button'
 import { Select } from '@renderer/components/ui/select'
 import { StatusBadge } from '@renderer/components/ui/badge'
@@ -70,7 +71,7 @@ export function ProjectsListPage(): JSX.Element {
         title="Projetos"
         action={{ label: 'Novo Projeto', onClick: () => navigate('/projects/new') }}
       />
-      <div className="flex gap-3 mb-4">
+      <FilterPanel>
         <Select
           value={status}
           onChange={(e) => {
@@ -86,7 +87,7 @@ export function ProjectsListPage(): JSX.Element {
           <option value="completed">Concluído</option>
           <option value="canceled">Cancelado</option>
         </Select>
-      </div>
+      </FilterPanel>
       {projects.length === 0 ? (
         <EmptyState
           message="Nenhum projeto cadastrado"

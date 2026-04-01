@@ -66,6 +66,7 @@ export function MachineFormPage(): JSX.Element {
   return (
     <FormCard
       title={isEdit ? 'Editar Máquina' : 'Nova Máquina'}
+      description="Organize os ativos da operação com identificação, modelo e status sempre atualizados."
       onSubmit={handleSubmit}
       onCancel={() => navigate('/machines')}
       isLoading={isLoading}

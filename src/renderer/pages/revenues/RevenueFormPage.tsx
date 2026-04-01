@@ -5,6 +5,7 @@ import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Select } from '@renderer/components/ui/select'
+import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import type { ProjectRevenueWithRelations, ProjectWithClient, ProjectRevenue } from '../../../shared/types'
 
@@ -84,6 +85,7 @@ export function RevenueFormPage(): JSX.Element {
   return (
     <FormCard
       title={isEdit ? 'Editar Receita' : 'Nova Receita'}
+      description="Cadastre medições e entradas com status financeiro claro para facilitar o acompanhamento."
       onSubmit={handleSubmit}
       onCancel={() => navigate('/revenues')}
       isLoading={isLoading}
@@ -91,15 +93,10 @@ export function RevenueFormPage(): JSX.Element {
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {/* Row 1: Data, Projeto */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="date">Data *</Label>
-          <Input
-            id="date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          <DatePicker id="date" value={date} onChange={setDate} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="projectId">Projeto *</Label>
@@ -119,7 +116,7 @@ export function RevenueFormPage(): JSX.Element {
       </div>
 
       {/* Row 2: Descrição, Valor */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="description">Descrição *</Label>
           <Input
@@ -145,7 +142,7 @@ export function RevenueFormPage(): JSX.Element {
       </div>
 
       {/* Row 3: Status */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="status">Status *</Label>
           <Select

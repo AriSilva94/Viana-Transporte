@@ -26,21 +26,26 @@ const navItems = [
 
 export function Sidebar(): JSX.Element {
   return (
-    <aside className="w-56 shrink-0 border-r border-border bg-card flex flex-col">
-      <div className="h-14 flex items-center px-4 border-b border-border">
-        <span className="font-semibold text-sm tracking-wide text-foreground">MightyRept</span>
+    <aside className="flex w-64 shrink-0 flex-col border-r border-white/10 bg-brand-deep text-white shadow-[12px_0_40px_rgba(34,49,95,0.16)]">
+      <div className="flex h-20 items-center border-b border-white/10 px-5">
+        <div>
+          <span className="block text-xs font-semibold uppercase tracking-[0.28em] text-brand-sand/80">
+            MightyRept
+          </span>
+          <span className="mt-1 block text-sm text-white/72">Gestao operacional e financeira</span>
+        </div>
       </div>
-      <nav className="flex-1 py-2 px-2 space-y-0.5">
+      <nav className="flex-1 space-y-1 px-3 py-4">
         {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200',
                 isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  ? 'bg-brand-sand text-brand-ink shadow-sm'
+                  : 'text-white/72 hover:bg-white/10 hover:text-white'
               )
             }
           >

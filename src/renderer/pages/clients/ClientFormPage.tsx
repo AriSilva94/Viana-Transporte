@@ -64,6 +64,7 @@ export function ClientFormPage(): JSX.Element {
   return (
     <FormCard
       title={isEdit ? 'Editar Cliente' : 'Novo Cliente'}
+      description="Cadastre ou atualize as informações de contato para manter o relacionamento comercial organizado."
       onSubmit={handleSubmit}
       onCancel={() => navigate('/clients')}
       isLoading={isLoading}

@@ -61,6 +61,7 @@ export function OperatorFormPage(): JSX.Element {
   return (
     <FormCard
       title={isEdit ? 'Editar Operador' : 'Novo Operador'}
+      description="Mantenha a equipe cadastrada com papel, contato e disponibilidade bem definidos."
       onSubmit={handleSubmit}
       onCancel={() => navigate('/operators')}
       isLoading={isLoading}
@@ -78,13 +79,13 @@ export function OperatorFormPage(): JSX.Element {
         <Label htmlFor="role">Função</Label>
         <Input id="role" value={role} onChange={(e) => setRole(e.target.value)} placeholder="Ex: Operador de Escavadeira" />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-brand-sand/12 px-4 py-3">
         <input
           id="isActive"
           type="checkbox"
           checked={isActive}
           onChange={(e) => setIsActive(e.target.checked)}
-          className="h-4 w-4"
+          className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
         />
         <Label htmlFor="isActive">Operador Ativo</Label>
       </div>

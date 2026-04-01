@@ -35,17 +35,17 @@ function DataTable<T extends object>({
           placeholder={searchPlaceholder}
           value={search}
           onChange={handleSearch}
-          className="max-w-sm"
+          className="max-w-sm bg-white/80"
         />
       )}
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-2xl border border-border/80 bg-white/80 shadow-sm backdrop-blur-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50">
+            <tr className="border-b bg-brand-sand/18">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-4 py-3 text-left font-medium text-muted-foreground"
+                  className="px-4 py-3 text-left font-medium text-foreground/70"
                 >
                   {col.label}
                 </th>
@@ -54,7 +54,7 @@ function DataTable<T extends object>({
           </thead>
           <tbody>
             {data.map((row, i) => (
-              <tr key={i} className="border-b last:border-0 hover:bg-muted/25">
+              <tr key={i} className="border-b border-border/70 last:border-0 hover:bg-brand-sky/8">
                 {columns.map((col) => (
                   <td key={col.key} className="px-4 py-3">
                     {col.render

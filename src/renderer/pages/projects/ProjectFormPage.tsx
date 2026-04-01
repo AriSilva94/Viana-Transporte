@@ -5,6 +5,7 @@ import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Select } from '@renderer/components/ui/select'
+import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import type { Client, Project, ProjectWithClient } from '../../../shared/types'
 
@@ -74,6 +75,7 @@ export function ProjectFormPage(): JSX.Element {
   return (
     <FormCard
       title={isEdit ? 'Editar Projeto' : 'Novo Projeto'}
+      description="Defina o contexto da obra, cliente, status e valores para acompanhar o projeto com clareza."
       onSubmit={handleSubmit}
       onCancel={() => navigate('/projects')}
       isLoading={isLoading}
@@ -96,14 +98,14 @@ export function ProjectFormPage(): JSX.Element {
         <Label htmlFor="location">Localização</Label>
         <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Local da obra" />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="startDate">Data Início</Label>
-          <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          <DatePicker id="startDate" value={startDate} onChange={setStartDate} allowClear />
         </div>
         <div className="space-y-2">
           <Label htmlFor="endDate">Data Fim</Label>
-          <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          <DatePicker id="endDate" value={endDate} onChange={setEndDate} allowClear />
         </div>
       </div>
       <div className="space-y-2">

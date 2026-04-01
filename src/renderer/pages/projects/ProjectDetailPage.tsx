@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '@renderer/lib/api'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
+import { SurfaceSection } from '@renderer/components/shared/SurfaceSection'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/ui/tabs'
 import { StatusBadge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
@@ -70,36 +71,44 @@ export function ProjectDetailPage(): JSX.Element {
         </TabsList>
 
         <TabsContent value="geral">
-          <div className="grid grid-cols-2 gap-4 rounded-lg border p-4">
-            <div>
-              <span className="text-sm text-muted-foreground">Cliente</span>
-              <p className="mt-1">{project.clientName ?? '—'}</p>
+          <SurfaceSection
+            eyebrow="Contexto"
+            title="Dados Gerais"
+            description="Informações centrais do projeto para acompanhamento operacional e comercial."
+          >
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-brand-sand/12 p-4">
+                <span className="text-sm text-muted-foreground">Cliente</span>
+                <p className="mt-1 font-medium">{project.clientName ?? '—'}</p>
+              </div>
+              <div className="rounded-2xl bg-brand-sky/10 p-4">
+                <span className="text-sm text-muted-foreground">Status</span>
+                <div className="mt-2"><StatusBadge status={project.status} /></div>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4">
+                <span className="text-sm text-muted-foreground">Localização</span>
+                <p className="mt-1 font-medium">{project.location ?? '—'}</p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4">
+                <span className="text-sm text-muted-foreground">Valor Contratado</span>
+                <p className="mt-1 font-medium">
+                  {project.contractAmount != null ? formatCurrency(project.contractAmount) : '—'}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4">
+                <span className="text-sm text-muted-foreground">Data Início</span>
+                <p className="mt-1 font-medium">{formatDate(project.startDate)}</p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4">
+                <span className="text-sm text-muted-foreground">Data Fim</span>
+                <p className="mt-1 font-medium">{formatDate(project.endDate)}</p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4 md:col-span-2">
+                <span className="text-sm text-muted-foreground">Descrição</span>
+                <p className="mt-1 font-medium">{project.description ?? '—'}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Status</span>
-              <div className="mt-1"><StatusBadge status={project.status} /></div>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Localização</span>
-              <p className="mt-1">{project.location ?? '—'}</p>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Valor Contratado</span>
-              <p className="mt-1">{project.contractAmount != null ? formatCurrency(project.contractAmount) : '—'}</p>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Data Início</span>
-              <p className="mt-1">{formatDate(project.startDate)}</p>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Data Fim</span>
-              <p className="mt-1">{formatDate(project.endDate)}</p>
-            </div>
-            <div className="col-span-2">
-              <span className="text-sm text-muted-foreground">Descrição</span>
-              <p className="mt-1">{project.description ?? '—'}</p>
-            </div>
-          </div>
+          </SurfaceSection>
         </TabsContent>
 
         <TabsContent value="logs">
@@ -170,26 +179,32 @@ export function ProjectDetailPage(): JSX.Element {
         </TabsContent>
 
         <TabsContent value="resumo">
-          <div className="grid grid-cols-2 gap-4 rounded-lg border p-4">
-            <div>
-              <span className="text-sm text-muted-foreground">Total de Custos</span>
-              <p className="text-lg font-semibold mt-1">{formatCurrency(summary.totalCosts)}</p>
+          <SurfaceSection
+            eyebrow="Indicadores"
+            title="Resumo Financeiro e Operacional"
+            description="Leitura rápida dos principais números do projeto."
+          >
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-brand-orange/12 p-4">
+                <span className="text-sm text-muted-foreground">Total de Custos</span>
+                <p className="mt-1 text-lg font-semibold">{formatCurrency(summary.totalCosts)}</p>
+              </div>
+              <div className="rounded-2xl bg-brand-sky/12 p-4">
+                <span className="text-sm text-muted-foreground">Total de Receitas</span>
+                <p className="mt-1 text-lg font-semibold">{formatCurrency(summary.totalRevenues)}</p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4">
+                <span className="text-sm text-muted-foreground">Lucro / Prejuízo</span>
+                <p className={`mt-1 text-lg font-semibold ${summary.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
+                  {formatCurrency(summary.profit)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4">
+                <span className="text-sm text-muted-foreground">Total de Horas</span>
+                <p className="mt-1 text-lg font-semibold">{summary.totalHours.toFixed(1)}h</p>
+              </div>
             </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Total de Receitas</span>
-              <p className="text-lg font-semibold mt-1">{formatCurrency(summary.totalRevenues)}</p>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Lucro / Prejuízo</span>
-              <p className={`text-lg font-semibold mt-1 ${summary.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(summary.profit)}
-              </p>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Total de Horas</span>
-              <p className="text-lg font-semibold mt-1">{summary.totalHours.toFixed(1)}h</p>
-            </div>
-          </div>
+          </SurfaceSection>
         </TabsContent>
       </Tabs>
     </div>

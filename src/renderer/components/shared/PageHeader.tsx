@@ -12,8 +12,11 @@ interface PageHeaderProps {
 
 function PageHeader({ title, action }: PageHeaderProps): JSX.Element {
   return (
-    <div className="flex items-center justify-between mb-6">
-      <h1 className="text-2xl font-semibold">{title}</h1>
+    <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-border/80 bg-white/75 px-5 py-4 shadow-sm backdrop-blur-sm">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">Painel</p>
+        <h1 className="mt-1 text-2xl font-semibold text-foreground">{title}</h1>
+      </div>
       {action && (
         <Button onClick={action.onClick}>{action.label}</Button>
       )}
