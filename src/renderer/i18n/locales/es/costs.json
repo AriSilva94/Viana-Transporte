@@ -1,0 +1,70 @@
+{
+  "title": "Costos",
+  "newAction": "Nuevo Costo",
+  "empty": "No hay costos registrados",
+  "createFirst": "Registrar primer costo",
+  "columns": {
+    "date": "Fecha",
+    "project": "Proyecto",
+    "category": "Categoría",
+    "description": "Descripción",
+    "amount": "Valor",
+    "machine": "Máquina",
+    "actions": "Acciones"
+  },
+  "filters": {
+    "project": "Proyecto",
+    "category": "Categoría",
+    "dateFrom": "Fecha inicial",
+    "dateTo": "Fecha final",
+    "allProjects": "Todos los proyectos",
+    "allCategories": "Todas las categorías",
+    "clear": "Limpiar filtros"
+  },
+  "categories": {
+    "fuel": "Combustible",
+    "labor": "Mano de obra",
+    "maintenance": "Mantenimiento",
+    "transport": "Transporte",
+    "outsourced": "Servicio tercerizado",
+    "miscellaneous": "Varios"
+  },
+  "deleteDialog": {
+    "title": "Eliminar costo",
+    "description": "¿Seguro que deseas eliminar este costo? Esta acción no se puede deshacer."
+  },
+  "form": {
+    "newTitle": "Nuevo Costo",
+    "editTitle": "Editar Costo",
+    "description": "Registra gastos con suficiente contexto para la lectura financiera y la trazabilidad operativa.",
+    "fields": {
+      "date": "Fecha *",
+      "project": "Proyecto *",
+      "category": "Categoría *",
+      "description": "Descripción *",
+      "amount": "Valor (R$) *",
+      "machine": "Máquina",
+      "operator": "Operador",
+      "notes": "Observaciones"
+    },
+    "placeholders": {
+      "select": "Seleccionar...",
+      "none": "Ninguna",
+      "description": "Describe el costo...",
+      "amount": "0,00",
+      "notes": "Observaciones adicionales..."
+    },
+    "errors": {
+      "requiredDate": "La fecha es obligatoria",
+      "requiredProject": "El proyecto es obligatorio",
+      "requiredCategory": "La categoría es obligatoria",
+      "requiredDescription": "La descripción es obligatoria",
+      "requiredAmount": "El valor debe ser mayor que cero",
+      "save": "Error al guardar el costo. Intenta de nuevo."
+    },
+    "toasts": {
+      "success": "Guardado con éxito",
+      "error": "Error al guardar. Intenta de nuevo."
+    }
+  }
+}

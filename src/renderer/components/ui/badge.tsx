@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@renderer/lib/utils'
 
 const statusColors: Record<string, string> = {
@@ -14,27 +15,22 @@ const statusColors: Record<string, string> = {
   received: 'bg-brand-deep/12 text-brand-deep',
 }
 
-const statusLabels: Record<string, string> = {
-  planned: 'Planejado',
-  active: 'Ativo',
-  completed: 'Concluído',
-  canceled: 'Cancelado',
-  available: 'Disponível',
-  allocated: 'Alocado',
-  under_maintenance: 'Em Manutenção',
-  inactive: 'Inativo',
-  billed: 'Faturado',
-  received: 'Recebido',
-}
-
 interface StatusBadgeProps {
   status: string
   className?: string
+  labelKeyPrefix?: string
+  namespace?: string
 }
 
-function StatusBadge({ status, className }: StatusBadgeProps): JSX.Element {
+function StatusBadge({
+  status,
+  className,
+  labelKeyPrefix = 'status',
+  namespace = 'common',
+}: StatusBadgeProps): JSX.Element {
+  const { t } = useTranslation(namespace)
   const colorClass = statusColors[status] ?? 'bg-muted text-muted-foreground'
-  const label = statusLabels[status] ?? status
+  const label = t(`${labelKeyPrefix}.${status}`, { defaultValue: status })
   return (
     <span
       className={cn(
@@ -48,4 +44,4 @@ function StatusBadge({ status, className }: StatusBadgeProps): JSX.Element {
   )
 }
 
-export { StatusBadge, statusLabels }
+export { StatusBadge }

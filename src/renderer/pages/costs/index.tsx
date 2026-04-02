@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatCurrency, formatDate } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { EmptyState } from '@renderer/components/shared/EmptyState'
@@ -9,30 +11,21 @@ import { FilterPanel } from '@renderer/components/shared/FilterPanel'
 import { Button } from '@renderer/components/ui/button'
 import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
-import type { ProjectCostWithRelations, ProjectWithClient, CostFilters, ProjectCost } from '../../../shared/types'
+import type {
+  CostFilters,
+  ProjectCost,
+  ProjectCostWithRelations,
+  ProjectWithClient,
+  SupportedLocale,
+} from '../../../shared/types'
 
 type CostCategory = ProjectCost['category']
 
-const CATEGORY_LABELS: Record<CostCategory, string> = {
-  fuel: 'Combustível',
-  labor: 'Mão de obra',
-  maintenance: 'Manutenção',
-  transport: 'Transporte',
-  outsourced: 'Serviço terceirizado',
-  miscellaneous: 'Diversos',
-}
-
-const CATEGORY_OPTIONS: { value: CostCategory; label: string }[] = [
-  { value: 'fuel', label: 'Combustível' },
-  { value: 'labor', label: 'Mão de obra' },
-  { value: 'maintenance', label: 'Manutenção' },
-  { value: 'transport', label: 'Transporte' },
-  { value: 'outsourced', label: 'Serviço terceirizado' },
-  { value: 'miscellaneous', label: 'Diversos' },
-]
-
 export function CostsPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['costs', 'common'])
+  const locale = i18n.language as SupportedLocale
+
   const [costs, setCosts] = useState<ProjectCostWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<CostFilters>({})
@@ -52,7 +45,6 @@ export function CostsPage(): JSX.Element {
 
   useEffect(() => {
     api.projects.list().then(setProjects)
-    loadCosts({})
   }, [])
 
   useEffect(() => {
@@ -74,6 +66,15 @@ export function CostsPage(): JSX.Element {
     loadCosts(filters)
   }
 
+  const categoryOptions: { value: CostCategory; label: string }[] = [
+    { value: 'fuel', label: t('costs:categories.fuel') },
+    { value: 'labor', label: t('costs:categories.labor') },
+    { value: 'maintenance', label: t('costs:categories.maintenance') },
+    { value: 'transport', label: t('costs:categories.transport') },
+    { value: 'outsourced', label: t('costs:categories.outsourced') },
+    { value: 'miscellaneous', label: t('costs:categories.miscellaneous') },
+  ]
+
   const hasActiveFilters =
     filters.projectId !== undefined ||
     filters.category !== undefined ||
@@ -83,54 +84,45 @@ export function CostsPage(): JSX.Element {
   const columns = [
     {
       key: 'date',
-      label: 'Data',
-      render: (row: ProjectCostWithRelations) =>
-        new Date(row.date).toLocaleDateString('pt-BR'),
+      label: t('costs:columns.date'),
+      render: (row: ProjectCostWithRelations) => formatDate(row.date, locale),
     },
     {
       key: 'projectName',
-      label: 'Projeto',
-      render: (row: ProjectCostWithRelations) => row.projectName ?? '—',
+      label: t('costs:columns.project'),
+      render: (row: ProjectCostWithRelations) => row.projectName ?? t('common:emptyValue'),
     },
     {
       key: 'category',
-      label: 'Categoria',
-      render: (row: ProjectCostWithRelations) => CATEGORY_LABELS[row.category] ?? row.category,
+      label: t('costs:columns.category'),
+      render: (row: ProjectCostWithRelations) =>
+        t(`costs:categories.${row.category}`, { defaultValue: row.category }),
     },
     {
       key: 'description',
-      label: 'Descrição',
+      label: t('costs:columns.description'),
       render: (row: ProjectCostWithRelations) => row.description,
     },
     {
       key: 'amount',
-      label: 'Valor',
-      render: (row: ProjectCostWithRelations) =>
-        `R$ ${Number(row.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      label: t('costs:columns.amount'),
+      render: (row: ProjectCostWithRelations) => formatCurrency(Number(row.amount), locale),
     },
     {
       key: 'machineName',
-      label: 'Máquina',
-      render: (row: ProjectCostWithRelations) => row.machineName ?? '—',
+      label: t('costs:columns.machine'),
+      render: (row: ProjectCostWithRelations) => row.machineName ?? t('common:emptyValue'),
     },
     {
       key: 'actions',
-      label: 'Ações',
+      label: t('costs:columns.actions'),
       render: (row: ProjectCostWithRelations) => (
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate(`/costs/${row.id}/edit`)}
-          >
-            Editar
+          <Button size="sm" variant="outline" onClick={() => navigate(`/costs/${row.id}/edit`)}>
+            {t('common:edit')}
           </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => setDeleteId(row.id)}
-          >
-            Excluir
+          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>
+            {t('common:delete')}
           </Button>
         </div>
       ),
@@ -140,13 +132,13 @@ export function CostsPage(): JSX.Element {
   return (
     <div>
       <PageHeader
-        title="Custos"
-        action={{ label: 'Novo Custo', onClick: () => navigate('/costs/new') }}
+        title={t('costs:title')}
+        action={{ label: t('costs:newAction'), onClick: () => navigate('/costs/new') }}
       />
 
       <FilterPanel>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Projeto</label>
+          <label className="text-sm font-medium text-foreground">{t('costs:filters.project')}</label>
           <Select
             value={filters.projectId !== undefined ? String(filters.projectId) : ''}
             onChange={(e) =>
@@ -156,7 +148,7 @@ export function CostsPage(): JSX.Element {
             }
             className="w-56"
           >
-            <option value="">Todos os projetos</option>
+            <option value="">{t('costs:filters.allProjects')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -166,7 +158,7 @@ export function CostsPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Categoria</label>
+          <label className="text-sm font-medium text-foreground">{t('costs:filters.category')}</label>
           <Select
             value={filters.category ?? ''}
             onChange={(e) =>
@@ -176,8 +168,8 @@ export function CostsPage(): JSX.Element {
             }
             className="w-48"
           >
-            <option value="">Todas as categorias</option>
-            {CATEGORY_OPTIONS.map((opt) => (
+            <option value="">{t('costs:filters.allCategories')}</option>
+            {categoryOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -186,7 +178,7 @@ export function CostsPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data inicial</label>
+          <label className="text-sm font-medium text-foreground">{t('costs:filters.dateFrom')}</label>
           <DatePicker
             value={filters.dateFrom ?? ''}
             onChange={(value) => handleFilterChange({ dateFrom: value || undefined })}
@@ -196,7 +188,7 @@ export function CostsPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data final</label>
+          <label className="text-sm font-medium text-foreground">{t('costs:filters.dateTo')}</label>
           <DatePicker
             value={filters.dateTo ?? ''}
             onChange={(value) => handleFilterChange({ dateTo: value || undefined })}
@@ -207,18 +199,18 @@ export function CostsPage(): JSX.Element {
 
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters}>
-            Limpar filtros
+            {t('costs:filters.clear')}
           </Button>
         )}
       </FilterPanel>
 
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">Carregando...</div>
+        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
       ) : costs.length === 0 && !hasActiveFilters ? (
         <EmptyState
-          message="Nenhum custo registrado"
+          message={t('costs:empty')}
           action={{
-            label: 'Registrar primeiro custo',
+            label: t('costs:createFirst'),
             onClick: () => navigate('/costs/new'),
           }}
         />
@@ -230,8 +222,8 @@ export function CostsPage(): JSX.Element {
         open={deleteId !== null}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        title="Excluir Custo"
-        description="Tem certeza que deseja excluir este custo? Esta ação não pode ser desfeita."
+        title={t('costs:deleteDialog.title')}
+        description={t('costs:deleteDialog.description')}
       />
     </div>
   )

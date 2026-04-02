@@ -1,0 +1,63 @@
+{
+  "title": "Ingresos / Mediciones",
+  "newAction": "Nuevo Ingreso",
+  "empty": "No hay ingresos registrados",
+  "createFirst": "Registrar primer ingreso",
+  "columns": {
+    "date": "Fecha",
+    "project": "Proyecto",
+    "description": "Descripción",
+    "amount": "Valor",
+    "status": "Estado",
+    "actions": "Acciones"
+  },
+  "filters": {
+    "project": "Proyecto",
+    "status": "Estado",
+    "dateFrom": "Fecha inicial",
+    "dateTo": "Fecha final",
+    "allProjects": "Todos los proyectos",
+    "allStatuses": "Todos los estados",
+    "clear": "Limpiar filtros"
+  },
+  "statuses": {
+    "planned": "Previsto",
+    "billed": "Facturado",
+    "received": "Recibido"
+  },
+  "deleteDialog": {
+    "title": "Eliminar ingreso",
+    "description": "¿Seguro que deseas eliminar este ingreso? Esta acción no se puede deshacer."
+  },
+  "form": {
+    "newTitle": "Nuevo Ingreso",
+    "editTitle": "Editar Ingreso",
+    "description": "Registra mediciones y entradas con un estado financiero claro para facilitar el seguimiento.",
+    "fields": {
+      "date": "Fecha *",
+      "project": "Proyecto *",
+      "description": "Descripción *",
+      "amount": "Valor (R$) *",
+      "status": "Estado *",
+      "notes": "Observaciones"
+    },
+    "placeholders": {
+      "select": "Seleccionar...",
+      "description": "Describe el ingreso o medición...",
+      "amount": "0,00",
+      "notes": "Observaciones adicionales..."
+    },
+    "errors": {
+      "requiredDate": "La fecha es obligatoria",
+      "requiredProject": "El proyecto es obligatorio",
+      "requiredDescription": "La descripción es obligatoria",
+      "requiredAmount": "El valor debe ser mayor que cero",
+      "requiredStatus": "El estado es obligatorio",
+      "save": "Error al guardar el ingreso. Intenta de nuevo."
+    },
+    "toasts": {
+      "success": "Guardado con éxito",
+      "error": "Error al guardar. Intenta de nuevo."
+    }
+  }
+}

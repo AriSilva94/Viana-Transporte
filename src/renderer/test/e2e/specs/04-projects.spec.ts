@@ -19,10 +19,9 @@ test.describe.serial('Projects — Automated', () => {
     await page.selectOption('#clientId', { value: String(clientId) })
     await page.fill('#location', 'Rodovia SP-123, km 45')
 
-    // DatePicker: clica para abrir o calendário, clica "Hoje"
+    // DatePicker customizado: abre e escolhe "Hoje/Today"
     await page.click('#startDate')
-    await page.locator('.relative.z-50').waitFor()
-    await page.locator('.relative.z-50 button', { hasText: /hoje|today/i }).first().click()
+    await page.getByRole('button', { name: /hoje|today/i }).first().click()
 
     await page.selectOption('#status', 'active')
     await page.fill('#contractAmount', '150000')

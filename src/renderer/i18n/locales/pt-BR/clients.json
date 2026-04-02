@@ -1,0 +1,69 @@
+{
+  "title": "Clientes",
+  "newAction": "Novo Cliente",
+  "empty": "Nenhum cliente cadastrado",
+  "createFirst": "Criar primeiro cliente",
+  "searchPlaceholder": "Pesquisar por nome...",
+  "columns": {
+    "name": "Nome",
+    "document": "Documento",
+    "phone": "Telefone",
+    "email": "E-mail",
+    "actions": "Ações",
+    "status": "Status",
+    "contractAmount": "Valor Contratado"
+  },
+  "deleteDialog": {
+    "title": "Excluir Cliente",
+    "description": "Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita."
+  },
+  "form": {
+    "newTitle": "Novo Cliente",
+    "editTitle": "Editar Cliente",
+    "description": "Cadastre ou atualize as informações de contato para manter o relacionamento comercial organizado.",
+    "fields": {
+      "name": "Nome *",
+      "document": "Documento",
+      "phone": "Telefone",
+      "email": "E-mail",
+      "notes": "Notas"
+    },
+    "placeholders": {
+      "name": "Nome do cliente",
+      "document": "CPF / CNPJ",
+      "phone": "(00) 00000-0000",
+      "email": "email@exemplo.com",
+      "notes": "Observações..."
+    },
+    "errors": {
+      "requiredName": "Nome é obrigatório",
+      "save": "Erro ao salvar cliente. Tente novamente."
+    },
+    "toasts": {
+      "success": "Salvo com sucesso!",
+      "error": "Erro ao salvar. Tente novamente."
+    }
+  },
+  "detail": {
+    "editAction": "Editar",
+    "sections": {
+      "profile": {
+        "eyebrow": "Perfil",
+        "title": "Dados do Cliente",
+        "description": "Informações de contato e referência comercial para acompanhar o relacionamento."
+      },
+      "projects": {
+        "eyebrow": "Relacionamento",
+        "title": "Projetos Vinculados",
+        "description": "Veja rapidamente os projetos associados a este cliente e acesse os detalhes."
+      }
+    },
+    "fields": {
+      "document": "Documento",
+      "phone": "Telefone",
+      "email": "E-mail",
+      "notes": "Notas"
+    },
+    "emptyProjects": "Nenhum projeto vinculado."
+  }
+}

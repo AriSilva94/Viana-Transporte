@@ -1,19 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatDate, formatDecimal } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { EmptyState } from '@renderer/components/shared/EmptyState'
 import { ConfirmDialog } from '@renderer/components/shared/ConfirmDialog'
 import { FilterPanel } from '@renderer/components/shared/FilterPanel'
 import { Button } from '@renderer/components/ui/button'
-import { Input } from '@renderer/components/ui/input'
 import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
-import type { DailyLogWithRelations, ProjectWithClient, Machine, Operator, DailyLogFilters } from '../../../shared/types'
+import type {
+  DailyLogFilters,
+  DailyLogWithRelations,
+  Machine,
+  Operator,
+  ProjectWithClient,
+  SupportedLocale,
+} from '../../../shared/types'
 
 export function DailyLogsPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['dailylogs', 'common'])
+  const locale = i18n.language as SupportedLocale
+
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [machines, setMachines] = useState<Machine[]>([])
@@ -37,7 +48,6 @@ export function DailyLogsPage(): JSX.Element {
     api.projects.list().then(setProjects)
     api.machines.list().then(setMachines)
     api.operators.list().then(setOperators)
-    loadLogs({})
   }, [])
 
   useEffect(() => {
@@ -69,54 +79,47 @@ export function DailyLogsPage(): JSX.Element {
   const columns = [
     {
       key: 'date',
-      label: 'Data',
-      render: (row: DailyLogWithRelations) =>
-        new Date(row.date).toLocaleDateString('pt-BR'),
+      label: t('dailylogs:columns.date'),
+      render: (row: DailyLogWithRelations) => formatDate(row.date, locale),
     },
     {
       key: 'projectName',
-      label: 'Projeto',
-      render: (row: DailyLogWithRelations) => row.projectName ?? '—',
+      label: t('dailylogs:columns.project'),
+      render: (row: DailyLogWithRelations) => row.projectName ?? t('common:emptyValue'),
     },
     {
       key: 'machineName',
-      label: 'Máquina',
-      render: (row: DailyLogWithRelations) => row.machineName ?? '—',
+      label: t('dailylogs:columns.machine'),
+      render: (row: DailyLogWithRelations) => row.machineName ?? t('common:emptyValue'),
     },
     {
       key: 'operatorName',
-      label: 'Operador',
-      render: (row: DailyLogWithRelations) => row.operatorName ?? '—',
+      label: t('dailylogs:columns.operator'),
+      render: (row: DailyLogWithRelations) => row.operatorName ?? t('common:emptyValue'),
     },
     {
       key: 'hoursWorked',
-      label: 'Horas',
-      render: (row: DailyLogWithRelations) => String(row.hoursWorked),
+      label: t('dailylogs:columns.hoursWorked'),
+      render: (row: DailyLogWithRelations) => formatDecimal(Number(row.hoursWorked), locale),
     },
     {
       key: 'fuelQuantity',
-      label: 'Combustível',
+      label: t('dailylogs:columns.fuelQuantity'),
       render: (row: DailyLogWithRelations) =>
-        row.fuelQuantity != null ? String(row.fuelQuantity) : '—',
+        row.fuelQuantity != null
+          ? formatDecimal(Number(row.fuelQuantity), locale)
+          : t('common:emptyValue'),
     },
     {
       key: 'actions',
-      label: 'Ações',
+      label: t('dailylogs:columns.actions'),
       render: (row: DailyLogWithRelations) => (
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate(`/daily-logs/${row.id}/edit`)}
-          >
-            Editar
+          <Button size="sm" variant="outline" onClick={() => navigate(`/daily-logs/${row.id}/edit`)}>
+            {t('common:edit')}
           </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => setDeleteId(row.id)}
-          >
-            Excluir
+          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>
+            {t('common:delete')}
           </Button>
         </div>
       ),
@@ -126,13 +129,13 @@ export function DailyLogsPage(): JSX.Element {
   return (
     <div>
       <PageHeader
-        title="Diários de Operação"
-        action={{ label: 'Novo Registro', onClick: () => navigate('/daily-logs/new') }}
+        title={t('dailylogs:title')}
+        action={{ label: t('dailylogs:newAction'), onClick: () => navigate('/daily-logs/new') }}
       />
 
       <FilterPanel>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Projeto</label>
+          <label className="text-sm font-medium text-foreground">{t('dailylogs:filters.project')}</label>
           <Select
             value={filters.projectId !== undefined ? String(filters.projectId) : ''}
             onChange={(e) =>
@@ -142,7 +145,7 @@ export function DailyLogsPage(): JSX.Element {
             }
             className="w-56"
           >
-            <option value="">Todos os projetos</option>
+            <option value="">{t('dailylogs:filters.allProjects')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -152,7 +155,7 @@ export function DailyLogsPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Máquina</label>
+          <label className="text-sm font-medium text-foreground">{t('dailylogs:filters.machine')}</label>
           <Select
             value={filters.machineId !== undefined ? String(filters.machineId) : ''}
             onChange={(e) =>
@@ -162,7 +165,7 @@ export function DailyLogsPage(): JSX.Element {
             }
             className="w-48"
           >
-            <option value="">Todas as máquinas</option>
+            <option value="">{t('dailylogs:filters.allMachines')}</option>
             {machines.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
@@ -172,7 +175,7 @@ export function DailyLogsPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Operador</label>
+          <label className="text-sm font-medium text-foreground">{t('dailylogs:filters.operator')}</label>
           <Select
             value={filters.operatorId !== undefined ? String(filters.operatorId) : ''}
             onChange={(e) =>
@@ -182,7 +185,7 @@ export function DailyLogsPage(): JSX.Element {
             }
             className="w-48"
           >
-            <option value="">Todos os operadores</option>
+            <option value="">{t('dailylogs:filters.allOperators')}</option>
             {operators.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
@@ -192,7 +195,7 @@ export function DailyLogsPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data inicial</label>
+          <label className="text-sm font-medium text-foreground">{t('dailylogs:filters.dateFrom')}</label>
           <DatePicker
             value={filters.dateFrom ?? ''}
             onChange={(value) => handleFilterChange({ dateFrom: value || undefined })}
@@ -202,7 +205,7 @@ export function DailyLogsPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data final</label>
+          <label className="text-sm font-medium text-foreground">{t('dailylogs:filters.dateTo')}</label>
           <DatePicker
             value={filters.dateTo ?? ''}
             onChange={(value) => handleFilterChange({ dateTo: value || undefined })}
@@ -213,18 +216,18 @@ export function DailyLogsPage(): JSX.Element {
 
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters}>
-            Limpar filtros
+            {t('dailylogs:filters.clear')}
           </Button>
         )}
       </FilterPanel>
 
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">Carregando...</div>
+        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
       ) : logs.length === 0 && !hasActiveFilters ? (
         <EmptyState
-          message="Nenhum diário de operação registrado"
+          message={t('dailylogs:empty')}
           action={{
-            label: 'Criar primeiro registro',
+            label: t('dailylogs:createFirst'),
             onClick: () => navigate('/daily-logs/new'),
           }}
         />
@@ -236,8 +239,8 @@ export function DailyLogsPage(): JSX.Element {
         open={deleteId !== null}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        title="Excluir Registro"
-        description="Tem certeza que deseja excluir este diário? Esta ação não pode ser desfeita."
+        title={t('dailylogs:deleteDialog.title')}
+        description={t('dailylogs:deleteDialog.description')}
       />
     </div>
   )

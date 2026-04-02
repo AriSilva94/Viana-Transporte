@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
@@ -10,6 +11,7 @@ import type { Client } from '../../../shared/types'
 
 export function ClientsListPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['clients', 'common'])
   const [clients, setClients] = useState<Client[]>([])
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
@@ -37,35 +39,35 @@ export function ClientsListPage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'name', label: 'Nome' },
-    { key: 'document', label: 'Documento', render: (row: Client) => row.document ?? '—' },
-    { key: 'phone', label: 'Telefone', render: (row: Client) => row.phone ?? '—' },
-    { key: 'email', label: 'E-mail', render: (row: Client) => row.email ?? '—' },
+    { key: 'name', label: t('clients:columns.name') },
+    {
+      key: 'document',
+      label: t('clients:columns.document'),
+      render: (row: Client) => row.document ?? t('common:emptyValue'),
+    },
+    {
+      key: 'phone',
+      label: t('clients:columns.phone'),
+      render: (row: Client) => row.phone ?? t('common:emptyValue'),
+    },
+    {
+      key: 'email',
+      label: t('clients:columns.email'),
+      render: (row: Client) => row.email ?? t('common:emptyValue'),
+    },
     {
       key: 'actions',
-      label: 'Ações',
+      label: t('clients:columns.actions'),
       render: (row: Client) => (
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate(`/clients/${row.id}`)}
-          >
-            Ver
+          <Button size="sm" variant="outline" onClick={() => navigate(`/clients/${row.id}`)}>
+            {t('common:view')}
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate(`/clients/${row.id}/edit`)}
-          >
-            Editar
+          <Button size="sm" variant="outline" onClick={() => navigate(`/clients/${row.id}/edit`)}>
+            {t('common:edit')}
           </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => setDeleteId(row.id)}
-          >
-            Excluir
+          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>
+            {t('common:delete')}
           </Button>
         </div>
       ),
@@ -75,16 +77,16 @@ export function ClientsListPage(): JSX.Element {
   return (
     <div>
       <PageHeader
-        title="Clientes"
-        action={{ label: 'Novo Cliente', onClick: () => navigate('/clients/new') }}
+        title={t('clients:title')}
+        action={{ label: t('clients:newAction'), onClick: () => navigate('/clients/new') }}
       />
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">Carregando...</div>
+        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
       ) : clients.length === 0 && !search ? (
         <EmptyState
-          message="Nenhum cliente cadastrado"
+          message={t('clients:empty')}
           action={{
-            label: 'Criar primeiro cliente',
+            label: t('clients:createFirst'),
             onClick: () => navigate('/clients/new'),
           }}
         />
@@ -96,15 +98,15 @@ export function ClientsListPage(): JSX.Element {
             setSearch(q)
             loadClients(q)
           }}
-          searchPlaceholder="Pesquisar por nome..."
+          searchPlaceholder={t('clients:searchPlaceholder')}
         />
       )}
       <ConfirmDialog
         open={deleteId !== null}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        title="Excluir Cliente"
-        description="Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita."
+        title={t('clients:deleteDialog.title')}
+        description={t('clients:deleteDialog.description')}
       />
     </div>
   )

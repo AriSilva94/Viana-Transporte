@@ -37,7 +37,7 @@ test.describe.serial('Revenues — Automated', () => {
     await page.waitForSelector('table')
 
     const row = page.locator('tr', { hasText: UNIQUE_DESC })
-    await row.locator('button').nth(1).click()
+    await row.locator('button').nth(0).click()
 
     await page.waitForSelector('#description')
     await page.fill('#description', UNIQUE_DESC + ' Editado')

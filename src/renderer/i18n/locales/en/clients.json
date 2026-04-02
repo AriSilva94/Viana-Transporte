@@ -1,0 +1,69 @@
+{
+  "title": "Clients",
+  "newAction": "New Client",
+  "empty": "No clients registered",
+  "createFirst": "Create first client",
+  "searchPlaceholder": "Search by name...",
+  "columns": {
+    "name": "Name",
+    "document": "Document",
+    "phone": "Phone",
+    "email": "Email",
+    "actions": "Actions",
+    "status": "Status",
+    "contractAmount": "Contract Amount"
+  },
+  "deleteDialog": {
+    "title": "Delete Client",
+    "description": "Are you sure you want to delete this client? This action cannot be undone."
+  },
+  "form": {
+    "newTitle": "New Client",
+    "editTitle": "Edit Client",
+    "description": "Register or update contact information to keep the commercial relationship organized.",
+    "fields": {
+      "name": "Name *",
+      "document": "Document",
+      "phone": "Phone",
+      "email": "Email",
+      "notes": "Notes"
+    },
+    "placeholders": {
+      "name": "Client name",
+      "document": "Tax ID / registration",
+      "phone": "(00) 00000-0000",
+      "email": "email@example.com",
+      "notes": "Notes..."
+    },
+    "errors": {
+      "requiredName": "Name is required",
+      "save": "Error saving client. Please try again."
+    },
+    "toasts": {
+      "success": "Saved successfully!",
+      "error": "Error saving. Please try again."
+    }
+  },
+  "detail": {
+    "editAction": "Edit",
+    "sections": {
+      "profile": {
+        "eyebrow": "Profile",
+        "title": "Client Details",
+        "description": "Contact information and commercial references to support the relationship."
+      },
+      "projects": {
+        "eyebrow": "Relationship",
+        "title": "Linked Projects",
+        "description": "Quickly review projects associated with this client and open their details."
+      }
+    },
+    "fields": {
+      "document": "Document",
+      "phone": "Phone",
+      "email": "Email",
+      "notes": "Notes"
+    },
+    "emptyProjects": "No linked projects."
+  }
+}

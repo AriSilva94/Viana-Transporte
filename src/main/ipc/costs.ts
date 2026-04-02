@@ -3,6 +3,7 @@ import { eq, and, gte, lte } from 'drizzle-orm'
 import { db } from '../db'
 import { projectCosts, projects, machines, operators } from '../db/schema'
 import type { ProjectCost, CostFilters } from '../../shared/types'
+import { endOfLocalDay, parseLocalDate } from '../../shared/date'
 
 const selectedFields = {
   id: projectCosts.id,
@@ -27,8 +28,8 @@ export function registerCostsHandlers(): void {
 
     if (filters?.projectId) conditions.push(eq(projectCosts.projectId, filters.projectId))
     if (filters?.category) conditions.push(eq(projectCosts.category, filters.category as ProjectCost['category']))
-    if (filters?.dateFrom) conditions.push(gte(projectCosts.date, new Date(filters.dateFrom)))
-    if (filters?.dateTo) conditions.push(lte(projectCosts.date, new Date(filters.dateTo)))
+    if (filters?.dateFrom) conditions.push(gte(projectCosts.date, parseLocalDate(filters.dateFrom)))
+    if (filters?.dateTo) conditions.push(lte(projectCosts.date, endOfLocalDay(filters.dateTo)))
 
     const baseQuery = db
       .select(selectedFields)
@@ -60,7 +61,7 @@ export function registerCostsHandlers(): void {
         .insert(projectCosts)
         .values({
           ...data,
-          date: new Date(data.date),
+          date: parseLocalDate(data.date),
         })
         .returning()
       return rows[0]
@@ -74,7 +75,7 @@ export function registerCostsHandlers(): void {
         ...data,
         updatedAt: new Date(),
       }
-      if (data.date) payload.date = new Date(data.date)
+      if (data.date) payload.date = parseLocalDate(data.date)
 
       const rows = await db
         .update(projectCosts)

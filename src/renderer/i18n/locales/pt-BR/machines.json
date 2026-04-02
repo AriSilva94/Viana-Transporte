@@ -1,0 +1,76 @@
+{
+  "title": "Máquinas",
+  "newAction": "Nova Máquina",
+  "empty": "Nenhuma máquina cadastrada",
+  "createFirst": "Cadastrar primeira máquina",
+  "searchPlaceholder": "Pesquisar por nome ou tipo...",
+  "columns": {
+    "name": "Nome",
+    "type": "Tipo",
+    "identifier": "Identificador",
+    "brandModel": "Marca/Modelo",
+    "status": "Status",
+    "actions": "Ações",
+    "date": "Data",
+    "project": "Projeto",
+    "operator": "Operador",
+    "hours": "Horas",
+    "workDescription": "Serviço"
+  },
+  "deleteDialog": {
+    "title": "Excluir Máquina",
+    "description": "Tem certeza que deseja excluir esta máquina? Esta ação não pode ser desfeita."
+  },
+  "form": {
+    "newTitle": "Nova Máquina",
+    "editTitle": "Editar Máquina",
+    "description": "Organize os ativos da operação com identificação, modelo e status sempre atualizados.",
+    "fields": {
+      "name": "Nome *",
+      "type": "Tipo *",
+      "identifier": "Identificador",
+      "brandModel": "Marca/Modelo",
+      "status": "Status *",
+      "notes": "Notas"
+    },
+    "placeholders": {
+      "name": "Ex: Escavadeira John Deere",
+      "type": "Ex: Escavadeira, Bulldozer",
+      "identifier": "Código do ativo",
+      "brandModel": "Ex: John Deere 350G",
+      "notes": "Observações..."
+    },
+    "errors": {
+      "requiredName": "Nome é obrigatório",
+      "requiredType": "Tipo é obrigatório",
+      "save": "Erro ao salvar máquina. Tente novamente."
+    },
+    "toasts": {
+      "success": "Salvo com sucesso!",
+      "error": "Erro ao salvar. Tente novamente."
+    }
+  },
+  "detail": {
+    "editAction": "Editar",
+    "sections": {
+      "machine": {
+        "eyebrow": "Equipamento",
+        "title": "Dados da Máquina",
+        "description": "Informações técnicas e operacionais do equipamento."
+      },
+      "history": {
+        "eyebrow": "Histórico",
+        "title": "Registros de Uso",
+        "description": "Diários de operação vinculados a este equipamento."
+      }
+    },
+    "fields": {
+      "type": "Tipo",
+      "identifier": "Identificador",
+      "brandModel": "Marca / Modelo",
+      "status": "Status",
+      "notes": "Notas"
+    },
+    "emptyLogs": "Nenhum registro de uso encontrado."
+  }
+}

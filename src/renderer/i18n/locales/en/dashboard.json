@@ -1,0 +1,55 @@
+{
+  "overview": "Overview",
+  "description": "Track operations, costs, revenues, and project performance from a single dashboard.",
+  "metrics": {
+    "activeProjects": {
+      "label": "Active Projects",
+      "hint": "Currently in progress"
+    },
+    "completedProjects": {
+      "label": "Completed Projects",
+      "hint": "Finished deliveries"
+    },
+    "totalMachines": {
+      "label": "Total Machines",
+      "hint": "{{count}} in use"
+    },
+    "totalProjects": {
+      "label": "Total Projects",
+      "hint": "Overall registered base"
+    },
+    "totalCosts": {
+      "label": "Total Costs",
+      "hint": "Accumulated outflows"
+    },
+    "totalRevenues": {
+      "label": "Total Revenues",
+      "hint": "Accumulated inflows"
+    },
+    "result": {
+      "label": "Result",
+      "positiveHint": "Operations running with a positive balance",
+      "negativeHint": "Operations need attention"
+    }
+  },
+  "recentLogs": {
+    "eyebrow": "Activity",
+    "title": "Recent Daily Logs",
+    "description": "Follow the latest operational entries to keep the routine under control.",
+    "empty": "No daily logs have been recorded yet."
+  },
+  "highlightedProjects": {
+    "eyebrow": "Pipeline",
+    "title": "Highlighted Projects",
+    "description": "Quickly review active projects and jump straight into the details that need attention.",
+    "empty": "There are no active projects to show here yet."
+  },
+  "table": {
+    "date": "Date",
+    "project": "Project",
+    "machine": "Machine",
+    "operator": "Operator",
+    "hours": "Hours"
+  },
+  "hoursValue": "{{value}}h"
+}

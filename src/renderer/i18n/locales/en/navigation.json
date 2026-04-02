@@ -1,0 +1,18 @@
+{
+  "appTagline": "Operational and financial management",
+  "dashboard": "Dashboard",
+  "clients": "Clients",
+  "projects": "Projects",
+  "machines": "Machines",
+  "operators": "Operators",
+  "dailylogs": "Daily Logs",
+  "costs": "Costs",
+  "revenues": "Revenues",
+  "reports": "Reports",
+  "language": "Language",
+  "languageNames": {
+    "pt-BR": "Portuguese",
+    "en": "English",
+    "es": "Spanish"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "appTagline": "Gestão operacional e financeira",
+  "dashboard": "Dashboard",
+  "clients": "Clientes",
+  "projects": "Projetos",
+  "machines": "Máquinas",
+  "operators": "Operadores",
+  "dailylogs": "Diários",
+  "costs": "Custos",
+  "revenues": "Receitas",
+  "reports": "Relatórios",
+  "language": "Idioma",
+  "languageNames": {
+    "pt-BR": "Português",
+    "en": "Inglês",
+    "es": "Espanhol"
+  }
+}

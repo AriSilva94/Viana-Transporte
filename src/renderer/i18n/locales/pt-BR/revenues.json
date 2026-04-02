@@ -1,0 +1,63 @@
+{
+  "title": "Receitas / Medições",
+  "newAction": "Nova Receita",
+  "empty": "Nenhuma receita registrada",
+  "createFirst": "Registrar primeira receita",
+  "columns": {
+    "date": "Data",
+    "project": "Projeto",
+    "description": "Descrição",
+    "amount": "Valor",
+    "status": "Status",
+    "actions": "Ações"
+  },
+  "filters": {
+    "project": "Projeto",
+    "status": "Status",
+    "dateFrom": "Data inicial",
+    "dateTo": "Data final",
+    "allProjects": "Todos os projetos",
+    "allStatuses": "Todos os status",
+    "clear": "Limpar filtros"
+  },
+  "statuses": {
+    "planned": "Previsto",
+    "billed": "Faturado",
+    "received": "Recebido"
+  },
+  "deleteDialog": {
+    "title": "Excluir Receita",
+    "description": "Tem certeza que deseja excluir esta receita? Esta ação não pode ser desfeita."
+  },
+  "form": {
+    "newTitle": "Nova Receita",
+    "editTitle": "Editar Receita",
+    "description": "Cadastre medições e entradas com status financeiro claro para facilitar o acompanhamento.",
+    "fields": {
+      "date": "Data *",
+      "project": "Projeto *",
+      "description": "Descrição *",
+      "amount": "Valor (R$) *",
+      "status": "Status *",
+      "notes": "Observações"
+    },
+    "placeholders": {
+      "select": "Selecionar...",
+      "description": "Descreva a receita ou medição...",
+      "amount": "0,00",
+      "notes": "Observações adicionais..."
+    },
+    "errors": {
+      "requiredDate": "Data é obrigatória",
+      "requiredProject": "Projeto é obrigatório",
+      "requiredDescription": "Descrição é obrigatória",
+      "requiredAmount": "Valor deve ser maior que zero",
+      "requiredStatus": "Status é obrigatório",
+      "save": "Erro ao salvar receita. Tente novamente."
+    },
+    "toasts": {
+      "success": "Salvo com sucesso!",
+      "error": "Erro ao salvar. Tente novamente."
+    }
+  }
+}

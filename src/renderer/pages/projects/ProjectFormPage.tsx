@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -8,10 +9,12 @@ import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import { useToast } from '@renderer/context/ToastContext'
+import { formatLocalDate, parseLocalDate } from '../../../shared/date'
 import type { Client, Project, ProjectWithClient } from '../../../shared/types'
 
 export function ProjectFormPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['projects', 'common'])
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const { showToast } = useToast()
@@ -36,8 +39,8 @@ export function ProjectFormPage(): JSX.Element {
       setName(project.name)
       setClientId(String(project.clientId))
       setLocation(project.location ?? '')
-      setStartDate(project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '')
-      setEndDate(project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '')
+      setStartDate(project.startDate ? formatLocalDate(project.startDate) : '')
+      setEndDate(project.endDate ? formatLocalDate(project.endDate) : '')
       setStatus(project.status)
       setContractAmount(project.contractAmount != null ? String(project.contractAmount) : '')
       setDescription(project.description ?? '')
@@ -46,8 +49,14 @@ export function ProjectFormPage(): JSX.Element {
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
-    if (!name.trim()) { setError('Nome é obrigatório'); return }
-    if (!clientId) { setError('Cliente é obrigatório'); return }
+    if (!name.trim()) {
+      setError(t('projects:form.errors.requiredName'))
+      return
+    }
+    if (!clientId) {
+      setError(t('projects:form.errors.requiredClient'))
+      return
+    }
     setIsLoading(true)
     setError('')
     try {
@@ -55,8 +64,8 @@ export function ProjectFormPage(): JSX.Element {
         name: name.trim(),
         clientId: Number(clientId),
         location: location.trim() || null,
-        startDate: startDate ? new Date(startDate) : null,
-        endDate: endDate ? new Date(endDate) : null,
+        startDate: startDate ? parseLocalDate(startDate) : null,
+        endDate: endDate ? parseLocalDate(endDate) : null,
         status,
         contractAmount: contractAmount ? Number(contractAmount) : null,
         description: description.trim() || null,
@@ -66,11 +75,11 @@ export function ProjectFormPage(): JSX.Element {
       } else {
         await api.projects.create(data)
       }
-      showToast('Salvo com sucesso!')
+      showToast(t('projects:form.toasts.success'))
       navigate('/projects')
     } catch {
-      showToast('Erro ao salvar. Tente novamente.', 'error')
-      setError('Erro ao salvar projeto. Tente novamente.')
+      showToast(t('projects:form.toasts.error'), 'error')
+      setError(t('projects:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -78,56 +87,79 @@ export function ProjectFormPage(): JSX.Element {
 
   return (
     <FormCard
-      title={isEdit ? 'Editar Projeto' : 'Novo Projeto'}
-      description="Defina o contexto da obra, cliente, status e valores para acompanhar o projeto com clareza."
+      title={isEdit ? t('projects:form.editTitle') : t('projects:form.newTitle')}
+      description={t('projects:form.description')}
       onSubmit={handleSubmit}
       onCancel={() => navigate('/projects')}
       isLoading={isLoading}
     >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="space-y-2">
-        <Label htmlFor="name">Nome *</Label>
-        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome do projeto" />
+        <Label htmlFor="name">{t('projects:form.fields.name')}</Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t('projects:form.placeholders.name')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="clientId">Cliente *</Label>
+        <Label htmlFor="clientId">{t('projects:form.fields.client')}</Label>
         <Select id="clientId" value={clientId} onChange={(e) => setClientId(e.target.value)}>
-          <option value="">Selecione um cliente</option>
+          <option value="">{t('projects:form.placeholders.client')}</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </Select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="location">Localização</Label>
-        <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Local da obra" />
+        <Label htmlFor="location">{t('projects:form.fields.location')}</Label>
+        <Input
+          id="location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder={t('projects:form.placeholders.location')}
+        />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="startDate">Data Início</Label>
+          <Label htmlFor="startDate">{t('projects:form.fields.startDate')}</Label>
           <DatePicker id="startDate" value={startDate} onChange={setStartDate} allowClear />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="endDate">Data Fim</Label>
+          <Label htmlFor="endDate">{t('projects:form.fields.endDate')}</Label>
           <DatePicker id="endDate" value={endDate} onChange={setEndDate} allowClear />
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="status">Status *</Label>
+        <Label htmlFor="status">{t('projects:form.fields.status')}</Label>
         <Select id="status" value={status} onChange={(e) => setStatus(e.target.value as Project['status'])}>
-          <option value="planned">Planejado</option>
-          <option value="active">Ativo</option>
-          <option value="completed">Concluído</option>
-          <option value="canceled">Cancelado</option>
+          <option value="planned">{t('common:status.planned')}</option>
+          <option value="active">{t('common:status.active')}</option>
+          <option value="completed">{t('common:status.completed')}</option>
+          <option value="canceled">{t('common:status.canceled')}</option>
         </Select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="contractAmount">Valor Contratado</Label>
-        <Input id="contractAmount" type="number" step="0.01" min="0" value={contractAmount} onChange={(e) => setContractAmount(e.target.value)} placeholder="0,00" />
+        <Label htmlFor="contractAmount">{t('projects:form.fields.contractAmount')}</Label>
+        <Input
+          id="contractAmount"
+          type="number"
+          step="0.01"
+          min="0"
+          value={contractAmount}
+          onChange={(e) => setContractAmount(e.target.value)}
+          placeholder={t('projects:form.placeholders.contractAmount')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="description">Descrição</Label>
-        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descreva o projeto..." />
+        <Label htmlFor="description">{t('projects:form.fields.description')}</Label>
+        <Textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t('projects:form.placeholders.description')}
+        />
       </div>
     </FormCard>
   )

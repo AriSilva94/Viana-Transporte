@@ -1,0 +1,99 @@
+{
+  "title": "Informes",
+  "tabs": {
+    "projectSummary": "Resumen de Proyectos",
+    "dailyLogs": "Registros Diarios",
+    "machineUsage": "Uso de Máquinas",
+    "costsByCategory": "Costos por Categoría"
+  },
+  "filters": {
+    "status": "Estado",
+    "project": "Proyecto",
+    "dateFrom": "Fecha inicial",
+    "dateTo": "Fecha final",
+    "allStatuses": "Todos los estados",
+    "allProjects": "Todos los proyectos",
+    "clear": "Limpiar filtros"
+  },
+  "hoursValue": "{{value}} h",
+  "fuelValue": "{{value}} L",
+  "categories": {
+    "fuel": "Combustible",
+    "labor": "Mano de obra",
+    "maintenance": "Mantenimiento",
+    "transport": "Transporte",
+    "outsourced": "Servicio tercerizado",
+    "miscellaneous": "Varios"
+  },
+  "projectSummary": {
+    "columns": {
+      "project": "Proyecto",
+      "client": "Cliente",
+      "status": "Estado",
+      "totalHours": "Horas Totales",
+      "totalCosts": "Total Costos",
+      "totalRevenues": "Total Ingresos",
+      "profit": "Resultado"
+    },
+    "summary": {
+      "totalCosts": "Total Costos",
+      "totalRevenues": "Total Ingresos",
+      "totalProfit": "Resultado Total",
+      "projects": "Proyectos"
+    },
+    "empty": "No se encontró ningún proyecto."
+  },
+  "dailyLogs": {
+    "columns": {
+      "date": "Fecha",
+      "project": "Proyecto",
+      "machine": "Máquina",
+      "operator": "Operador",
+      "hours": "Horas",
+      "fuel": "Combustible",
+      "workDescription": "Servicio"
+    },
+    "summary": {
+      "totalRecords": "Total de Registros",
+      "totalHours": "Total de Horas"
+    },
+    "empty": "No se encontró ningún registro diario."
+  },
+  "machineUsage": {
+    "columns": {
+      "machine": "Máquina",
+      "type": "Tipo",
+      "totalHours": "Total de Horas",
+      "logCount": "Nº de Registros"
+    },
+    "summary": {
+      "totalMachines": "Total de Máquinas",
+      "activeMachines": "Máquinas en Uso",
+      "totalHours": "Total de Horas Registradas"
+    },
+    "empty": "No hay máquinas registradas."
+  },
+  "costsByCategory": {
+    "summary": {
+      "totalLabel": "Total General",
+      "title": "Resumen por Categoría"
+    },
+    "detail": {
+      "title": "Todos los Lanzamientos"
+    },
+    "columns": {
+      "category": "Categoría",
+      "entries": "Nº de Lanzamientos",
+      "total": "Total",
+      "share": "% del Total"
+    },
+    "detailColumns": {
+      "date": "Fecha",
+      "project": "Proyecto",
+      "category": "Categoría",
+      "description": "Descripción",
+      "amount": "Valor"
+    },
+    "empty": "No se encontraron costos."
+  }
+}

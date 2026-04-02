@@ -1,0 +1,55 @@
+{
+  "overview": "Visão geral",
+  "description": "Acompanhe operação, custos, receitas e o desempenho dos projetos em um único painel.",
+  "metrics": {
+    "activeProjects": {
+      "label": "Projetos Ativos",
+      "hint": "Em andamento neste momento"
+    },
+    "completedProjects": {
+      "label": "Projetos Concluídos",
+      "hint": "Entregas finalizadas"
+    },
+    "totalMachines": {
+      "label": "Total de Máquinas",
+      "hint": "{{count}} em uso"
+    },
+    "totalProjects": {
+      "label": "Total de Projetos",
+      "hint": "Base geral cadastrada"
+    },
+    "totalCosts": {
+      "label": "Total de Custos",
+      "hint": "Saídas acumuladas"
+    },
+    "totalRevenues": {
+      "label": "Total de Receitas",
+      "hint": "Entradas acumuladas"
+    },
+    "result": {
+      "label": "Resultado",
+      "positiveHint": "Operação com saldo positivo",
+      "negativeHint": "Operação requer atenção"
+    }
+  },
+  "recentLogs": {
+    "eyebrow": "Atividade",
+    "title": "Últimos Registros Diários",
+    "description": "Acompanhe os lançamentos operacionais mais recentes para manter a rotina sob controle.",
+    "empty": "Nenhum registro diário foi lançado ainda."
+  },
+  "highlightedProjects": {
+    "eyebrow": "Pipeline",
+    "title": "Projetos em Destaque",
+    "description": "Veja rapidamente os projetos ativos e entre direto no detalhe do que precisa de atenção.",
+    "empty": "Ainda não existem projetos ativos para exibir aqui."
+  },
+  "table": {
+    "date": "Data",
+    "project": "Projeto",
+    "machine": "Máquina",
+    "operator": "Operador",
+    "hours": "Horas"
+  },
+  "hoursValue": "{{value}}h"
+}

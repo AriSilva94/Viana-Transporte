@@ -3,6 +3,7 @@ import { eq, like, and, sum } from 'drizzle-orm'
 import { db } from '../db'
 import { projects, clients, dailyLogs, projectCosts, projectRevenues } from '../db/schema'
 import type { Project, ProjectFilters } from '../../shared/types'
+import { parseLocalDate } from '../../shared/date'
 
 export function registerProjectsHandlers(): void {
   ipcMain.handle('projects:list', async (_, filters?: ProjectFilters) => {
@@ -59,7 +60,14 @@ export function registerProjectsHandlers(): void {
   ipcMain.handle(
     'projects:create',
     async (_, data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
-      const rows = await db.insert(projects).values(data).returning()
+      const rows = await db
+        .insert(projects)
+        .values({
+          ...data,
+          startDate: data.startDate ? parseLocalDate(data.startDate) : null,
+          endDate: data.endDate ? parseLocalDate(data.endDate) : null,
+        })
+        .returning()
       return rows[0]
     }
   )
@@ -69,7 +77,12 @@ export function registerProjectsHandlers(): void {
     async (_, id: number, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>) => {
       const rows = await db
         .update(projects)
-        .set({ ...data, updatedAt: new Date() })
+        .set({
+          ...data,
+          startDate: data.startDate ? parseLocalDate(data.startDate) : data.startDate,
+          endDate: data.endDate ? parseLocalDate(data.endDate) : data.endDate,
+          updatedAt: new Date(),
+        })
         .where(eq(projects.id, id))
         .returning()
       return rows[0]
