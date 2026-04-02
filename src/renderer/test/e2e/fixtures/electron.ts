@@ -13,11 +13,15 @@ type Fixtures = {
 
 // ─── Helper: navigate using HashRouter ───────────────────────────────────────
 
-export async function goTo(page: Page, hash: string): Promise<void> {
+export async function goTo(page: Page, hash: string, awaitSelector?: string): Promise<void> {
   await page.evaluate((h: string) => {
     window.location.hash = h
   }, hash)
-  await page.waitForTimeout(400)
+  if (awaitSelector) {
+    await page.waitForSelector(awaitSelector, { state: 'visible' })
+  } else {
+    await page.waitForTimeout(400)
+  }
 }
 
 // ─── Helper: ensure screenshot dir exists ────────────────────────────────────
@@ -50,7 +54,7 @@ export async function seedBase(page: Page): Promise<{ clientId: number; projectI
       clientId,
       name: '__Seed Projeto__',
       location: null,
-      startDate: new Date(),
+      startDate: new Date('2026-01-01'),
       endDate: null,
       status: 'active',
       contractAmount: null,
@@ -93,13 +97,11 @@ export async function seedOperator(page: Page): Promise<number> {
 }
 
 // ─── Helper: click confirm in ConfirmDialog ───────────────────────────────────
-// Dialog renders as a fixed overlay. The dialog content div has class "relative z-50".
-// The confirm button is the last button inside it.
 
 export async function confirmDialog(page: Page): Promise<void> {
-  const dialogContent = page.locator('.relative.z-50')
-  await dialogContent.waitFor({ state: 'visible', timeout: 5000 })
-  await dialogContent.locator('button').last().click()
+  const confirmBtn = page.locator('[data-testid="confirm-button"]')
+  await confirmBtn.waitFor({ state: 'visible', timeout: 5000 })
+  await confirmBtn.click()
 }
 
 // ─── Fixture ──────────────────────────────────────────────────────────────────
@@ -115,6 +117,7 @@ export const test = base.extend<Fixtures>({
   page: async ({ electronApp }, use) => {
     const page = await electronApp.firstWindow()
     await page.waitForLoadState('domcontentloaded')
+    await page.waitForFunction(() => typeof (window as any).api !== 'undefined')
     await use(page)
   },
 })
