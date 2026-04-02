@@ -2,9 +2,9 @@
 import path from 'path'
 import { test, expect, goTo, ensureScreenshotDir, confirmDialog } from '../fixtures/electron'
 
-const UNIQUE_NAME = 'Cliente Playwright 01'
+const UNIQUE_NAME = `Cliente Playwright 01 ${Date.now()}`
 
-test.describe('Clients — Automated', () => {
+test.describe.serial('Clients — Automated', () => {
   test('create client', async ({ page }) => {
     await goTo(page, '#/clients/new')
     await page.waitForSelector('#name')
@@ -58,9 +58,8 @@ test.describe('Clients — Automated', () => {
 
     await confirmDialog(page)
 
-    await page.waitForTimeout(500)
     const deletedRow = page.locator('tr', { hasText: UNIQUE_NAME + ' Editado' })
-    await expect(deletedRow).not.toBeVisible()
+    await expect(deletedRow).not.toBeVisible({ timeout: 5000 })
   })
 })
 
@@ -68,7 +67,7 @@ test.describe('Clients — Screenshots', () => {
   test('screenshot: list page', async ({ page }) => {
     const dir = ensureScreenshotDir('clients')
     await goTo(page, '#/clients')
-    await page.waitForTimeout(500)
+    await page.waitForSelector('table, [class*="empty"]', { timeout: 5000 })
     await page.screenshot({ path: path.join(dir, 'list.png'), fullPage: true })
   })
 
