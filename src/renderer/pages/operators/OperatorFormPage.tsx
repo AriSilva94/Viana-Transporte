@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -10,6 +11,7 @@ import type { Operator } from '../../../shared/types'
 
 export function OperatorFormPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['operators', 'common'])
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const { showToast } = useToast()
@@ -36,7 +38,10 @@ export function OperatorFormPage(): JSX.Element {
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
-    if (!name.trim()) { setError('Nome é obrigatório'); return }
+    if (!name.trim()) {
+      setError(t('operators:form.errors.requiredName'))
+      return
+    }
     setIsLoading(true)
     setError('')
     try {
@@ -52,11 +57,11 @@ export function OperatorFormPage(): JSX.Element {
       } else {
         await api.operators.create(data)
       }
-      showToast('Salvo com sucesso!')
+      showToast(t('operators:form.toasts.success'))
       navigate('/operators')
     } catch {
-      showToast('Erro ao salvar. Tente novamente.', 'error')
-      setError('Erro ao salvar operador. Tente novamente.')
+      showToast(t('operators:form.toasts.error'), 'error')
+      setError(t('operators:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -64,24 +69,39 @@ export function OperatorFormPage(): JSX.Element {
 
   return (
     <FormCard
-      title={isEdit ? 'Editar Operador' : 'Novo Operador'}
-      description="Mantenha a equipe cadastrada com papel, contato e disponibilidade bem definidos."
+      title={isEdit ? t('operators:form.editTitle') : t('operators:form.newTitle')}
+      description={t('operators:form.description')}
       onSubmit={handleSubmit}
       onCancel={() => navigate('/operators')}
       isLoading={isLoading}
     >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="space-y-2">
-        <Label htmlFor="name">Nome *</Label>
-        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome do operador" />
+        <Label htmlFor="name">{t('operators:form.fields.name')}</Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t('operators:form.placeholders.name')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="phone">Telefone</Label>
-        <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(00) 00000-0000" />
+        <Label htmlFor="phone">{t('operators:form.fields.phone')}</Label>
+        <Input
+          id="phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder={t('operators:form.placeholders.phone')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="role">Função</Label>
-        <Input id="role" value={role} onChange={(e) => setRole(e.target.value)} placeholder="Ex: Operador de Escavadeira" />
+        <Label htmlFor="role">{t('operators:form.fields.role')}</Label>
+        <Input
+          id="role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          placeholder={t('operators:form.placeholders.role')}
+        />
       </div>
       <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-brand-sand/12 px-4 py-3">
         <input
@@ -91,11 +111,16 @@ export function OperatorFormPage(): JSX.Element {
           onChange={(e) => setIsActive(e.target.checked)}
           className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
         />
-        <Label htmlFor="isActive">Operador Ativo</Label>
+        <Label htmlFor="isActive">{t('operators:form.fields.isActive')}</Label>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="notes">Notas</Label>
-        <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observações..." />
+        <Label htmlFor="notes">{t('operators:form.fields.notes')}</Label>
+        <Textarea
+          id="notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder={t('operators:form.placeholders.notes')}
+        />
       </div>
     </FormCard>
   )

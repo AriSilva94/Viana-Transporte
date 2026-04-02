@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatCurrency, formatDate } from '@renderer/lib/format'
 import { StatusBadge } from '@renderer/components/ui/badge'
 import {
   Activity,
@@ -17,17 +19,8 @@ import type {
   DailyLogWithRelations,
   ProjectCostWithRelations,
   ProjectRevenueWithRelations,
+  SupportedLocale,
 } from '../../shared/types'
-
-function formatCurrency(val: number): string {
-  return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
-
-function formatDate(date: Date | string | null | undefined): string {
-  if (!date) return '—'
-  const d = typeof date === 'string' ? new Date(date) : date
-  return d.toLocaleDateString('pt-BR')
-}
 
 interface MetricCardProps {
   label: string
@@ -104,12 +97,14 @@ function DashboardEmptyState({ message }: { message: string }): JSX.Element {
 
 export function Dashboard(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['dashboard', 'navigation', 'common'])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [machines, setMachines] = useState<Machine[]>([])
   const [recentLogs, setRecentLogs] = useState<DailyLogWithRelations[]>([])
   const [costs, setCosts] = useState<ProjectCostWithRelations[]>([])
   const [revenues, setRevenues] = useState<ProjectRevenueWithRelations[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const locale = i18n.language as SupportedLocale
 
   useEffect(() => {
     async function load(): Promise<void> {
@@ -132,7 +127,7 @@ export function Dashboard(): JSX.Element {
   }, [])
 
   if (isLoading) {
-    return <div className="text-muted-foreground">Carregando...</div>
+    return <div className="text-muted-foreground">{t('common:loading')}</div>
   }
 
   const activeProjects = projects.filter((p) => p.status === 'active')
@@ -144,45 +139,49 @@ export function Dashboard(): JSX.Element {
   const last5Logs = recentLogs.slice(0, 5)
   const top5Active = activeProjects.slice(0, 5)
   const resultTone = profit >= 0 ? 'sky' : 'orange'
+  const formatHoursValue = (value: number): string =>
+    t('dashboard:hoursValue', {
+      value: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value),
+    })
 
   return (
     <div className="space-y-6">
       <section className="rounded-[28px] border border-white/60 bg-gradient-to-r from-brand-deep via-brand-sky to-brand-orange px-6 py-7 text-white shadow-[0_24px_60px_rgba(56,82,180,0.22)]">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-sand/90">
-          Visao geral
+          {t('dashboard:overview')}
         </p>
-        <h1 className="mt-2 text-3xl font-semibold">Dashboard</h1>
+        <h1 className="mt-2 text-3xl font-semibold">{t('navigation:dashboard')}</h1>
         <p className="mt-2 max-w-2xl text-sm text-white/80">
-          Acompanhe operacao, custos, receitas e o desempenho dos projetos em um unico painel.
+          {t('dashboard:description')}
         </p>
       </section>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="Projetos Ativos"
+          label={t('dashboard:metrics.activeProjects.label')}
           value={activeProjects.length}
-          hint="Em andamento neste momento"
+          hint={t('dashboard:metrics.activeProjects.hint')}
           icon={Activity}
           tone="deep"
         />
         <MetricCard
-          label="Projetos Concluídos"
+          label={t('dashboard:metrics.completedProjects.label')}
           value={completedProjects.length}
-          hint="Entregas finalizadas"
+          hint={t('dashboard:metrics.completedProjects.hint')}
           icon={FolderKanban}
           tone="sky"
         />
         <MetricCard
-          label="Total de Máquinas"
+          label={t('dashboard:metrics.totalMachines.label')}
           value={machines.length}
-          hint={`${allocatedMachines.length} em uso`}
+          hint={t('dashboard:metrics.totalMachines.hint', { count: allocatedMachines.length })}
           icon={Hammer}
           tone="sand"
         />
         <MetricCard
-          label="Total de Projetos"
+          label={t('dashboard:metrics.totalProjects.label')}
           value={projects.length}
-          hint="Base geral cadastrada"
+          hint={t('dashboard:metrics.totalProjects.hint')}
           icon={BriefcaseBusiness}
           tone="orange"
         />
@@ -190,55 +189,59 @@ export function Dashboard(): JSX.Element {
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <MetricCard
-          label="Total de Custos"
-          value={formatCurrency(totalCosts)}
-          hint="Saídas acumuladas"
+          label={t('dashboard:metrics.totalCosts.label')}
+          value={formatCurrency(totalCosts, locale)}
+          hint={t('dashboard:metrics.totalCosts.hint')}
           icon={TrendingDown}
           tone="orange"
         />
         <MetricCard
-          label="Total de Receitas"
-          value={formatCurrency(totalRevenues)}
-          hint="Entradas acumuladas"
+          label={t('dashboard:metrics.totalRevenues.label')}
+          value={formatCurrency(totalRevenues, locale)}
+          hint={t('dashboard:metrics.totalRevenues.hint')}
           icon={TrendingUp}
           tone="sky"
         />
         <MetricCard
-          label="Resultado"
-          value={formatCurrency(profit)}
-          hint={profit >= 0 ? 'Operação com saldo positivo' : 'Operação requer atenção'}
+          label={t('dashboard:metrics.result.label')}
+          value={formatCurrency(profit, locale)}
+          hint={
+            profit >= 0
+              ? t('dashboard:metrics.result.positiveHint')
+              : t('dashboard:metrics.result.negativeHint')
+          }
           icon={CircleDollarSign}
           tone={resultTone}
         />
       </div>
 
       <SectionCard
-        eyebrow="Atividade"
-        title="Últimos Registros Diários"
-        description="Acompanhe os lançamentos operacionais mais recentes para manter a rotina sob controle."
+        eyebrow={t('dashboard:recentLogs.eyebrow')}
+        title={t('dashboard:recentLogs.title')}
+        description={t('dashboard:recentLogs.description')}
       >
         {last5Logs.length === 0 ? (
-          <DashboardEmptyState message="Nenhum registro diário foi lançado ainda." />
+          <DashboardEmptyState message={t('dashboard:recentLogs.empty')} />
         ) : (
           <div className="overflow-hidden rounded-3xl border border-border/80 bg-white/80 shadow-sm backdrop-blur-sm">
             <table className="w-full text-sm">
               <thead className="bg-brand-sand/18">
                 <tr>
-                  <th className="text-left px-4 py-2 font-medium">Data</th>
-                  <th className="text-left px-4 py-2 font-medium">Projeto</th>
-                  <th className="text-left px-4 py-2 font-medium">Máquina</th>
-                  <th className="text-left px-4 py-2 font-medium">Operador</th>
-                  <th className="text-left px-4 py-2 font-medium">Horas</th>
+                  <th className="text-left px-4 py-2 font-medium">{t('dashboard:table.date')}</th>
+                  <th className="text-left px-4 py-2 font-medium">{t('dashboard:table.project')}</th>
+                  <th className="text-left px-4 py-2 font-medium">{t('dashboard:table.machine')}</th>
+                  <th className="text-left px-4 py-2 font-medium">{t('dashboard:table.operator')}</th>
+                  <th className="text-left px-4 py-2 font-medium">{t('dashboard:table.hours')}</th>
                 </tr>
               </thead>
               <tbody>
                 {last5Logs.map((log) => (
                   <tr key={log.id} className="border-t border-border/70 hover:bg-brand-sky/8">
-                    <td className="px-4 py-2">{formatDate(log.date)}</td>
-                    <td className="px-4 py-2">{log.projectName ?? '—'}</td>
-                    <td className="px-4 py-2">{log.machineName ?? '—'}</td>
-                    <td className="px-4 py-2">{log.operatorName ?? '—'}</td>
-                    <td className="px-4 py-2">{log.hoursWorked}h</td>
+                    <td className="px-4 py-2">{formatDate(log.date, locale)}</td>
+                    <td className="px-4 py-2">{log.projectName ?? t('common:emptyValue')}</td>
+                    <td className="px-4 py-2">{log.machineName ?? t('common:emptyValue')}</td>
+                    <td className="px-4 py-2">{log.operatorName ?? t('common:emptyValue')}</td>
+                    <td className="px-4 py-2">{formatHoursValue(log.hoursWorked)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -248,12 +251,12 @@ export function Dashboard(): JSX.Element {
       </SectionCard>
 
       <SectionCard
-        eyebrow="Pipeline"
-        title="Projetos em Destaque"
-        description="Veja rapidamente os projetos ativos e entre direto no detalhe do que precisa de atenção."
+        eyebrow={t('dashboard:highlightedProjects.eyebrow')}
+        title={t('dashboard:highlightedProjects.title')}
+        description={t('dashboard:highlightedProjects.description')}
       >
         {top5Active.length === 0 ? (
-          <DashboardEmptyState message="Ainda não existem projetos ativos para exibir aqui." />
+          <DashboardEmptyState message={t('dashboard:highlightedProjects.empty')} />
         ) : (
           <div className="overflow-hidden rounded-3xl border border-border/80 bg-white/80 shadow-sm backdrop-blur-sm">
             {top5Active.map((project) => (
@@ -266,7 +269,9 @@ export function Dashboard(): JSX.Element {
                   <span className="font-medium">{project.name}</span>
                   <StatusBadge status={project.status} />
                 </div>
-                <span className="text-sm text-muted-foreground">{project.clientName ?? '—'}</span>
+                <span className="text-sm text-muted-foreground">
+                  {project.clientName ?? t('common:emptyValue')}
+                </span>
               </div>
             ))}
           </div>

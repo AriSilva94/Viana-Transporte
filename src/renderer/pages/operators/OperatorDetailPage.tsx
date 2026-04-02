@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatDate } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { SurfaceSection } from '@renderer/components/shared/SurfaceSection'
 import { StatusBadge } from '@renderer/components/ui/badge'
-import type { Operator, DailyLogWithRelations } from '../../../shared/types'
+import type { Operator, DailyLogWithRelations, SupportedLocale } from '../../../shared/types'
 
 export function OperatorDetailPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['operators', 'common'])
   const { id } = useParams<{ id: string }>()
   const [operator, setOperator] = useState<Operator | null>(null)
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
+  const locale = i18n.language as SupportedLocale
 
   useEffect(() => {
     const numId = Number(id)
@@ -20,35 +24,34 @@ export function OperatorDetailPage(): JSX.Element {
   }, [id])
 
   if (!operator) {
-    return <div className="text-muted-foreground">Carregando...</div>
+    return <div className="text-muted-foreground">{t('common:loading')}</div>
   }
 
   const logColumns = [
     {
       key: 'date',
-      label: 'Data',
-      render: (row: DailyLogWithRelations) =>
-        new Date(row.date).toLocaleDateString('pt-BR'),
+      label: t('operators:columns.date'),
+      render: (row: DailyLogWithRelations) => formatDate(row.date, locale),
     },
     {
       key: 'projectName',
-      label: 'Projeto',
-      render: (row: DailyLogWithRelations) => row.projectName ?? '—',
+      label: t('operators:columns.project'),
+      render: (row: DailyLogWithRelations) => row.projectName ?? t('common:emptyValue'),
     },
     {
       key: 'machineName',
-      label: 'Máquina',
-      render: (row: DailyLogWithRelations) => row.machineName ?? '—',
+      label: t('operators:columns.machine'),
+      render: (row: DailyLogWithRelations) => row.machineName ?? t('common:emptyValue'),
     },
     {
       key: 'hoursWorked',
-      label: 'Horas',
+      label: t('operators:columns.hours'),
       render: (row: DailyLogWithRelations) => String(row.hoursWorked),
     },
     {
       key: 'workDescription',
-      label: 'Serviço',
-      render: (row: DailyLogWithRelations) => row.workDescription ?? '—',
+      label: t('operators:columns.workDescription'),
+      render: (row: DailyLogWithRelations) => row.workDescription ?? t('common:emptyValue'),
     },
   ]
 
@@ -57,45 +60,53 @@ export function OperatorDetailPage(): JSX.Element {
       <PageHeader
         title={operator.name}
         action={{
-          label: 'Editar',
+          label: t('operators:detail.editAction'),
           onClick: () => navigate(`/operators/${id}/edit`),
         }}
       />
       <div className="space-y-6">
         <SurfaceSection
-          eyebrow="Colaborador"
-          title="Dados do Operador"
-          description="Informações de contato e função operacional."
+          eyebrow={t('operators:detail.sections.operator.eyebrow')}
+          title={t('operators:detail.sections.operator.title')}
+          description={t('operators:detail.sections.operator.description')}
         >
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="rounded-2xl bg-brand-sand/12 p-4">
-              <span className="text-sm text-muted-foreground">Telefone</span>
-              <p className="mt-1 font-medium">{operator.phone ?? '—'}</p>
+              <span className="text-sm text-muted-foreground">
+                {t('operators:detail.fields.phone')}
+              </span>
+              <p className="mt-1 font-medium">{operator.phone ?? t('common:emptyValue')}</p>
             </div>
             <div className="rounded-2xl bg-brand-sky/10 p-4">
-              <span className="text-sm text-muted-foreground">Função</span>
-              <p className="mt-1 font-medium">{operator.role ?? '—'}</p>
+              <span className="text-sm text-muted-foreground">
+                {t('operators:detail.fields.role')}
+              </span>
+              <p className="mt-1 font-medium">{operator.role ?? t('common:emptyValue')}</p>
             </div>
             <div className="rounded-2xl bg-white/70 p-4">
-              <span className="text-sm text-muted-foreground">Status</span>
+              <span className="text-sm text-muted-foreground">
+                {t('operators:detail.fields.status')}
+              </span>
               <p className="mt-1 font-medium">
                 <StatusBadge status={operator.isActive ? 'active' : 'inactive'} />
               </p>
             </div>
             <div className="rounded-2xl bg-white/70 p-4 md:col-span-2">
-              <span className="text-sm text-muted-foreground">Notas</span>
-              <p className="mt-1 font-medium">{operator.notes ?? '—'}</p>
+              <span className="text-sm text-muted-foreground">
+                {t('operators:detail.fields.notes')}
+              </span>
+              <p className="mt-1 font-medium">{operator.notes ?? t('common:emptyValue')}</p>
             </div>
           </div>
         </SurfaceSection>
 
         <SurfaceSection
-          eyebrow="Histórico"
-          title="Registros Diários"
-          description="Diários de operação vinculados a este operador."
+          eyebrow={t('operators:detail.sections.history.eyebrow')}
+          title={t('operators:detail.sections.history.title')}
+          description={t('operators:detail.sections.history.description')}
         >
           {logs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum registro encontrado para este operador.</p>
+            <p className="text-sm text-muted-foreground">{t('operators:detail.emptyLogs')}</p>
           ) : (
             <DataTable columns={logColumns} data={logs} />
           )}

@@ -1,0 +1,71 @@
+{
+  "title": "Operadores",
+  "newAction": "Novo Operador",
+  "empty": "Nenhum operador cadastrado",
+  "createFirst": "Cadastrar primeiro operador",
+  "searchPlaceholder": "Pesquisar por nome...",
+  "columns": {
+    "name": "Nome",
+    "phone": "Telefone",
+    "role": "Função",
+    "isActive": "Ativo",
+    "actions": "Ações",
+    "date": "Data",
+    "project": "Projeto",
+    "machine": "Máquina",
+    "hours": "Horas",
+    "workDescription": "Serviço"
+  },
+  "deleteDialog": {
+    "title": "Excluir Operador",
+    "description": "Tem certeza que deseja excluir este operador? Esta ação não pode ser desfeita."
+  },
+  "form": {
+    "newTitle": "Novo Operador",
+    "editTitle": "Editar Operador",
+    "description": "Mantenha a equipe cadastrada com papel, contato e disponibilidade bem definidos.",
+    "fields": {
+      "name": "Nome *",
+      "phone": "Telefone",
+      "role": "Função",
+      "isActive": "Operador Ativo",
+      "notes": "Notas"
+    },
+    "placeholders": {
+      "name": "Nome do operador",
+      "phone": "(00) 00000-0000",
+      "role": "Ex: Operador de Escavadeira",
+      "notes": "Observações..."
+    },
+    "errors": {
+      "requiredName": "Nome é obrigatório",
+      "save": "Erro ao salvar operador. Tente novamente."
+    },
+    "toasts": {
+      "success": "Salvo com sucesso!",
+      "error": "Erro ao salvar. Tente novamente."
+    }
+  },
+  "detail": {
+    "editAction": "Editar",
+    "sections": {
+      "operator": {
+        "eyebrow": "Colaborador",
+        "title": "Dados do Operador",
+        "description": "Informações de contato e função operacional."
+      },
+      "history": {
+        "eyebrow": "Histórico",
+        "title": "Registros Diários",
+        "description": "Diários de operação vinculados a este operador."
+      }
+    },
+    "fields": {
+      "phone": "Telefone",
+      "role": "Função",
+      "status": "Status",
+      "notes": "Notas"
+    },
+    "emptyLogs": "Nenhum registro encontrado para este operador."
+  }
+}

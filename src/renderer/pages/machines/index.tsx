@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
@@ -11,6 +12,7 @@ import type { Machine } from '../../../shared/types'
 
 export function MachinesListPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['machines', 'common'])
   const [machines, setMachines] = useState<Machine[]>([])
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
@@ -38,19 +40,37 @@ export function MachinesListPage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'name', label: 'Nome' },
-    { key: 'type', label: 'Tipo' },
-    { key: 'identifier', label: 'Identificador', render: (row: Machine) => row.identifier ?? '—' },
-    { key: 'brandModel', label: 'Marca/Modelo', render: (row: Machine) => row.brandModel ?? '—' },
-    { key: 'status', label: 'Status', render: (row: Machine) => <StatusBadge status={row.status} /> },
+    { key: 'name', label: t('machines:columns.name') },
+    { key: 'type', label: t('machines:columns.type') },
+    {
+      key: 'identifier',
+      label: t('machines:columns.identifier'),
+      render: (row: Machine) => row.identifier ?? t('common:emptyValue'),
+    },
+    {
+      key: 'brandModel',
+      label: t('machines:columns.brandModel'),
+      render: (row: Machine) => row.brandModel ?? t('common:emptyValue'),
+    },
+    {
+      key: 'status',
+      label: t('machines:columns.status'),
+      render: (row: Machine) => <StatusBadge status={row.status} />,
+    },
     {
       key: 'actions',
-      label: 'Ações',
+      label: t('machines:columns.actions'),
       render: (row: Machine) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => navigate(`/machines/${row.id}`)}>Ver</Button>
-          <Button size="sm" variant="outline" onClick={() => navigate(`/machines/${row.id}/edit`)}>Editar</Button>
-          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>Excluir</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate(`/machines/${row.id}`)}>
+            {t('common:view')}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => navigate(`/machines/${row.id}/edit`)}>
+            {t('common:edit')}
+          </Button>
+          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>
+            {t('common:delete')}
+          </Button>
         </div>
       ),
     },
@@ -59,30 +79,30 @@ export function MachinesListPage(): JSX.Element {
   return (
     <div>
       <PageHeader
-        title="Máquinas"
-        action={{ label: 'Nova Máquina', onClick: () => navigate('/machines/new') }}
+        title={t('machines:title')}
+        action={{ label: t('machines:newAction'), onClick: () => navigate('/machines/new') }}
       />
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">Carregando...</div>
+        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
       ) : machines.length === 0 && !search ? (
         <EmptyState
-          message="Nenhuma máquina cadastrada"
-          action={{ label: 'Cadastrar primeira máquina', onClick: () => navigate('/machines/new') }}
+          message={t('machines:empty')}
+          action={{ label: t('machines:createFirst'), onClick: () => navigate('/machines/new') }}
         />
       ) : (
         <DataTable
           columns={columns}
           data={machines}
           onSearch={(q) => { setSearch(q); loadMachines(q) }}
-          searchPlaceholder="Pesquisar por nome ou tipo..."
+          searchPlaceholder={t('machines:searchPlaceholder')}
         />
       )}
       <ConfirmDialog
         open={deleteId !== null}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        title="Excluir Máquina"
-        description="Tem certeza que deseja excluir esta máquina? Esta ação não pode ser desfeita."
+        title={t('machines:deleteDialog.title')}
+        description={t('machines:deleteDialog.description')}
       />
     </div>
   )

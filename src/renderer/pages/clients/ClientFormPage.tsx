@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -10,6 +11,7 @@ import type { Client } from '../../../shared/types'
 
 export function ClientFormPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['clients', 'common'])
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const { showToast } = useToast()
@@ -37,7 +39,7 @@ export function ClientFormPage(): JSX.Element {
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
     if (!name.trim()) {
-      setError('Nome é obrigatório')
+      setError(t('clients:form.errors.requiredName'))
       return
     }
     setIsLoading(true)
@@ -55,11 +57,11 @@ export function ClientFormPage(): JSX.Element {
       } else {
         await api.clients.create(data)
       }
-      showToast('Salvo com sucesso!')
+      showToast(t('clients:form.toasts.success'))
       navigate('/clients')
     } catch {
-      showToast('Erro ao salvar. Tente novamente.', 'error')
-      setError('Erro ao salvar cliente. Tente novamente.')
+      showToast(t('clients:form.toasts.error'), 'error')
+      setError(t('clients:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -67,57 +69,57 @@ export function ClientFormPage(): JSX.Element {
 
   return (
     <FormCard
-      title={isEdit ? 'Editar Cliente' : 'Novo Cliente'}
-      description="Cadastre ou atualize as informações de contato para manter o relacionamento comercial organizado."
+      title={isEdit ? t('clients:form.editTitle') : t('clients:form.newTitle')}
+      description={t('clients:form.description')}
       onSubmit={handleSubmit}
       onCancel={() => navigate('/clients')}
       isLoading={isLoading}
     >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="space-y-2">
-        <Label htmlFor="name">Nome *</Label>
+        <Label htmlFor="name">{t('clients:form.fields.name')}</Label>
         <Input
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nome do cliente"
+          placeholder={t('clients:form.placeholders.name')}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="document">Documento</Label>
+        <Label htmlFor="document">{t('clients:form.fields.document')}</Label>
         <Input
           id="document"
           value={document}
           onChange={(e) => setDocument(e.target.value)}
-          placeholder="CPF / CNPJ"
+          placeholder={t('clients:form.placeholders.document')}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="phone">Telefone</Label>
+        <Label htmlFor="phone">{t('clients:form.fields.phone')}</Label>
         <Input
           id="phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="(00) 00000-0000"
+          placeholder={t('clients:form.placeholders.phone')}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">E-mail</Label>
+        <Label htmlFor="email">{t('clients:form.fields.email')}</Label>
         <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="email@exemplo.com"
+          placeholder={t('clients:form.placeholders.email')}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="notes">Notas</Label>
+        <Label htmlFor="notes">{t('clients:form.fields.notes')}</Label>
         <Textarea
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Observações..."
+          placeholder={t('clients:form.placeholders.notes')}
         />
       </div>
     </FormCard>

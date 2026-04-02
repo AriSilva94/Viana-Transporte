@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -11,6 +12,7 @@ import type { Machine } from '../../../shared/types'
 
 export function MachineFormPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['machines', 'common'])
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const { showToast } = useToast()
@@ -39,8 +41,14 @@ export function MachineFormPage(): JSX.Element {
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
-    if (!name.trim()) { setError('Nome é obrigatório'); return }
-    if (!type.trim()) { setError('Tipo é obrigatório'); return }
+    if (!name.trim()) {
+      setError(t('machines:form.errors.requiredName'))
+      return
+    }
+    if (!type.trim()) {
+      setError(t('machines:form.errors.requiredType'))
+      return
+    }
     setIsLoading(true)
     setError('')
     try {
@@ -57,11 +65,11 @@ export function MachineFormPage(): JSX.Element {
       } else {
         await api.machines.create(data)
       }
-      showToast('Salvo com sucesso!')
+      showToast(t('machines:form.toasts.success'))
       navigate('/machines')
     } catch {
-      showToast('Erro ao salvar. Tente novamente.', 'error')
-      setError('Erro ao salvar máquina. Tente novamente.')
+      showToast(t('machines:form.toasts.error'), 'error')
+      setError(t('machines:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -69,41 +77,66 @@ export function MachineFormPage(): JSX.Element {
 
   return (
     <FormCard
-      title={isEdit ? 'Editar Máquina' : 'Nova Máquina'}
-      description="Organize os ativos da operação com identificação, modelo e status sempre atualizados."
+      title={isEdit ? t('machines:form.editTitle') : t('machines:form.newTitle')}
+      description={t('machines:form.description')}
       onSubmit={handleSubmit}
       onCancel={() => navigate('/machines')}
       isLoading={isLoading}
     >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="space-y-2">
-        <Label htmlFor="name">Nome *</Label>
-        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Escavadeira John Deere" />
+        <Label htmlFor="name">{t('machines:form.fields.name')}</Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t('machines:form.placeholders.name')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="type">Tipo *</Label>
-        <Input id="type" value={type} onChange={(e) => setType(e.target.value)} placeholder="Ex: Escavadeira, Bulldozer" />
+        <Label htmlFor="type">{t('machines:form.fields.type')}</Label>
+        <Input
+          id="type"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          placeholder={t('machines:form.placeholders.type')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="identifier">Identificador</Label>
-        <Input id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="Código do ativo" />
+        <Label htmlFor="identifier">{t('machines:form.fields.identifier')}</Label>
+        <Input
+          id="identifier"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
+          placeholder={t('machines:form.placeholders.identifier')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="brandModel">Marca/Modelo</Label>
-        <Input id="brandModel" value={brandModel} onChange={(e) => setBrandModel(e.target.value)} placeholder="Ex: John Deere 350G" />
+        <Label htmlFor="brandModel">{t('machines:form.fields.brandModel')}</Label>
+        <Input
+          id="brandModel"
+          value={brandModel}
+          onChange={(e) => setBrandModel(e.target.value)}
+          placeholder={t('machines:form.placeholders.brandModel')}
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="status">Status *</Label>
+        <Label htmlFor="status">{t('machines:form.fields.status')}</Label>
         <Select id="status" value={status} onChange={(e) => setStatus(e.target.value as Machine['status'])}>
-          <option value="available">Disponível</option>
-          <option value="allocated">Alocado</option>
-          <option value="under_maintenance">Em Manutenção</option>
-          <option value="inactive">Inativo</option>
+          <option value="available">{t('common:status.available')}</option>
+          <option value="allocated">{t('common:status.allocated')}</option>
+          <option value="under_maintenance">{t('common:status.under_maintenance')}</option>
+          <option value="inactive">{t('common:status.inactive')}</option>
         </Select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="notes">Notas</Label>
-        <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observações..." />
+        <Label htmlFor="notes">{t('machines:form.fields.notes')}</Label>
+        <Textarea
+          id="notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder={t('machines:form.placeholders.notes')}
+        />
       </div>
     </FormCard>
   )

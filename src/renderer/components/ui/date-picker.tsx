@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@renderer/lib/utils'
 
 interface DatePickerProps {
@@ -12,8 +13,6 @@ interface DatePickerProps {
   allowClear?: boolean
 }
 
-const WEEK_DAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
-
 function parseDate(value: string): Date | null {
   if (!value) return null
   const [year, month, day] = value.split('-').map(Number)
@@ -21,10 +20,10 @@ function parseDate(value: string): Date | null {
   return new Date(year, month - 1, day)
 }
 
-function formatDate(value: string): string {
+function formatDate(value: string, locale: string): string {
   const date = parseDate(value)
   if (!date) return ''
-  return new Intl.DateTimeFormat('pt-BR', {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -69,19 +68,26 @@ function DatePicker({
   id,
   value,
   onChange,
-  placeholder = 'Selecione uma data',
+  placeholder,
   disabled = false,
   className,
   allowClear = false,
 }: DatePickerProps): JSX.Element {
+  const { t, i18n } = useTranslation('common')
   const containerRef = React.useRef<HTMLDivElement | null>(null)
   const selectedDate = parseDate(value)
   const [open, setOpen] = React.useState(false)
   const [visibleMonth, setVisibleMonth] = React.useState<Date>(() => selectedDate ?? new Date())
+  const locale = i18n.resolvedLanguage ?? i18n.language
+  const translatedWeekDays = t('weekDays', { returnObjects: true })
+  const weekDays = Array.isArray(translatedWeekDays) ? translatedWeekDays : []
+  const inputPlaceholder = placeholder ?? t('selectDate')
 
   React.useEffect(() => {
-    if (selectedDate) {
-      setVisibleMonth(selectedDate)
+    const nextSelectedDate = parseDate(value)
+
+    if (nextSelectedDate && !isSameMonth(visibleMonth, nextSelectedDate)) {
+      setVisibleMonth(nextSelectedDate)
     }
   }, [value])
 
@@ -103,7 +109,7 @@ function DatePicker({
 
   const today = new Date()
   const days = getCalendarDays(visibleMonth)
-  const monthLabel = new Intl.DateTimeFormat('pt-BR', {
+  const monthLabel = new Intl.DateTimeFormat(locale, {
     month: 'long',
     year: 'numeric',
   }).format(visibleMonth)
@@ -128,7 +134,7 @@ function DatePicker({
         )}
       >
         <span className={cn('truncate whitespace-nowrap pr-3', !value && 'text-muted-foreground')}>
-          {value ? formatDate(value) : placeholder}
+          {value ? formatDate(value, locale) : inputPlaceholder}
         </span>
         <CalendarDays className="h-4 w-4 shrink-0 text-secondary" />
       </button>
@@ -144,7 +150,7 @@ function DatePicker({
               <ChevronLeft className="h-4 w-4" />
             </button>
             <div className="text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-secondary">Calendário</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-secondary">{t('calendar')}</p>
               <p className="mt-1 text-sm font-semibold capitalize leading-none text-foreground">{monthLabel}</p>
             </div>
             <button
@@ -157,8 +163,11 @@ function DatePicker({
           </div>
 
           <div className="grid grid-cols-7 gap-0.5 text-center">
-            {WEEK_DAYS.map((day) => (
-              <span key={day} className="py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {weekDays.map((day, index) => (
+              <span
+                key={`${day}-${index}`}
+                className="py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+              >
                 {day}
               </span>
             ))}
@@ -195,7 +204,7 @@ function DatePicker({
               }}
               className="text-sm font-medium text-secondary transition-colors hover:text-primary"
             >
-              Hoje
+              {t('today')}
             </button>
             <div className="flex items-center gap-2">
               {allowClear ? (
@@ -207,7 +216,7 @@ function DatePicker({
                   }}
                   className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Limpar
+                  {t('clear')}
                 </button>
               ) : null}
               <button
@@ -215,7 +224,7 @@ function DatePicker({
                 onClick={() => setOpen(false)}
                 className="rounded-xl bg-brand-sand/28 px-3 py-1.5 text-sm font-medium text-brand-ink transition-colors hover:bg-brand-sand/40"
               >
-                Fechar
+                {t('close')}
               </button>
             </div>
           </div>

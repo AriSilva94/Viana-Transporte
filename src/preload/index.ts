@@ -55,6 +55,11 @@ const api: ElectronAPI = {
   dashboard: {
     stats: () => ipcRenderer.invoke('dashboard:stats'),
   },
+  preferences: {
+    getSystemLocale: () => ipcRenderer.invoke('preferences:getSystemLocale'),
+    getSavedLanguage: () => ipcRenderer.invoke('preferences:getSavedLanguage'),
+    setLanguage: (language) => ipcRenderer.invoke('preferences:setLanguage', language),
+  },
 }
 
 contextBridge.exposeInMainWorld('api', api)

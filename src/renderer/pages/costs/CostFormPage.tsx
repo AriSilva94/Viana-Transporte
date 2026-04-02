@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -8,21 +9,14 @@ import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import { useToast } from '@renderer/context/ToastContext'
-import type { ProjectCostWithRelations, ProjectWithClient, Machine, Operator, ProjectCost } from '../../../shared/types'
+import { formatLocalDate, parseLocalDate } from '../../../shared/date'
+import type { Machine, Operator, ProjectCost, ProjectCostWithRelations, ProjectWithClient } from '../../../shared/types'
 
 type CostCategory = ProjectCost['category']
 
-const CATEGORY_OPTIONS: { value: CostCategory; label: string }[] = [
-  { value: 'fuel', label: 'Combustível' },
-  { value: 'labor', label: 'Mão de obra' },
-  { value: 'maintenance', label: 'Manutenção' },
-  { value: 'transport', label: 'Transporte' },
-  { value: 'outsourced', label: 'Serviço terceirizado' },
-  { value: 'miscellaneous', label: 'Diversos' },
-]
-
 export function CostFormPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['costs', 'common'])
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const { showToast } = useToast()
@@ -33,7 +27,7 @@ export function CostFormPage(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(formatLocalDate(new Date()))
   const [projectId, setProjectId] = useState<number | ''>('')
   const [category, setCategory] = useState<CostCategory | ''>('')
   const [description, setDescription] = useState('')
@@ -41,6 +35,15 @@ export function CostFormPage(): JSX.Element {
   const [machineId, setMachineId] = useState<number | ''>('')
   const [operatorId, setOperatorId] = useState<number | ''>('')
   const [notes, setNotes] = useState('')
+
+  const categoryOptions: { value: CostCategory; label: string }[] = [
+    { value: 'fuel', label: t('costs:categories.fuel') },
+    { value: 'labor', label: t('costs:categories.labor') },
+    { value: 'maintenance', label: t('costs:categories.maintenance') },
+    { value: 'transport', label: t('costs:categories.transport') },
+    { value: 'outsourced', label: t('costs:categories.outsourced') },
+    { value: 'miscellaneous', label: t('costs:categories.miscellaneous') },
+  ]
 
   useEffect(() => {
     api.projects.list().then(setProjects)
@@ -50,7 +53,7 @@ export function CostFormPage(): JSX.Element {
     if (!isEdit) return
     api.costs.get(Number(id)).then((cost: ProjectCostWithRelations | null) => {
       if (!cost) return
-      setDate(new Date(cost.date).toISOString().split('T')[0])
+      setDate(formatLocalDate(cost.date))
       setProjectId(cost.projectId)
       setCategory(cost.category)
       setDescription(cost.description)
@@ -63,19 +66,31 @@ export function CostFormPage(): JSX.Element {
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
-    if (!date) { setError('Data é obrigatória'); return }
-    if (!projectId) { setError('Projeto é obrigatório'); return }
-    if (!category) { setError('Categoria é obrigatória'); return }
-    if (!description.trim()) { setError('Descrição é obrigatória'); return }
+    if (!date) {
+      setError(t('costs:form.errors.requiredDate'))
+      return
+    }
+    if (!projectId) {
+      setError(t('costs:form.errors.requiredProject'))
+      return
+    }
+    if (!category) {
+      setError(t('costs:form.errors.requiredCategory'))
+      return
+    }
+    if (!description.trim()) {
+      setError(t('costs:form.errors.requiredDescription'))
+      return
+    }
     if (amount === '' || Number(amount) <= 0) {
-      setError('Valor deve ser maior que zero')
+      setError(t('costs:form.errors.requiredAmount'))
       return
     }
     setIsLoading(true)
     setError('')
     try {
       const data = {
-        date: new Date(date),
+        date: parseLocalDate(date),
         projectId: Number(projectId),
         category: category as CostCategory,
         description: description.trim(),
@@ -89,11 +104,11 @@ export function CostFormPage(): JSX.Element {
       } else {
         await api.costs.create(data)
       }
-      showToast('Salvo com sucesso!')
+      showToast(t('costs:form.toasts.success'))
       navigate('/costs')
     } catch {
-      showToast('Erro ao salvar. Tente novamente.', 'error')
-      setError('Erro ao salvar custo. Tente novamente.')
+      showToast(t('costs:form.toasts.error'), 'error')
+      setError(t('costs:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -101,48 +116,46 @@ export function CostFormPage(): JSX.Element {
 
   return (
     <FormCard
-      title={isEdit ? 'Editar Custo' : 'Novo Custo'}
-      description="Registre despesas com contexto suficiente para leitura financeira e rastreabilidade operacional."
+      title={isEdit ? t('costs:form.editTitle') : t('costs:form.newTitle')}
+      description={t('costs:form.description')}
       onSubmit={handleSubmit}
       onCancel={() => navigate('/costs')}
       isLoading={isLoading}
     >
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {/* Row 1: Data, Projeto */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="date">Data *</Label>
+          <Label htmlFor="date">{t('costs:form.fields.date')}</Label>
           <DatePicker id="date" value={date} onChange={setDate} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="projectId">Projeto *</Label>
+          <Label htmlFor="projectId">{t('costs:form.fields.project')}</Label>
           <Select
             id="projectId"
             value={projectId === '' ? '' : String(projectId)}
             onChange={(e) => setProjectId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">Selecionar...</option>
+            <option value="">{t('costs:form.placeholders.select')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {p.clientName ?? ''}
+                {p.name} — {p.clientName ?? t('common:emptyValue')}
               </option>
             ))}
           </Select>
         </div>
       </div>
 
-      {/* Row 2: Categoria, Descrição */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="category">Categoria *</Label>
+          <Label htmlFor="category">{t('costs:form.fields.category')}</Label>
           <Select
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value as CostCategory | '')}
           >
-            <option value="">Selecionar...</option>
-            {CATEGORY_OPTIONS.map((opt) => (
+            <option value="">{t('costs:form.placeholders.select')}</option>
+            {categoryOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -150,21 +163,20 @@ export function CostFormPage(): JSX.Element {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description">Descrição *</Label>
+          <Label htmlFor="description">{t('costs:form.fields.description')}</Label>
           <Input
             id="description"
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Descreva o custo..."
+            placeholder={t('costs:form.placeholders.description')}
           />
         </div>
       </div>
 
-      {/* Row 3: Valor, Máquina */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="amount">Valor (R$) *</Label>
+          <Label htmlFor="amount">{t('costs:form.fields.amount')}</Label>
           <Input
             id="amount"
             type="number"
@@ -172,17 +184,17 @@ export function CostFormPage(): JSX.Element {
             step={0.01}
             value={amount}
             onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder="0,00"
+            placeholder={t('costs:form.placeholders.amount')}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="machineId">Máquina</Label>
+          <Label htmlFor="machineId">{t('costs:form.fields.machine')}</Label>
           <Select
             id="machineId"
             value={machineId === '' ? '' : String(machineId)}
             onChange={(e) => setMachineId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">Nenhuma</option>
+            <option value="">{t('costs:form.placeholders.none')}</option>
             {machines.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name} ({m.type})
@@ -192,16 +204,15 @@ export function CostFormPage(): JSX.Element {
         </div>
       </div>
 
-      {/* Row 4: Operador */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="operatorId">Operador</Label>
+          <Label htmlFor="operatorId">{t('costs:form.fields.operator')}</Label>
           <Select
             id="operatorId"
             value={operatorId === '' ? '' : String(operatorId)}
             onChange={(e) => setOperatorId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">Nenhum</option>
+            <option value="">{t('costs:form.placeholders.none')}</option>
             {operators.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
@@ -211,14 +222,13 @@ export function CostFormPage(): JSX.Element {
         </div>
       </div>
 
-      {/* Row 5: Observações */}
       <div className="space-y-2">
-        <Label htmlFor="notes">Observações</Label>
+        <Label htmlFor="notes">{t('costs:form.fields.notes')}</Label>
         <Textarea
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Observações adicionais..."
+          placeholder={t('costs:form.placeholders.notes')}
         />
       </div>
     </FormCard>

@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatCurrency, formatDate } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { SurfaceSection } from '@renderer/components/shared/SurfaceSection'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/ui/tabs'
 import { StatusBadge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
-import type { ProjectWithClient, ProjectSummary, DailyLogWithRelations, ProjectCostWithRelations, ProjectRevenueWithRelations } from '../../../shared/types'
-
-const categoryLabels: Record<string, string> = {
-  fuel: 'Combustível',
-  labor: 'Mão de obra',
-  maintenance: 'Manutenção',
-  transport: 'Transporte',
-  outsourced_service: 'Serviço terceirizado',
-  outsourced: 'Serviço terceirizado',
-  miscellaneous: 'Diversos',
-}
+import type {
+  ProjectWithClient,
+  ProjectSummary,
+  DailyLogWithRelations,
+  ProjectCostWithRelations,
+  ProjectRevenueWithRelations,
+  SupportedLocale,
+} from '../../../shared/types'
 
 export function ProjectDetailPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['projects', 'common'])
   const { id } = useParams<{ id: string }>()
   const [project, setProject] = useState<ProjectWithClient | null>(null)
   const [summary, setSummary] = useState<ProjectSummary>({
@@ -32,6 +32,7 @@ export function ProjectDetailPage(): JSX.Element {
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
   const [costs, setCosts] = useState<ProjectCostWithRelations[]>([])
   const [revenues, setRevenues] = useState<ProjectRevenueWithRelations[]>([])
+  const locale = i18n.language as SupportedLocale
 
   useEffect(() => {
     const numId = Number(id)
@@ -43,69 +44,87 @@ export function ProjectDetailPage(): JSX.Element {
   }, [id])
 
   if (!project) {
-    return <div className="text-muted-foreground">Carregando...</div>
+    return <div className="text-muted-foreground">{t('common:loading')}</div>
   }
-
-  function formatCurrency(val: number): string {
-    return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  }
-
-  function formatDate(d: Date | null): string {
-    if (!d) return '—'
-    return new Date(d).toLocaleDateString('pt-BR')
+  const formatHoursValue = (value: number): string =>
+    t('projects:detail.totalHoursValue', {
+      value: new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }).format(value),
+    })
+  const getCategoryLabel = (category: string): string => {
+    const translated = t(`projects:categories.${category}`)
+    return translated === `projects:categories.${category}` ? category : translated
   }
 
   return (
     <div>
       <PageHeader
         title={project.name}
-        action={{ label: 'Editar', onClick: () => navigate(`/projects/${id}/edit`) }}
+        action={{ label: t('projects:detail.editAction'), onClick: () => navigate(`/projects/${id}/edit`) }}
       />
-      <Tabs defaultValue="geral">
+      <Tabs defaultValue="general">
         <TabsList>
-          <TabsTrigger value="geral">Geral</TabsTrigger>
-          <TabsTrigger value="logs">Registros</TabsTrigger>
-          <TabsTrigger value="custos">Custos</TabsTrigger>
-          <TabsTrigger value="receitas">Receitas</TabsTrigger>
-          <TabsTrigger value="resumo">Resumo</TabsTrigger>
+          <TabsTrigger value="general">{t('projects:detail.tabs.general')}</TabsTrigger>
+          <TabsTrigger value="logs">{t('projects:detail.tabs.logs')}</TabsTrigger>
+          <TabsTrigger value="costs">{t('projects:detail.tabs.costs')}</TabsTrigger>
+          <TabsTrigger value="revenues">{t('projects:detail.tabs.revenues')}</TabsTrigger>
+          <TabsTrigger value="summary">{t('projects:detail.tabs.summary')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="geral">
+        <TabsContent value="general">
           <SurfaceSection
-            eyebrow="Contexto"
-            title="Dados Gerais"
-            description="Informações centrais do projeto para acompanhamento operacional e comercial."
+            eyebrow={t('projects:detail.sections.general.eyebrow')}
+            title={t('projects:detail.sections.general.title')}
+            description={t('projects:detail.sections.general.description')}
           >
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-2xl bg-brand-sand/12 p-4">
-                <span className="text-sm text-muted-foreground">Cliente</span>
-                <p className="mt-1 font-medium">{project.clientName ?? '—'}</p>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.client')}
+                </span>
+                <p className="mt-1 font-medium">{project.clientName ?? t('common:emptyValue')}</p>
               </div>
               <div className="rounded-2xl bg-brand-sky/10 p-4">
-                <span className="text-sm text-muted-foreground">Status</span>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.status')}
+                </span>
                 <div className="mt-2"><StatusBadge status={project.status} /></div>
               </div>
               <div className="rounded-2xl bg-white/70 p-4">
-                <span className="text-sm text-muted-foreground">Localização</span>
-                <p className="mt-1 font-medium">{project.location ?? '—'}</p>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.location')}
+                </span>
+                <p className="mt-1 font-medium">{project.location ?? t('common:emptyValue')}</p>
               </div>
               <div className="rounded-2xl bg-white/70 p-4">
-                <span className="text-sm text-muted-foreground">Valor Contratado</span>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.contractAmount')}
+                </span>
                 <p className="mt-1 font-medium">
-                  {project.contractAmount != null ? formatCurrency(project.contractAmount) : '—'}
+                  {project.contractAmount != null
+                    ? formatCurrency(project.contractAmount, locale)
+                    : t('common:emptyValue')}
                 </p>
               </div>
               <div className="rounded-2xl bg-white/70 p-4">
-                <span className="text-sm text-muted-foreground">Data Início</span>
-                <p className="mt-1 font-medium">{formatDate(project.startDate)}</p>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.startDate')}
+                </span>
+                <p className="mt-1 font-medium">{formatDate(project.startDate, locale)}</p>
               </div>
               <div className="rounded-2xl bg-white/70 p-4">
-                <span className="text-sm text-muted-foreground">Data Fim</span>
-                <p className="mt-1 font-medium">{formatDate(project.endDate)}</p>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.endDate')}
+                </span>
+                <p className="mt-1 font-medium">{formatDate(project.endDate, locale)}</p>
               </div>
               <div className="rounded-2xl bg-white/70 p-4 md:col-span-2">
-                <span className="text-sm text-muted-foreground">Descrição</span>
-                <p className="mt-1 font-medium">{project.description ?? '—'}</p>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.description')}
+                </span>
+                <p className="mt-1 font-medium">{project.description ?? t('common:emptyValue')}</p>
               </div>
             </div>
           </SurfaceSection>
@@ -113,20 +132,45 @@ export function ProjectDetailPage(): JSX.Element {
 
         <TabsContent value="logs">
           <div className="flex justify-end mb-3">
-            <Button size="sm" onClick={() => navigate(`/daily-logs/new`)}>Novo Registro</Button>
+            <Button size="sm" onClick={() => navigate('/daily-logs/new')}>
+              {t('projects:detail.actions.newLog')}
+            </Button>
           </div>
           {logs.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhum registro diário para este projeto.</p>
+            <p className="text-muted-foreground text-sm">{t('projects:detail.empty.logs')}</p>
           ) : (
             <DataTable
               columns={[
-                { key: 'date', label: 'Data', render: (row: DailyLogWithRelations) => new Date(row.date).toLocaleDateString('pt-BR') },
-                { key: 'machineName', label: 'Máquina', render: (row: DailyLogWithRelations) => row.machineName ?? '—' },
-                { key: 'operatorName', label: 'Operador', render: (row: DailyLogWithRelations) => row.operatorName ?? '—' },
-                { key: 'hoursWorked', label: 'Horas', render: (row: DailyLogWithRelations) => String(row.hoursWorked) },
-                { key: 'workDescription', label: 'Serviço', render: (row: DailyLogWithRelations) => row.workDescription ?? '—' },
-                { key: 'actions', label: 'Ações', render: (row: DailyLogWithRelations) => (
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/daily-logs/${row.id}/edit`)}>Editar</Button>
+                {
+                  key: 'date',
+                  label: t('projects:columns.date'),
+                  render: (row: DailyLogWithRelations) => formatDate(row.date, locale),
+                },
+                {
+                  key: 'machineName',
+                  label: t('projects:columns.machine'),
+                  render: (row: DailyLogWithRelations) => row.machineName ?? t('common:emptyValue'),
+                },
+                {
+                  key: 'operatorName',
+                  label: t('projects:columns.operator'),
+                  render: (row: DailyLogWithRelations) => row.operatorName ?? t('common:emptyValue'),
+                },
+                {
+                  key: 'hoursWorked',
+                  label: t('projects:columns.hours'),
+                  render: (row: DailyLogWithRelations) => String(row.hoursWorked),
+                },
+                {
+                  key: 'workDescription',
+                  label: t('projects:columns.workDescription'),
+                  render: (row: DailyLogWithRelations) =>
+                    row.workDescription ?? t('common:emptyValue'),
+                },
+                { key: 'actions', label: t('projects:columns.actions'), render: (row: DailyLogWithRelations) => (
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/daily-logs/${row.id}/edit`)}>
+                    {t('common:edit')}
+                  </Button>
                 )},
               ]}
               data={logs}
@@ -134,21 +178,43 @@ export function ProjectDetailPage(): JSX.Element {
           )}
         </TabsContent>
 
-        <TabsContent value="custos">
+        <TabsContent value="costs">
           <div className="flex justify-end mb-3">
-            <Button size="sm" onClick={() => navigate('/costs/new')}>Novo Custo</Button>
+            <Button size="sm" onClick={() => navigate('/costs/new')}>
+              {t('projects:detail.actions.newCost')}
+            </Button>
           </div>
           {costs.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhum custo registrado para este projeto.</p>
+            <p className="text-muted-foreground text-sm">{t('projects:detail.empty.costs')}</p>
           ) : (
             <DataTable
               columns={[
-                { key: 'date', label: 'Data', render: (row: ProjectCostWithRelations) => new Date(row.date).toLocaleDateString('pt-BR') },
-                { key: 'category', label: 'Categoria', render: (row: ProjectCostWithRelations) => categoryLabels[row.category] ?? row.category },
-                { key: 'description', label: 'Descrição', render: (row: ProjectCostWithRelations) => row.description },
-                { key: 'amount', label: 'Valor', render: (row: ProjectCostWithRelations) => formatCurrency(Number(row.amount)) },
-                { key: 'actions', label: 'Ações', render: (row: ProjectCostWithRelations) => (
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/costs/${row.id}/edit`)}>Editar</Button>
+                {
+                  key: 'date',
+                  label: t('projects:columns.date'),
+                  render: (row: ProjectCostWithRelations) => formatDate(row.date, locale),
+                },
+                {
+                  key: 'category',
+                  label: t('projects:columns.category'),
+                  render: (row: ProjectCostWithRelations) => getCategoryLabel(row.category),
+                },
+                {
+                  key: 'description',
+                  label: t('projects:columns.description'),
+                  render: (row: ProjectCostWithRelations) =>
+                    row.description ?? t('common:emptyValue'),
+                },
+                {
+                  key: 'amount',
+                  label: t('projects:columns.amount'),
+                  render: (row: ProjectCostWithRelations) =>
+                    formatCurrency(Number(row.amount), locale),
+                },
+                { key: 'actions', label: t('projects:columns.actions'), render: (row: ProjectCostWithRelations) => (
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/costs/${row.id}/edit`)}>
+                    {t('common:edit')}
+                  </Button>
                 )},
               ]}
               data={costs}
@@ -156,21 +222,45 @@ export function ProjectDetailPage(): JSX.Element {
           )}
         </TabsContent>
 
-        <TabsContent value="receitas">
+        <TabsContent value="revenues">
           <div className="flex justify-end mb-3">
-            <Button size="sm" onClick={() => navigate('/revenues/new')}>Nova Receita</Button>
+            <Button size="sm" onClick={() => navigate('/revenues/new')}>
+              {t('projects:detail.actions.newRevenue')}
+            </Button>
           </div>
           {revenues.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhuma receita registrada para este projeto.</p>
+            <p className="text-muted-foreground text-sm">{t('projects:detail.empty.revenues')}</p>
           ) : (
             <DataTable
               columns={[
-                { key: 'date', label: 'Data', render: (row: ProjectRevenueWithRelations) => new Date(row.date).toLocaleDateString('pt-BR') },
-                { key: 'description', label: 'Descrição', render: (row: ProjectRevenueWithRelations) => row.description },
-                { key: 'amount', label: 'Valor', render: (row: ProjectRevenueWithRelations) => formatCurrency(Number(row.amount)) },
-                { key: 'status', label: 'Status', render: (row: ProjectRevenueWithRelations) => <StatusBadge status={row.status} /> },
-                { key: 'actions', label: 'Ações', render: (row: ProjectRevenueWithRelations) => (
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/revenues/${row.id}/edit`)}>Editar</Button>
+                {
+                  key: 'date',
+                  label: t('projects:columns.date'),
+                  render: (row: ProjectRevenueWithRelations) => formatDate(row.date, locale),
+                },
+                {
+                  key: 'description',
+                  label: t('projects:columns.description'),
+                  render: (row: ProjectRevenueWithRelations) =>
+                    row.description ?? t('common:emptyValue'),
+                },
+                {
+                  key: 'amount',
+                  label: t('projects:columns.amount'),
+                  render: (row: ProjectRevenueWithRelations) =>
+                    formatCurrency(Number(row.amount), locale),
+                },
+                {
+                  key: 'status',
+                  label: t('projects:columns.status'),
+                  render: (row: ProjectRevenueWithRelations) => (
+                    <StatusBadge status={row.status} namespace="revenues" labelKeyPrefix="statuses" />
+                  ),
+                },
+                { key: 'actions', label: t('projects:columns.actions'), render: (row: ProjectRevenueWithRelations) => (
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/revenues/${row.id}/edit`)}>
+                    {t('common:edit')}
+                  </Button>
                 )},
               ]}
               data={revenues}
@@ -178,30 +268,42 @@ export function ProjectDetailPage(): JSX.Element {
           )}
         </TabsContent>
 
-        <TabsContent value="resumo">
+        <TabsContent value="summary">
           <SurfaceSection
-            eyebrow="Indicadores"
-            title="Resumo Financeiro e Operacional"
-            description="Leitura rápida dos principais números do projeto."
+            eyebrow={t('projects:detail.sections.summary.eyebrow')}
+            title={t('projects:detail.sections.summary.title')}
+            description={t('projects:detail.sections.summary.description')}
           >
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-2xl bg-brand-orange/12 p-4">
-                <span className="text-sm text-muted-foreground">Total de Custos</span>
-                <p className="mt-1 text-lg font-semibold">{formatCurrency(summary.totalCosts)}</p>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.totalCosts')}
+                </span>
+                <p className="mt-1 text-lg font-semibold">
+                  {formatCurrency(summary.totalCosts, locale)}
+                </p>
               </div>
               <div className="rounded-2xl bg-brand-sky/12 p-4">
-                <span className="text-sm text-muted-foreground">Total de Receitas</span>
-                <p className="mt-1 text-lg font-semibold">{formatCurrency(summary.totalRevenues)}</p>
-              </div>
-              <div className="rounded-2xl bg-white/70 p-4">
-                <span className="text-sm text-muted-foreground">Lucro / Prejuízo</span>
-                <p className={`mt-1 text-lg font-semibold ${summary.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
-                  {formatCurrency(summary.profit)}
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.totalRevenues')}
+                </span>
+                <p className="mt-1 text-lg font-semibold">
+                  {formatCurrency(summary.totalRevenues, locale)}
                 </p>
               </div>
               <div className="rounded-2xl bg-white/70 p-4">
-                <span className="text-sm text-muted-foreground">Total de Horas</span>
-                <p className="mt-1 text-lg font-semibold">{summary.totalHours.toFixed(1)}h</p>
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.profit')}
+                </span>
+                <p className={`mt-1 text-lg font-semibold ${summary.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
+                  {formatCurrency(summary.profit, locale)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-4">
+                <span className="text-sm text-muted-foreground">
+                  {t('projects:detail.fields.totalHours')}
+                </span>
+                <p className="mt-1 text-lg font-semibold">{formatHoursValue(summary.totalHours)}</p>
               </div>
             </div>
           </SurfaceSection>

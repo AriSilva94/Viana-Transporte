@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatDate } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { SurfaceSection } from '@renderer/components/shared/SurfaceSection'
 import { StatusBadge } from '@renderer/components/ui/badge'
-import type { Machine, DailyLogWithRelations } from '../../../shared/types'
+import type { Machine, DailyLogWithRelations, SupportedLocale } from '../../../shared/types'
 
 export function MachineDetailPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['machines', 'common'])
   const { id } = useParams<{ id: string }>()
   const [machine, setMachine] = useState<Machine | null>(null)
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
+  const locale = i18n.language as SupportedLocale
 
   useEffect(() => {
     const numId = Number(id)
@@ -20,35 +24,34 @@ export function MachineDetailPage(): JSX.Element {
   }, [id])
 
   if (!machine) {
-    return <div className="text-muted-foreground">Carregando...</div>
+    return <div className="text-muted-foreground">{t('common:loading')}</div>
   }
 
   const logColumns = [
     {
       key: 'date',
-      label: 'Data',
-      render: (row: DailyLogWithRelations) =>
-        new Date(row.date).toLocaleDateString('pt-BR'),
+      label: t('machines:columns.date'),
+      render: (row: DailyLogWithRelations) => formatDate(row.date, locale),
     },
     {
       key: 'projectName',
-      label: 'Projeto',
-      render: (row: DailyLogWithRelations) => row.projectName ?? '—',
+      label: t('machines:columns.project'),
+      render: (row: DailyLogWithRelations) => row.projectName ?? t('common:emptyValue'),
     },
     {
       key: 'operatorName',
-      label: 'Operador',
-      render: (row: DailyLogWithRelations) => row.operatorName ?? '—',
+      label: t('machines:columns.operator'),
+      render: (row: DailyLogWithRelations) => row.operatorName ?? t('common:emptyValue'),
     },
     {
       key: 'hoursWorked',
-      label: 'Horas',
+      label: t('machines:columns.hours'),
       render: (row: DailyLogWithRelations) => String(row.hoursWorked),
     },
     {
       key: 'workDescription',
-      label: 'Serviço',
-      render: (row: DailyLogWithRelations) => row.workDescription ?? '—',
+      label: t('machines:columns.workDescription'),
+      render: (row: DailyLogWithRelations) => row.workDescription ?? t('common:emptyValue'),
     },
   ]
 
@@ -57,49 +60,59 @@ export function MachineDetailPage(): JSX.Element {
       <PageHeader
         title={machine.name}
         action={{
-          label: 'Editar',
+          label: t('machines:detail.editAction'),
           onClick: () => navigate(`/machines/${id}/edit`),
         }}
       />
       <div className="space-y-6">
         <SurfaceSection
-          eyebrow="Equipamento"
-          title="Dados da Máquina"
-          description="Informações técnicas e operacionais do equipamento."
+          eyebrow={t('machines:detail.sections.machine.eyebrow')}
+          title={t('machines:detail.sections.machine.title')}
+          description={t('machines:detail.sections.machine.description')}
         >
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="rounded-2xl bg-brand-sand/12 p-4">
-              <span className="text-sm text-muted-foreground">Tipo</span>
+              <span className="text-sm text-muted-foreground">
+                {t('machines:detail.fields.type')}
+              </span>
               <p className="mt-1 font-medium">{machine.type}</p>
             </div>
             <div className="rounded-2xl bg-brand-sky/10 p-4">
-              <span className="text-sm text-muted-foreground">Identificador</span>
-              <p className="mt-1 font-medium">{machine.identifier ?? '—'}</p>
+              <span className="text-sm text-muted-foreground">
+                {t('machines:detail.fields.identifier')}
+              </span>
+              <p className="mt-1 font-medium">{machine.identifier ?? t('common:emptyValue')}</p>
             </div>
             <div className="rounded-2xl bg-white/70 p-4">
-              <span className="text-sm text-muted-foreground">Marca / Modelo</span>
-              <p className="mt-1 font-medium">{machine.brandModel ?? '—'}</p>
+              <span className="text-sm text-muted-foreground">
+                {t('machines:detail.fields.brandModel')}
+              </span>
+              <p className="mt-1 font-medium">{machine.brandModel ?? t('common:emptyValue')}</p>
             </div>
             <div className="rounded-2xl bg-white/70 p-4">
-              <span className="text-sm text-muted-foreground">Status</span>
+              <span className="text-sm text-muted-foreground">
+                {t('machines:detail.fields.status')}
+              </span>
               <p className="mt-1 font-medium">
                 <StatusBadge status={machine.status} />
               </p>
             </div>
             <div className="rounded-2xl bg-white/70 p-4 md:col-span-2">
-              <span className="text-sm text-muted-foreground">Notas</span>
-              <p className="mt-1 font-medium">{machine.notes ?? '—'}</p>
+              <span className="text-sm text-muted-foreground">
+                {t('machines:detail.fields.notes')}
+              </span>
+              <p className="mt-1 font-medium">{machine.notes ?? t('common:emptyValue')}</p>
             </div>
           </div>
         </SurfaceSection>
 
         <SurfaceSection
-          eyebrow="Histórico"
-          title="Registros de Uso"
-          description="Diários de operação vinculados a este equipamento."
+          eyebrow={t('machines:detail.sections.history.eyebrow')}
+          title={t('machines:detail.sections.history.title')}
+          description={t('machines:detail.sections.history.description')}
         >
           {logs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum registro de uso encontrado.</p>
+            <p className="text-sm text-muted-foreground">{t('machines:detail.emptyLogs')}</p>
           ) : (
             <DataTable columns={logColumns} data={logs} />
           )}

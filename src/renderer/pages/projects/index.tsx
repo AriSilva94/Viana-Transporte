@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatCurrency } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { EmptyState } from '@renderer/components/shared/EmptyState'
@@ -9,15 +11,17 @@ import { FilterPanel } from '@renderer/components/shared/FilterPanel'
 import { Button } from '@renderer/components/ui/button'
 import { Select } from '@renderer/components/ui/select'
 import { StatusBadge } from '@renderer/components/ui/badge'
-import type { Project, ProjectWithClient } from '../../../shared/types'
+import type { Project, ProjectWithClient, SupportedLocale } from '../../../shared/types'
 
 export function ProjectsListPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['projects', 'common'])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<Project['status'] | ''>('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const locale = i18n.language as SupportedLocale
 
   async function loadProjects(q?: string, s?: Project['status'] | ''): Promise<void> {
     setIsLoading(true)
@@ -46,26 +50,44 @@ export function ProjectsListPage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'name', label: 'Nome' },
-    { key: 'clientName', label: 'Cliente', render: (row: ProjectWithClient) => row.clientName ?? '—' },
-    { key: 'location', label: 'Localização', render: (row: ProjectWithClient) => row.location ?? '—' },
-    { key: 'status', label: 'Status', render: (row: ProjectWithClient) => <StatusBadge status={row.status} /> },
+    { key: 'name', label: t('projects:columns.name') },
+    {
+      key: 'clientName',
+      label: t('projects:columns.client'),
+      render: (row: ProjectWithClient) => row.clientName ?? t('common:emptyValue'),
+    },
+    {
+      key: 'location',
+      label: t('projects:columns.location'),
+      render: (row: ProjectWithClient) => row.location ?? t('common:emptyValue'),
+    },
+    {
+      key: 'status',
+      label: t('projects:columns.status'),
+      render: (row: ProjectWithClient) => <StatusBadge status={row.status} />,
+    },
     {
       key: 'contractAmount',
-      label: 'Valor Contratado',
+      label: t('projects:columns.contractAmount'),
       render: (row: ProjectWithClient) =>
         row.contractAmount != null
-          ? `R$ ${row.contractAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-          : '—',
+          ? formatCurrency(row.contractAmount, locale)
+          : t('common:emptyValue'),
     },
     {
       key: 'actions',
-      label: 'Ações',
+      label: t('projects:columns.actions'),
       render: (row: ProjectWithClient) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => navigate(`/projects/${row.id}`)}>Ver</Button>
-          <Button size="sm" variant="outline" onClick={() => navigate(`/projects/${row.id}/edit`)}>Editar</Button>
-          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>Excluir</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate(`/projects/${row.id}`)}>
+            {t('common:view')}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => navigate(`/projects/${row.id}/edit`)}>
+            {t('common:edit')}
+          </Button>
+          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>
+            {t('common:delete')}
+          </Button>
         </div>
       ),
     },
@@ -74,8 +96,8 @@ export function ProjectsListPage(): JSX.Element {
   return (
     <div>
       <PageHeader
-        title="Projetos"
-        action={{ label: 'Novo Projeto', onClick: () => navigate('/projects/new') }}
+        title={t('projects:title')}
+        action={{ label: t('projects:newAction'), onClick: () => navigate('/projects/new') }}
       />
       <FilterPanel>
         <Select
@@ -87,34 +109,34 @@ export function ProjectsListPage(): JSX.Element {
           }}
           className="w-48"
         >
-          <option value="">Todos os status</option>
-          <option value="planned">Planejado</option>
-          <option value="active">Ativo</option>
-          <option value="completed">Concluído</option>
-          <option value="canceled">Cancelado</option>
+          <option value="">{t('projects:filters.allStatuses')}</option>
+          <option value="planned">{t('common:status.planned')}</option>
+          <option value="active">{t('common:status.active')}</option>
+          <option value="completed">{t('common:status.completed')}</option>
+          <option value="canceled">{t('common:status.canceled')}</option>
         </Select>
       </FilterPanel>
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">Carregando...</div>
+        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
       ) : projects.length === 0 ? (
         <EmptyState
-          message="Nenhum projeto cadastrado"
-          action={{ label: 'Criar primeiro projeto', onClick: () => navigate('/projects/new') }}
+          message={t('projects:empty')}
+          action={{ label: t('projects:createFirst'), onClick: () => navigate('/projects/new') }}
         />
       ) : (
         <DataTable
           columns={columns}
           data={projects}
           onSearch={(q) => { setSearch(q); loadProjects(q, status) }}
-          searchPlaceholder="Pesquisar por nome..."
+          searchPlaceholder={t('projects:searchPlaceholder')}
         />
       )}
       <ConfirmDialog
         open={deleteId !== null}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        title="Excluir Projeto"
-        description="Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita."
+        title={t('projects:deleteDialog.title')}
+        description={t('projects:deleteDialog.description')}
       />
     </div>
   )

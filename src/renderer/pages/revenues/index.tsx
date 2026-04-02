@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatCurrency, formatDate } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { EmptyState } from '@renderer/components/shared/EmptyState'
@@ -10,18 +12,21 @@ import { StatusBadge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
-import type { ProjectRevenueWithRelations, ProjectWithClient, RevenueFilters, ProjectRevenue } from '../../../shared/types'
+import type {
+  ProjectRevenue,
+  ProjectRevenueWithRelations,
+  ProjectWithClient,
+  RevenueFilters,
+  SupportedLocale,
+} from '../../../shared/types'
 
 type RevenueStatus = ProjectRevenue['status']
 
-const STATUS_OPTIONS: { value: RevenueStatus; label: string }[] = [
-  { value: 'planned', label: 'Previsto' },
-  { value: 'billed', label: 'Faturado' },
-  { value: 'received', label: 'Recebido' },
-]
-
 export function RevenuesPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation(['revenues', 'common'])
+  const locale = i18n.language as SupportedLocale
+
   const [revenues, setRevenues] = useState<ProjectRevenueWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<RevenueFilters>({})
@@ -41,7 +46,6 @@ export function RevenuesPage(): JSX.Element {
 
   useEffect(() => {
     api.projects.list().then(setProjects)
-    loadRevenues({})
   }, [])
 
   useEffect(() => {
@@ -63,6 +67,12 @@ export function RevenuesPage(): JSX.Element {
     loadRevenues(filters)
   }
 
+  const statusOptions: { value: RevenueStatus; label: string }[] = [
+    { value: 'planned', label: t('revenues:statuses.planned') },
+    { value: 'billed', label: t('revenues:statuses.billed') },
+    { value: 'received', label: t('revenues:statuses.received') },
+  ]
+
   const hasActiveFilters =
     filters.projectId !== undefined ||
     filters.status !== undefined ||
@@ -72,49 +82,41 @@ export function RevenuesPage(): JSX.Element {
   const columns = [
     {
       key: 'date',
-      label: 'Data',
-      render: (row: ProjectRevenueWithRelations) =>
-        new Date(row.date).toLocaleDateString('pt-BR'),
+      label: t('revenues:columns.date'),
+      render: (row: ProjectRevenueWithRelations) => formatDate(row.date, locale),
     },
     {
       key: 'projectName',
-      label: 'Projeto',
-      render: (row: ProjectRevenueWithRelations) => row.projectName ?? '—',
+      label: t('revenues:columns.project'),
+      render: (row: ProjectRevenueWithRelations) => row.projectName ?? t('common:emptyValue'),
     },
     {
       key: 'description',
-      label: 'Descrição',
+      label: t('revenues:columns.description'),
       render: (row: ProjectRevenueWithRelations) => row.description,
     },
     {
       key: 'amount',
-      label: 'Valor',
-      render: (row: ProjectRevenueWithRelations) =>
-        `R$ ${Number(row.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      label: t('revenues:columns.amount'),
+      render: (row: ProjectRevenueWithRelations) => formatCurrency(Number(row.amount), locale),
     },
     {
       key: 'status',
-      label: 'Status',
-      render: (row: ProjectRevenueWithRelations) => <StatusBadge status={row.status} />,
+      label: t('revenues:columns.status'),
+      render: (row: ProjectRevenueWithRelations) => (
+        <StatusBadge status={row.status} namespace="revenues" labelKeyPrefix="statuses" />
+      ),
     },
     {
       key: 'actions',
-      label: 'Ações',
+      label: t('revenues:columns.actions'),
       render: (row: ProjectRevenueWithRelations) => (
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate(`/revenues/${row.id}/edit`)}
-          >
-            Editar
+          <Button size="sm" variant="outline" onClick={() => navigate(`/revenues/${row.id}/edit`)}>
+            {t('common:edit')}
           </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => setDeleteId(row.id)}
-          >
-            Excluir
+          <Button size="sm" variant="destructive" onClick={() => setDeleteId(row.id)}>
+            {t('common:delete')}
           </Button>
         </div>
       ),
@@ -124,13 +126,13 @@ export function RevenuesPage(): JSX.Element {
   return (
     <div>
       <PageHeader
-        title="Receitas / Medições"
-        action={{ label: 'Nova Receita', onClick: () => navigate('/revenues/new') }}
+        title={t('revenues:title')}
+        action={{ label: t('revenues:newAction'), onClick: () => navigate('/revenues/new') }}
       />
 
       <FilterPanel>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Projeto</label>
+          <label className="text-sm font-medium text-foreground">{t('revenues:filters.project')}</label>
           <Select
             value={filters.projectId !== undefined ? String(filters.projectId) : ''}
             onChange={(e) =>
@@ -140,7 +142,7 @@ export function RevenuesPage(): JSX.Element {
             }
             className="w-56"
           >
-            <option value="">Todos os projetos</option>
+            <option value="">{t('revenues:filters.allProjects')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -150,7 +152,7 @@ export function RevenuesPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Status</label>
+          <label className="text-sm font-medium text-foreground">{t('revenues:filters.status')}</label>
           <Select
             value={filters.status ?? ''}
             onChange={(e) =>
@@ -160,8 +162,8 @@ export function RevenuesPage(): JSX.Element {
             }
             className="w-48"
           >
-            <option value="">Todos os status</option>
-            {STATUS_OPTIONS.map((opt) => (
+            <option value="">{t('revenues:filters.allStatuses')}</option>
+            {statusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -170,7 +172,7 @@ export function RevenuesPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data inicial</label>
+          <label className="text-sm font-medium text-foreground">{t('revenues:filters.dateFrom')}</label>
           <DatePicker
             value={filters.dateFrom ?? ''}
             onChange={(value) => handleFilterChange({ dateFrom: value || undefined })}
@@ -180,7 +182,7 @@ export function RevenuesPage(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data final</label>
+          <label className="text-sm font-medium text-foreground">{t('revenues:filters.dateTo')}</label>
           <DatePicker
             value={filters.dateTo ?? ''}
             onChange={(value) => handleFilterChange({ dateTo: value || undefined })}
@@ -191,18 +193,18 @@ export function RevenuesPage(): JSX.Element {
 
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters}>
-            Limpar filtros
+            {t('revenues:filters.clear')}
           </Button>
         )}
       </FilterPanel>
 
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">Carregando...</div>
+        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
       ) : revenues.length === 0 && !hasActiveFilters ? (
         <EmptyState
-          message="Nenhuma receita registrada"
+          message={t('revenues:empty')}
           action={{
-            label: 'Registrar primeira receita',
+            label: t('revenues:createFirst'),
             onClick: () => navigate('/revenues/new'),
           }}
         />
@@ -214,8 +216,8 @@ export function RevenuesPage(): JSX.Element {
         open={deleteId !== null}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        title="Excluir Receita"
-        description="Tem certeza que deseja excluir esta receita? Esta ação não pode ser desfeita."
+        title={t('revenues:deleteDialog.title')}
+        description={t('revenues:deleteDialog.description')}
       />
     </div>
   )

@@ -1,0 +1,99 @@
+{
+  "title": "Reports",
+  "tabs": {
+    "projectSummary": "Project Summary",
+    "dailyLogs": "Daily Logs",
+    "machineUsage": "Machine Usage",
+    "costsByCategory": "Costs by Category"
+  },
+  "filters": {
+    "status": "Status",
+    "project": "Project",
+    "dateFrom": "Start date",
+    "dateTo": "End date",
+    "allStatuses": "All statuses",
+    "allProjects": "All projects",
+    "clear": "Clear filters"
+  },
+  "hoursValue": "{{value}} h",
+  "fuelValue": "{{value}} L",
+  "categories": {
+    "fuel": "Fuel",
+    "labor": "Labor",
+    "maintenance": "Maintenance",
+    "transport": "Transport",
+    "outsourced": "Outsourced service",
+    "miscellaneous": "Miscellaneous"
+  },
+  "projectSummary": {
+    "columns": {
+      "project": "Project",
+      "client": "Client",
+      "status": "Status",
+      "totalHours": "Total Hours",
+      "totalCosts": "Total Costs",
+      "totalRevenues": "Total Revenues",
+      "profit": "Result"
+    },
+    "summary": {
+      "totalCosts": "Total Costs",
+      "totalRevenues": "Total Revenues",
+      "totalProfit": "Total Result",
+      "projects": "Projects"
+    },
+    "empty": "No project found."
+  },
+  "dailyLogs": {
+    "columns": {
+      "date": "Date",
+      "project": "Project",
+      "machine": "Machine",
+      "operator": "Operator",
+      "hours": "Hours",
+      "fuel": "Fuel",
+      "workDescription": "Work"
+    },
+    "summary": {
+      "totalRecords": "Total Entries",
+      "totalHours": "Total Hours"
+    },
+    "empty": "No daily log found."
+  },
+  "machineUsage": {
+    "columns": {
+      "machine": "Machine",
+      "type": "Type",
+      "totalHours": "Total Hours",
+      "logCount": "No. of Entries"
+    },
+    "summary": {
+      "totalMachines": "Total Machines",
+      "activeMachines": "Machines in Use",
+      "totalHours": "Total Logged Hours"
+    },
+    "empty": "No machine registered."
+  },
+  "costsByCategory": {
+    "summary": {
+      "totalLabel": "Grand Total",
+      "title": "Summary by Category"
+    },
+    "detail": {
+      "title": "All Entries"
+    },
+    "columns": {
+      "category": "Category",
+      "entries": "No. of Entries",
+      "total": "Total",
+      "share": "% of Total"
+    },
+    "detailColumns": {
+      "date": "Date",
+      "project": "Project",
+      "category": "Category",
+      "description": "Description",
+      "amount": "Amount"
+    },
+    "empty": "No cost found."
+  }
+}

@@ -10,21 +10,24 @@ import {
   TrendingUp,
   BarChart2,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@renderer/lib/utils'
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/clients', label: 'Clientes', icon: Users },
-  { to: '/projects', label: 'Projetos', icon: FolderOpen },
-  { to: '/machines', label: 'Máquinas', icon: Wrench },
-  { to: '/operators', label: 'Operadores', icon: HardHat },
-  { to: '/daily-logs', label: 'Diários', icon: ClipboardList },
-  { to: '/costs', label: 'Custos', icon: Receipt },
-  { to: '/revenues', label: 'Receitas', icon: TrendingUp },
-  { to: '/reports', label: 'Relatórios', icon: BarChart2 },
+  { to: '/dashboard', labelKey: 'dashboard', icon: LayoutDashboard },
+  { to: '/clients', labelKey: 'clients', icon: Users },
+  { to: '/projects', labelKey: 'projects', icon: FolderOpen },
+  { to: '/machines', labelKey: 'machines', icon: Wrench },
+  { to: '/operators', labelKey: 'operators', icon: HardHat },
+  { to: '/daily-logs', labelKey: 'dailylogs', icon: ClipboardList },
+  { to: '/costs', labelKey: 'costs', icon: Receipt },
+  { to: '/revenues', labelKey: 'revenues', icon: TrendingUp },
+  { to: '/reports', labelKey: 'reports', icon: BarChart2 },
 ]
 
 export function Sidebar(): JSX.Element {
+  const { t } = useTranslation('navigation')
+
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-white/10 bg-brand-deep text-white shadow-[12px_0_40px_rgba(34,49,95,0.16)]">
       <div className="flex h-20 items-center border-b border-white/10 px-5">
@@ -32,11 +35,11 @@ export function Sidebar(): JSX.Element {
           <span className="block text-xs font-semibold uppercase tracking-[0.28em] text-brand-sand/80">
             MightyRept
           </span>
-          <span className="mt-1 block text-sm text-white/72">Gestao operacional e financeira</span>
+          <span className="mt-1 block text-sm text-white/72">{t('appTagline')}</span>
         </div>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map(({ to, label, icon: Icon }) => (
+        {navItems.map(({ to, labelKey, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -50,7 +53,7 @@ export function Sidebar(): JSX.Element {
             }
           >
             <Icon className="h-4 w-4 shrink-0" />
-            {label}
+            {t(labelKey)}
           </NavLink>
         ))}
       </nav>

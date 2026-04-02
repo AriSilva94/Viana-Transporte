@@ -1,0 +1,71 @@
+{
+  "title": "Operadores",
+  "newAction": "Nuevo Operador",
+  "empty": "No hay operadores registrados",
+  "createFirst": "Registrar primer operador",
+  "searchPlaceholder": "Buscar por nombre...",
+  "columns": {
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "role": "Función",
+    "isActive": "Activo",
+    "actions": "Acciones",
+    "date": "Fecha",
+    "project": "Proyecto",
+    "machine": "Máquina",
+    "hours": "Horas",
+    "workDescription": "Servicio"
+  },
+  "deleteDialog": {
+    "title": "Eliminar Operador",
+    "description": "¿Seguro que desea eliminar este operador? Esta acción no se puede deshacer."
+  },
+  "form": {
+    "newTitle": "Nuevo Operador",
+    "editTitle": "Editar Operador",
+    "description": "Mantenga al equipo registrado con función, contacto y disponibilidad bien definidos.",
+    "fields": {
+      "name": "Nombre *",
+      "phone": "Teléfono",
+      "role": "Función",
+      "isActive": "Operador Activo",
+      "notes": "Notas"
+    },
+    "placeholders": {
+      "name": "Nombre del operador",
+      "phone": "(00) 00000-0000",
+      "role": "Ej.: Operador de Excavadora",
+      "notes": "Observaciones..."
+    },
+    "errors": {
+      "requiredName": "El nombre es obligatorio",
+      "save": "Error al guardar el operador. Inténtelo de nuevo."
+    },
+    "toasts": {
+      "success": "¡Guardado con éxito!",
+      "error": "Error al guardar. Inténtelo de nuevo."
+    }
+  },
+  "detail": {
+    "editAction": "Editar",
+    "sections": {
+      "operator": {
+        "eyebrow": "Colaborador",
+        "title": "Datos del Operador",
+        "description": "Información de contacto y función operativa."
+      },
+      "history": {
+        "eyebrow": "Historial",
+        "title": "Registros Diarios",
+        "description": "Partes operativos vinculados a este operador."
+      }
+    },
+    "fields": {
+      "phone": "Teléfono",
+      "role": "Función",
+      "status": "Estado",
+      "notes": "Notas"
+    },
+    "emptyLogs": "No se encontraron registros para este operador."
+  }
+}

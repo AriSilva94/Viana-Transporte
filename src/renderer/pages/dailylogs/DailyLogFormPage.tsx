@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -8,10 +9,12 @@ import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import { useToast } from '@renderer/context/ToastContext'
-import type { DailyLogWithRelations, ProjectWithClient, Machine, Operator } from '../../../shared/types'
+import { formatLocalDate, parseLocalDate } from '../../../shared/date'
+import type { DailyLogWithRelations, Machine, Operator, ProjectWithClient } from '../../../shared/types'
 
 export function DailyLogFormPage(): JSX.Element {
   const navigate = useNavigate()
+  const { t } = useTranslation(['dailylogs', 'common'])
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const { showToast } = useToast()
@@ -22,7 +25,7 @@ export function DailyLogFormPage(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(formatLocalDate(new Date()))
   const [projectId, setProjectId] = useState<number | ''>('')
   const [machineId, setMachineId] = useState<number | ''>('')
   const [operatorId, setOperatorId] = useState<number | ''>('')
@@ -40,7 +43,7 @@ export function DailyLogFormPage(): JSX.Element {
     if (!isEdit) return
     api.dailylogs.get(Number(id)).then((log: DailyLogWithRelations | null) => {
       if (!log) return
-      setDate(new Date(log.date).toISOString().split('T')[0])
+      setDate(formatLocalDate(log.date))
       setProjectId(log.projectId)
       setMachineId(log.machineId ?? '')
       setOperatorId(log.operatorId ?? '')
@@ -54,17 +57,23 @@ export function DailyLogFormPage(): JSX.Element {
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
-    if (!date) { setError('Data é obrigatória'); return }
-    if (!projectId) { setError('Projeto é obrigatório'); return }
+    if (!date) {
+      setError(t('dailylogs:form.errors.requiredDate'))
+      return
+    }
+    if (!projectId) {
+      setError(t('dailylogs:form.errors.requiredProject'))
+      return
+    }
     if (hoursWorked === '' || Number(hoursWorked) <= 0) {
-      setError('Horas trabalhadas devem ser maiores que zero')
+      setError(t('dailylogs:form.errors.requiredHours'))
       return
     }
     setIsLoading(true)
     setError('')
     try {
       const data = {
-        date: new Date(date),
+        date: parseLocalDate(date),
         projectId: Number(projectId),
         machineId: machineId !== '' ? Number(machineId) : null,
         operatorId: operatorId !== '' ? Number(operatorId) : null,
@@ -79,11 +88,11 @@ export function DailyLogFormPage(): JSX.Element {
       } else {
         await api.dailylogs.create(data)
       }
-      showToast('Salvo com sucesso!')
+      showToast(t('dailylogs:form.toasts.success'))
       navigate('/daily-logs')
     } catch {
-      showToast('Erro ao salvar. Tente novamente.', 'error')
-      setError('Erro ao salvar diário. Tente novamente.')
+      showToast(t('dailylogs:form.toasts.error'), 'error')
+      setError(t('dailylogs:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -91,47 +100,45 @@ export function DailyLogFormPage(): JSX.Element {
 
   return (
     <FormCard
-      title={isEdit ? 'Editar Diário de Operação' : 'Novo Diário de Operação'}
-      description="Registre a rotina do dia com horas, máquina, operador e ocorrências de forma clara e auditável."
+      title={isEdit ? t('dailylogs:form.editTitle') : t('dailylogs:form.newTitle')}
+      description={t('dailylogs:form.description')}
       onSubmit={handleSubmit}
       onCancel={() => navigate('/daily-logs')}
       isLoading={isLoading}
     >
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {/* Row 1: Data, Projeto */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="date">Data *</Label>
+          <Label htmlFor="date">{t('dailylogs:form.fields.date')}</Label>
           <DatePicker id="date" value={date} onChange={setDate} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="projectId">Projeto *</Label>
+          <Label htmlFor="projectId">{t('dailylogs:form.fields.project')}</Label>
           <Select
             id="projectId"
             value={projectId === '' ? '' : String(projectId)}
             onChange={(e) => setProjectId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">Selecionar...</option>
+            <option value="">{t('dailylogs:form.placeholders.select')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {p.clientName ?? ''}
+                {p.name} — {p.clientName ?? t('common:emptyValue')}
               </option>
             ))}
           </Select>
         </div>
       </div>
 
-      {/* Row 2: Máquina, Operador */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="machineId">Máquina</Label>
+          <Label htmlFor="machineId">{t('dailylogs:form.fields.machine')}</Label>
           <Select
             id="machineId"
             value={machineId === '' ? '' : String(machineId)}
             onChange={(e) => setMachineId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">Nenhum</option>
+            <option value="">{t('dailylogs:form.placeholders.none')}</option>
             {machines.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name} ({m.type})
@@ -140,13 +147,13 @@ export function DailyLogFormPage(): JSX.Element {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="operatorId">Operador</Label>
+          <Label htmlFor="operatorId">{t('dailylogs:form.fields.operator')}</Label>
           <Select
             id="operatorId"
             value={operatorId === '' ? '' : String(operatorId)}
             onChange={(e) => setOperatorId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">Nenhum</option>
+            <option value="">{t('dailylogs:form.placeholders.none')}</option>
             {operators.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
@@ -156,10 +163,9 @@ export function DailyLogFormPage(): JSX.Element {
         </div>
       </div>
 
-      {/* Row 3: Horas Trabalhadas, Combustível */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="hoursWorked">Horas Trabalhadas *</Label>
+          <Label htmlFor="hoursWorked">{t('dailylogs:form.fields.hoursWorked')}</Label>
           <Input
             id="hoursWorked"
             type="number"
@@ -167,11 +173,11 @@ export function DailyLogFormPage(): JSX.Element {
             step={0.5}
             value={hoursWorked}
             onChange={(e) => setHoursWorked(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder="0.0"
+            placeholder={t('dailylogs:form.placeholders.hoursWorked')}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="fuelQuantity">Combustível (L)</Label>
+          <Label htmlFor="fuelQuantity">{t('dailylogs:form.fields.fuelQuantity')}</Label>
           <Input
             id="fuelQuantity"
             type="number"
@@ -179,40 +185,38 @@ export function DailyLogFormPage(): JSX.Element {
             step={0.1}
             value={fuelQuantity}
             onChange={(e) => setFuelQuantity(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder="0.0"
+            placeholder={t('dailylogs:form.placeholders.fuelQuantity')}
           />
         </div>
       </div>
 
-      {/* Row 4: Descrição do Serviço (full width) */}
       <div className="space-y-2">
-        <Label htmlFor="workDescription">Descrição do Serviço</Label>
+        <Label htmlFor="workDescription">{t('dailylogs:form.fields.workDescription')}</Label>
         <Textarea
           id="workDescription"
           value={workDescription}
           onChange={(e) => setWorkDescription(e.target.value)}
-          placeholder="Descreva o serviço realizado..."
+          placeholder={t('dailylogs:form.placeholders.workDescription')}
         />
       </div>
 
-      {/* Row 5: Observações de Parada, Observações Gerais */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="downtimeNotes">Observações de Parada</Label>
+          <Label htmlFor="downtimeNotes">{t('dailylogs:form.fields.downtimeNotes')}</Label>
           <Textarea
             id="downtimeNotes"
             value={downtimeNotes}
             onChange={(e) => setDowntimeNotes(e.target.value)}
-            placeholder="Registre ocorrências ou paradas..."
+            placeholder={t('dailylogs:form.placeholders.downtimeNotes')}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="notes">Observações Gerais</Label>
+          <Label htmlFor="notes">{t('dailylogs:form.fields.notes')}</Label>
           <Textarea
             id="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Observações adicionais..."
+            placeholder={t('dailylogs:form.placeholders.notes')}
           />
         </div>
       </div>

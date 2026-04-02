@@ -6,6 +6,7 @@ import { registerDailyLogsHandlers } from './dailylogs'
 import { registerCostsHandlers } from './costs'
 import { registerRevenuesHandlers } from './revenues'
 import { registerDashboardHandlers } from './dashboard'
+import { registerPreferencesHandlers } from './preferences'
 
 export function registerAllHandlers(): void {
   registerClientsHandlers()
@@ -16,4 +17,5 @@ export function registerAllHandlers(): void {
   registerCostsHandlers()
   registerRevenuesHandlers()
   registerDashboardHandlers()
+  registerPreferencesHandlers()
 }

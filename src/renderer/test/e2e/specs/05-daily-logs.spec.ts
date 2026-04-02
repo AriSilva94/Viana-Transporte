@@ -5,12 +5,18 @@ const UNIQUE_DESC = `Escavação Playwright 05 ${Date.now()}`
 
 test.describe.serial('Daily Logs — Automated', () => {
   let projectId: number
+  let machineId: number
+  let machineName: string
+  let operatorId: number
 
   test.beforeAll(async ({ page }) => {
     const seed = await seedBase(page)
     projectId = seed.projectId
-    await seedMachine(page)
-    await seedOperator(page)
+    const machine = await seedMachine(page)
+    machineId = machine.id
+    machineName = machine.name
+    const operator = await seedOperator(page)
+    operatorId = operator.id
   })
 
   test('create daily log', async ({ page }) => {
@@ -18,6 +24,8 @@ test.describe.serial('Daily Logs — Automated', () => {
     await page.waitForSelector('#hoursWorked')
 
     await page.selectOption('#projectId', { value: String(projectId) })
+    await page.selectOption('#machineId', { value: String(machineId) })
+    await page.selectOption('#operatorId', { value: String(operatorId) })
     await page.fill('#hoursWorked', '8')
     await page.fill('#workDescription', UNIQUE_DESC)
     await page.fill('#fuelQuantity', '120')
@@ -25,13 +33,13 @@ test.describe.serial('Daily Logs — Automated', () => {
     await page.click('button[type="submit"]')
     await page.waitForSelector('table')
 
-    await expect(page.locator('tr', { hasText: UNIQUE_DESC })).toBeVisible()
+    await expect(page.locator('tr', { hasText: machineName })).toBeVisible()
   })
 
   test('list shows created log', async ({ page }) => {
     await goTo(page, '#/daily-logs')
     await page.waitForSelector('table')
-    await expect(page.locator('tr', { hasText: UNIQUE_DESC })).toBeVisible()
+    await expect(page.locator('tr', { hasText: machineName })).toBeVisible()
   })
 
   test('edit daily log', async ({ page }) => {
@@ -39,7 +47,7 @@ test.describe.serial('Daily Logs — Automated', () => {
     await page.waitForSelector('table')
 
     // daily-logs lista tem apenas Edit + Delete (sem View). Edit = nth(0), Delete = last()
-    const row = page.locator('tr', { hasText: UNIQUE_DESC })
+    const row = page.locator('tr', { hasText: machineName })
     await row.locator('button').nth(0).click()
 
     await page.waitForSelector('#hoursWorked')
@@ -47,18 +55,18 @@ test.describe.serial('Daily Logs — Automated', () => {
     await page.click('button[type="submit"]')
 
     await page.waitForSelector('table')
-    await expect(page.locator('tr', { hasText: UNIQUE_DESC })).toBeVisible()
+    await expect(page.locator('tr', { hasText: machineName })).toBeVisible()
   })
 
   test('delete daily log', async ({ page }) => {
     await goTo(page, '#/daily-logs')
     await page.waitForSelector('table')
 
-    const row = page.locator('tr', { hasText: UNIQUE_DESC })
+    const row = page.locator('tr', { hasText: machineName })
     await row.locator('button').last().click()
     await confirmDialog(page)
 
-    const deletedRow = page.locator('tr', { hasText: UNIQUE_DESC })
+    const deletedRow = page.locator('tr', { hasText: machineName })
     await expect(deletedRow).not.toBeVisible({ timeout: 5000 })
   })
 })

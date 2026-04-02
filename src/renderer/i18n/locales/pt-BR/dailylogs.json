@@ -1,0 +1,65 @@
+{
+  "title": "Diários de Operação",
+  "newAction": "Novo Registro",
+  "empty": "Nenhum diário de operação registrado",
+  "createFirst": "Criar primeiro registro",
+  "columns": {
+    "date": "Data",
+    "project": "Projeto",
+    "machine": "Máquina",
+    "operator": "Operador",
+    "hoursWorked": "Horas",
+    "fuelQuantity": "Combustível",
+    "actions": "Ações"
+  },
+  "filters": {
+    "project": "Projeto",
+    "machine": "Máquina",
+    "operator": "Operador",
+    "dateFrom": "Data inicial",
+    "dateTo": "Data final",
+    "allProjects": "Todos os projetos",
+    "allMachines": "Todas as máquinas",
+    "allOperators": "Todos os operadores",
+    "clear": "Limpar filtros"
+  },
+  "deleteDialog": {
+    "title": "Excluir Registro",
+    "description": "Tem certeza que deseja excluir este diário? Esta ação não pode ser desfeita."
+  },
+  "form": {
+    "newTitle": "Novo Diário de Operação",
+    "editTitle": "Editar Diário de Operação",
+    "description": "Registre a rotina do dia com horas, máquina, operador e ocorrências de forma clara e auditável.",
+    "fields": {
+      "date": "Data *",
+      "project": "Projeto *",
+      "machine": "Máquina",
+      "operator": "Operador",
+      "hoursWorked": "Horas Trabalhadas *",
+      "fuelQuantity": "Combustível (L)",
+      "workDescription": "Descrição do Serviço",
+      "downtimeNotes": "Observações de Parada",
+      "notes": "Observações Gerais"
+    },
+    "placeholders": {
+      "select": "Selecionar...",
+      "none": "Nenhum",
+      "hoursWorked": "0,0",
+      "fuelQuantity": "0,0",
+      "workDescription": "Descreva o serviço realizado...",
+      "downtimeNotes": "Registre ocorrências ou paradas...",
+      "notes": "Observações adicionais..."
+    },
+    "errors": {
+      "requiredDate": "Data é obrigatória",
+      "requiredProject": "Projeto é obrigatório",
+      "requiredHours": "Horas trabalhadas devem ser maiores que zero",
+      "save": "Erro ao salvar diário. Tente novamente."
+    },
+    "toasts": {
+      "success": "Salvo com sucesso!",
+      "error": "Erro ao salvar. Tente novamente."
+    }
+  }
+}

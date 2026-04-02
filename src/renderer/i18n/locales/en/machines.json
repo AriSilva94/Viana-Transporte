@@ -1,0 +1,76 @@
+{
+  "title": "Machines",
+  "newAction": "New Machine",
+  "empty": "No machines registered",
+  "createFirst": "Register first machine",
+  "searchPlaceholder": "Search by name or type...",
+  "columns": {
+    "name": "Name",
+    "type": "Type",
+    "identifier": "Identifier",
+    "brandModel": "Brand/Model",
+    "status": "Status",
+    "actions": "Actions",
+    "date": "Date",
+    "project": "Project",
+    "operator": "Operator",
+    "hours": "Hours",
+    "workDescription": "Service"
+  },
+  "deleteDialog": {
+    "title": "Delete Machine",
+    "description": "Are you sure you want to delete this machine? This action cannot be undone."
+  },
+  "form": {
+    "newTitle": "New Machine",
+    "editTitle": "Edit Machine",
+    "description": "Organize operational assets with identification, model, and status always up to date.",
+    "fields": {
+      "name": "Name *",
+      "type": "Type *",
+      "identifier": "Identifier",
+      "brandModel": "Brand/Model",
+      "status": "Status *",
+      "notes": "Notes"
+    },
+    "placeholders": {
+      "name": "E.g. John Deere Excavator",
+      "type": "E.g. Excavator, Bulldozer",
+      "identifier": "Asset code",
+      "brandModel": "E.g. John Deere 350G",
+      "notes": "Notes..."
+    },
+    "errors": {
+      "requiredName": "Name is required",
+      "requiredType": "Type is required",
+      "save": "Error saving machine. Please try again."
+    },
+    "toasts": {
+      "success": "Saved successfully!",
+      "error": "Error saving. Please try again."
+    }
+  },
+  "detail": {
+    "editAction": "Edit",
+    "sections": {
+      "machine": {
+        "eyebrow": "Equipment",
+        "title": "Machine Details",
+        "description": "Technical and operational information about the equipment."
+      },
+      "history": {
+        "eyebrow": "History",
+        "title": "Usage Logs",
+        "description": "Operational logs linked to this equipment."
+      }
+    },
+    "fields": {
+      "type": "Type",
+      "identifier": "Identifier",
+      "brandModel": "Brand / Model",
+      "status": "Status",
+      "notes": "Notes"
+    },
+    "emptyLogs": "No usage logs found."
+  }
+}

@@ -3,6 +3,7 @@ import { eq, and, gte, lte } from 'drizzle-orm'
 import { db } from '../db'
 import { dailyLogs, projects, machines, operators } from '../db/schema'
 import type { DailyLog, DailyLogFilters } from '../../shared/types'
+import { endOfLocalDay, parseLocalDate } from '../../shared/date'
 
 const selectedFields = {
   id: dailyLogs.id,
@@ -29,8 +30,8 @@ export function registerDailyLogsHandlers(): void {
     if (filters?.projectId) conditions.push(eq(dailyLogs.projectId, filters.projectId))
     if (filters?.machineId) conditions.push(eq(dailyLogs.machineId, filters.machineId))
     if (filters?.operatorId) conditions.push(eq(dailyLogs.operatorId, filters.operatorId))
-    if (filters?.dateFrom) conditions.push(gte(dailyLogs.date, new Date(filters.dateFrom)))
-    if (filters?.dateTo) conditions.push(lte(dailyLogs.date, new Date(filters.dateTo)))
+    if (filters?.dateFrom) conditions.push(gte(dailyLogs.date, parseLocalDate(filters.dateFrom)))
+    if (filters?.dateTo) conditions.push(lte(dailyLogs.date, endOfLocalDay(filters.dateTo)))
 
     const baseQuery = db
       .select(selectedFields)
@@ -62,7 +63,7 @@ export function registerDailyLogsHandlers(): void {
         .insert(dailyLogs)
         .values({
           ...data,
-          date: new Date(data.date),
+          date: parseLocalDate(data.date),
         })
         .returning()
       return rows[0]
@@ -76,7 +77,7 @@ export function registerDailyLogsHandlers(): void {
         ...data,
         updatedAt: new Date(),
       }
-      if (data.date) payload.date = new Date(data.date)
+      if (data.date) payload.date = parseLocalDate(data.date)
 
       const rows = await db
         .update(dailyLogs)

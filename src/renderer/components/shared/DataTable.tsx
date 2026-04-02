@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useState } from 'react'
 import { Input } from '@renderer/components/ui/input'
+import { useTranslation } from 'react-i18next'
 
 interface Column<T> {
   key: string
@@ -19,8 +20,9 @@ function DataTable<T extends object>({
   columns,
   data,
   onSearch,
-  searchPlaceholder = 'Pesquisar...',
+  searchPlaceholder,
 }: DataTableProps<T>): JSX.Element {
+  const { t } = useTranslation('common')
   const [search, setSearch] = useState('')
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -32,7 +34,7 @@ function DataTable<T extends object>({
     <div className="space-y-4">
       {onSearch && (
         <Input
-          placeholder={searchPlaceholder}
+          placeholder={searchPlaceholder ?? t('search')}
           value={search}
           onChange={handleSearch}
           className="max-w-sm bg-white/80"

@@ -39,20 +39,23 @@ export function ensureScreenshotDir(module: string): string {
 // ─── Helper: seed base data (client + project) ───────────────────────────────
 
 export async function seedBase(page: Page): Promise<{ clientId: number; projectId: number }> {
-  const client = await page.evaluate(async () => {
+  const suffix = `${Date.now()}-${Math.floor(Math.random() * 10000)}`
+  const clientName = `__Seed Cliente__ ${suffix}`
+  const projectName = `__Seed Projeto__ ${suffix}`
+  const client = await page.evaluate(async (seedClientName: string) => {
     return (window as any).api.clients.create({
-      name: '__Seed Cliente__',
+      name: seedClientName,
       document: null,
       phone: null,
       email: null,
       notes: null,
     })
-  })
+  }, clientName)
 
-  const project = await page.evaluate(async (clientId: number) => {
+  const project = await page.evaluate(async ({ seedProjectName, clientId }: { seedProjectName: string; clientId: number }) => {
     return (window as any).api.projects.create({
       clientId,
-      name: '__Seed Projeto__',
+      name: seedProjectName,
       location: null,
       startDate: new Date('2026-01-01'),
       endDate: null,
@@ -60,40 +63,42 @@ export async function seedBase(page: Page): Promise<{ clientId: number; projectI
       contractAmount: null,
       description: null,
     })
-  }, client.id)
+  }, { seedProjectName: projectName, clientId: client.id })
 
   return { clientId: client.id, projectId: project.id }
 }
 
 // ─── Helper: seed a machine ───────────────────────────────────────────────────
 
-export async function seedMachine(page: Page): Promise<number> {
-  const machine = await page.evaluate(async () => {
+export async function seedMachine(page: Page): Promise<{ id: number; name: string }> {
+  const name = `__Seed Máquina__ ${Date.now()}-${Math.floor(Math.random() * 10000)}`
+  const machine = await page.evaluate(async (machineName: string) => {
     return (window as any).api.machines.create({
-      name: '__Seed Máquina__',
+      name: machineName,
       type: 'Escavadeira',
       identifier: null,
       brandModel: null,
       status: 'available',
       notes: null,
     })
-  })
-  return machine.id
+  }, name)
+  return { id: machine.id, name: machine.name }
 }
 
 // ─── Helper: seed an operator ─────────────────────────────────────────────────
 
-export async function seedOperator(page: Page): Promise<number> {
-  const operator = await page.evaluate(async () => {
+export async function seedOperator(page: Page): Promise<{ id: number; name: string }> {
+  const name = `__Seed Operador__ ${Date.now()}-${Math.floor(Math.random() * 10000)}`
+  const operator = await page.evaluate(async (operatorName: string) => {
     return (window as any).api.operators.create({
-      name: '__Seed Operador__',
+      name: operatorName,
       phone: null,
       role: null,
       isActive: true,
       notes: null,
     })
-  })
-  return operator.id
+  }, name)
+  return { id: operator.id, name: operator.name }
 }
 
 // ─── Helper: click confirm in ConfirmDialog ───────────────────────────────────
@@ -108,16 +113,18 @@ export async function confirmDialog(page: Page): Promise<void> {
 
 export const test = base.extend<Fixtures>({
   electronApp: async ({}, use) => {
-    const appPath = path.join(process.cwd(), 'out/main/index.js')
-    const app = await electron.launch({ args: [appPath] })
+    const projectRoot = process.cwd()
+    const launchEnv = { ...process.env }
+    delete launchEnv.ELECTRON_RUN_AS_NODE
+    const app = await electron.launch({ args: ['.'], cwd: projectRoot, env: launchEnv })
     await use(app)
     await app.close()
   },
 
   page: async ({ electronApp }, use) => {
-    const page = await electronApp.firstWindow()
+    const page = await electronApp.firstWindow({ timeout: 15000 })
     await page.waitForLoadState('domcontentloaded')
-    await page.waitForFunction(() => typeof (window as any).api !== 'undefined')
+    await page.waitForFunction(() => typeof (window as any).api !== 'undefined', null, { timeout: 15000 })
     await use(page)
   },
 })

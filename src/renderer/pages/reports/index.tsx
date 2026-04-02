@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { api } from '@renderer/lib/api'
+import { formatCurrency, formatDate, formatDecimal } from '@renderer/lib/format'
 import { PageHeader } from '@renderer/components/shared/PageHeader'
 import { DataTable } from '@renderer/components/shared/DataTable'
 import { FilterPanel } from '@renderer/components/shared/FilterPanel'
@@ -8,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/u
 import { Select } from '@renderer/components/ui/select'
 import { Button } from '@renderer/components/ui/button'
 import { DatePicker } from '@renderer/components/ui/date-picker'
+import { endOfLocalDay, isLocalDateWithinInclusiveRange, parseLocalDate } from '../../../shared/date'
 import type {
   ProjectWithClient,
   Machine,
@@ -18,41 +21,12 @@ import type {
   ProjectCost,
   DailyLogFilters,
   CostFilters,
+  SupportedLocale,
 } from '../../../shared/types'
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatCurrency(val: number): string {
-  return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
-
-function formatDate(date: Date | string | null): string {
-  if (!date) return '—'
-  return new Date(date).toLocaleDateString('pt-BR')
-}
 
 const reportCardClass = 'rounded-3xl border border-border/80 bg-white/82 p-4 shadow-sm backdrop-blur-sm'
 
 type CostCategory = ProjectCost['category']
-
-const CATEGORY_LABELS: Record<CostCategory, string> = {
-  fuel: 'Combustível',
-  labor: 'Mão de obra',
-  maintenance: 'Manutenção',
-  transport: 'Transporte',
-  outsourced: 'Serviço terceirizado',
-  miscellaneous: 'Diversos',
-}
-
-const STATUS_OPTIONS: { value: Project['status'] | ''; label: string }[] = [
-  { value: '', label: 'Todos os status' },
-  { value: 'planned', label: 'Planejado' },
-  { value: 'active', label: 'Ativo' },
-  { value: 'completed', label: 'Concluído' },
-  { value: 'canceled', label: 'Cancelado' },
-]
-
-// ─── Project Summary Tab ──────────────────────────────────────────────────────
 
 interface ProjectSummaryRow {
   id: number
@@ -71,7 +45,24 @@ interface ProjectSummaryFilters {
   dateTo: string
 }
 
+interface MachineUsageRow {
+  id: number
+  name: string
+  type: string
+  totalHours: number
+  logCount: number
+}
+
+interface CategorySummaryRow {
+  category: CostCategory
+  label: string
+  total: number
+  count: number
+}
+
 function ProjectSummaryTab(): JSX.Element {
+  const { t, i18n } = useTranslation(['reports', 'common'])
+  const locale = i18n.language as SupportedLocale
   const [rows, setRows] = useState<ProjectSummaryRow[]>([])
   const [filters, setFilters] = useState<ProjectSummaryFilters>({ status: '', dateFrom: '', dateTo: '' })
   const [loading, setLoading] = useState(true)
@@ -92,20 +83,20 @@ function ProjectSummaryTab(): JSX.Element {
           api.dailylogs.list(),
         ])
 
-        let filtered = projects as ProjectWithClient[]
+        let filtered = projects
 
         if (filters.status) {
           filtered = filtered.filter((p) => p.status === filters.status)
         }
 
         if (filters.dateFrom) {
-          const from = new Date(filters.dateFrom)
-          filtered = filtered.filter((p) => !p.startDate || new Date(p.startDate) >= from)
+          const from = parseLocalDate(filters.dateFrom)
+          filtered = filtered.filter((p) => !p.startDate || isLocalDateWithinInclusiveRange(p.startDate, from))
         }
 
         if (filters.dateTo) {
-          const to = new Date(filters.dateTo)
-          filtered = filtered.filter((p) => !p.startDate || new Date(p.startDate) <= to)
+          const to = endOfLocalDay(filters.dateTo)
+          filtered = filtered.filter((p) => !p.startDate || isLocalDateWithinInclusiveRange(p.startDate, undefined, to))
         }
 
         const summaryRows: ProjectSummaryRow[] = filtered.map((project) => {
@@ -155,40 +146,40 @@ function ProjectSummaryTab(): JSX.Element {
   const columns = [
     {
       key: 'name',
-      label: 'Projeto',
+      label: t('reports:projectSummary.columns.project'),
       render: (row: ProjectSummaryRow) => <span className="font-medium">{row.name}</span>,
     },
     {
       key: 'clientName',
-      label: 'Cliente',
-      render: (row: ProjectSummaryRow) => row.clientName ?? '—',
+      label: t('reports:projectSummary.columns.client'),
+      render: (row: ProjectSummaryRow) => row.clientName ?? t('common:emptyValue'),
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('reports:projectSummary.columns.status'),
       render: (row: ProjectSummaryRow) => <StatusBadge status={row.status} />,
     },
     {
       key: 'totalHours',
-      label: 'Horas Totais',
-      render: (row: ProjectSummaryRow) => `${Number(row.totalHours).toFixed(1)} h`,
+      label: t('reports:projectSummary.columns.totalHours'),
+      render: (row: ProjectSummaryRow) => formatDecimal(row.totalHours, locale),
     },
     {
       key: 'totalCosts',
-      label: 'Total Custos',
-      render: (row: ProjectSummaryRow) => formatCurrency(row.totalCosts),
+      label: t('reports:projectSummary.columns.totalCosts'),
+      render: (row: ProjectSummaryRow) => formatCurrency(row.totalCosts, locale),
     },
     {
       key: 'totalRevenues',
-      label: 'Total Receitas',
-      render: (row: ProjectSummaryRow) => formatCurrency(row.totalRevenues),
+      label: t('reports:projectSummary.columns.totalRevenues'),
+      render: (row: ProjectSummaryRow) => formatCurrency(row.totalRevenues, locale),
     },
     {
       key: 'profit',
-      label: 'Resultado',
+      label: t('reports:projectSummary.columns.profit'),
       render: (row: ProjectSummaryRow) => (
         <span className={row.profit >= 0 ? 'font-medium text-success' : 'font-medium text-destructive'}>
-          {formatCurrency(row.profit)}
+          {formatCurrency(row.profit, locale)}
         </span>
       ),
     },
@@ -198,22 +189,22 @@ function ProjectSummaryTab(): JSX.Element {
     <div>
       <FilterPanel>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Status</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.status')}</label>
           <Select
             value={filters.status}
             onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value as Project['status'] | '' }))}
             className="min-w-[12rem] text-[15px]"
           >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
+            <option value="">{t('reports:filters.allStatuses')}</option>
+            <option value="planned">{t('common:status.planned')}</option>
+            <option value="active">{t('common:status.active')}</option>
+            <option value="completed">{t('common:status.completed')}</option>
+            <option value="canceled">{t('common:status.canceled')}</option>
           </Select>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data início (de)</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
           <DatePicker
             value={filters.dateFrom}
             onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value }))}
@@ -223,7 +214,7 @@ function ProjectSummaryTab(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data início (até)</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
           <DatePicker
             value={filters.dateTo}
             onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value }))}
@@ -234,38 +225,38 @@ function ProjectSummaryTab(): JSX.Element {
 
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters}>
-            Limpar filtros
+            {t('reports:filters.clear')}
           </Button>
         )}
       </FilterPanel>
 
       {!loading && rows.length > 0 && (
-        <div className="flex gap-4 mb-4">
+        <div className="mb-4 flex gap-4">
           <div className={`${reportCardClass} flex-1 bg-brand-orange/12`}>
-            <p className="text-sm text-muted-foreground">Total Custos</p>
-            <p className="text-xl font-semibold text-destructive">{formatCurrency(totalCosts)}</p>
+            <p className="text-sm text-muted-foreground">{t('reports:projectSummary.summary.totalCosts')}</p>
+            <p className="text-xl font-semibold text-destructive">{formatCurrency(totalCosts, locale)}</p>
           </div>
           <div className={`${reportCardClass} flex-1 bg-brand-sky/12`}>
-            <p className="text-sm text-muted-foreground">Total Receitas</p>
-            <p className="text-xl font-semibold text-success">{formatCurrency(totalRevenues)}</p>
+            <p className="text-sm text-muted-foreground">{t('reports:projectSummary.summary.totalRevenues')}</p>
+            <p className="text-xl font-semibold text-success">{formatCurrency(totalRevenues, locale)}</p>
           </div>
           <div className={`${reportCardClass} flex-1`}>
-            <p className="text-sm text-muted-foreground">Resultado Total</p>
+            <p className="text-sm text-muted-foreground">{t('reports:projectSummary.summary.totalProfit')}</p>
             <p className={`text-xl font-semibold ${totalProfit >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {formatCurrency(totalProfit)}
+              {formatCurrency(totalProfit, locale)}
             </p>
           </div>
           <div className={`${reportCardClass} flex-1`}>
-            <p className="text-sm text-muted-foreground">Projetos</p>
+            <p className="text-sm text-muted-foreground">{t('reports:projectSummary.summary.projects')}</p>
             <p className="text-xl font-semibold">{rows.length}</p>
           </div>
         </div>
       )}
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Carregando...</p>
+        <p className="text-muted-foreground text-sm">{t('common:loading')}</p>
       ) : rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm">Nenhum projeto encontrado.</p>
+        <p className="text-muted-foreground text-sm">{t('reports:projectSummary.empty')}</p>
       ) : (
         <DataTable columns={columns} data={rows} />
       )}
@@ -273,9 +264,9 @@ function ProjectSummaryTab(): JSX.Element {
   )
 }
 
-// ─── Daily Logs Tab ───────────────────────────────────────────────────────────
-
 function DailyLogsTab(): JSX.Element {
+  const { t, i18n } = useTranslation(['reports', 'common'])
+  const locale = i18n.language as SupportedLocale
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<DailyLogFilters>({})
@@ -310,39 +301,41 @@ function DailyLogsTab(): JSX.Element {
   const columns = [
     {
       key: 'date',
-      label: 'Data',
-      render: (row: DailyLogWithRelations) => formatDate(row.date),
+      label: t('reports:dailyLogs.columns.date'),
+      render: (row: DailyLogWithRelations) => formatDate(row.date, locale),
     },
     {
       key: 'projectName',
-      label: 'Projeto',
-      render: (row: DailyLogWithRelations) => row.projectName ?? '—',
+      label: t('reports:dailyLogs.columns.project'),
+      render: (row: DailyLogWithRelations) => row.projectName ?? t('common:emptyValue'),
     },
     {
       key: 'machineName',
-      label: 'Máquina',
-      render: (row: DailyLogWithRelations) => row.machineName ?? '—',
+      label: t('reports:dailyLogs.columns.machine'),
+      render: (row: DailyLogWithRelations) => row.machineName ?? t('common:emptyValue'),
     },
     {
       key: 'operatorName',
-      label: 'Operador',
-      render: (row: DailyLogWithRelations) => row.operatorName ?? '—',
+      label: t('reports:dailyLogs.columns.operator'),
+      render: (row: DailyLogWithRelations) => row.operatorName ?? t('common:emptyValue'),
     },
     {
       key: 'hoursWorked',
-      label: 'Horas',
-      render: (row: DailyLogWithRelations) => `${Number(row.hoursWorked).toFixed(1)} h`,
+      label: t('reports:dailyLogs.columns.hours'),
+      render: (row: DailyLogWithRelations) => formatDecimal(Number(row.hoursWorked), locale),
     },
     {
       key: 'fuelQuantity',
-      label: 'Combustível',
+      label: t('reports:dailyLogs.columns.fuel'),
       render: (row: DailyLogWithRelations) =>
-        row.fuelQuantity != null ? `${Number(row.fuelQuantity).toFixed(1)} L` : '—',
+        row.fuelQuantity != null
+          ? formatDecimal(Number(row.fuelQuantity), locale)
+          : t('common:emptyValue'),
     },
     {
       key: 'workDescription',
-      label: 'Serviço',
-      render: (row: DailyLogWithRelations) => row.workDescription ?? '—',
+      label: t('reports:dailyLogs.columns.workDescription'),
+      render: (row: DailyLogWithRelations) => row.workDescription ?? t('common:emptyValue'),
     },
   ]
 
@@ -350,7 +343,7 @@ function DailyLogsTab(): JSX.Element {
     <div>
       <FilterPanel>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Projeto</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.project')}</label>
           <Select
             value={filters.projectId !== undefined ? String(filters.projectId) : ''}
             onChange={(e) =>
@@ -361,7 +354,7 @@ function DailyLogsTab(): JSX.Element {
             }
             className="min-w-[13rem] text-[15px]"
           >
-            <option value="">Todos os projetos</option>
+            <option value="">{t('reports:filters.allProjects')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -371,24 +364,20 @@ function DailyLogsTab(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data inicial</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
           <DatePicker
             value={filters.dateFrom ?? ''}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))
-            }
+            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
             className="min-w-[12rem] text-[15px]"
             allowClear
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data final</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
           <DatePicker
             value={filters.dateTo ?? ''}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, dateTo: value || undefined }))
-            }
+            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
             className="min-w-[12rem] text-[15px]"
             allowClear
           />
@@ -396,28 +385,28 @@ function DailyLogsTab(): JSX.Element {
 
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters}>
-            Limpar filtros
+            {t('reports:filters.clear')}
           </Button>
         )}
       </FilterPanel>
 
       {!loading && logs.length > 0 && (
-        <div className="flex gap-4 mb-4">
+        <div className="mb-4 flex gap-4">
           <div className={reportCardClass}>
-            <p className="text-sm text-muted-foreground">Total de Registros</p>
+            <p className="text-sm text-muted-foreground">{t('reports:dailyLogs.summary.totalRecords')}</p>
             <p className="text-xl font-semibold">{logs.length}</p>
           </div>
           <div className={reportCardClass}>
-            <p className="text-sm text-muted-foreground">Total de Horas</p>
-            <p className="text-xl font-semibold">{totalHours.toFixed(1)} h</p>
+            <p className="text-sm text-muted-foreground">{t('reports:dailyLogs.summary.totalHours')}</p>
+            <p className="text-xl font-semibold">{formatDecimal(totalHours, locale)}</p>
           </div>
         </div>
       )}
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Carregando...</p>
+        <p className="text-muted-foreground text-sm">{t('common:loading')}</p>
       ) : logs.length === 0 ? (
-        <p className="text-muted-foreground text-sm">Nenhum registro diário encontrado.</p>
+        <p className="text-muted-foreground text-sm">{t('reports:dailyLogs.empty')}</p>
       ) : (
         <DataTable columns={columns} data={logs} />
       )}
@@ -425,17 +414,9 @@ function DailyLogsTab(): JSX.Element {
   )
 }
 
-// ─── Machine Usage Tab ────────────────────────────────────────────────────────
-
-interface MachineUsageRow {
-  id: number
-  name: string
-  type: string
-  totalHours: number
-  logCount: number
-}
-
 function MachineUsageTab(): JSX.Element {
+  const { t, i18n } = useTranslation(['reports', 'common'])
+  const locale = i18n.language as SupportedLocale
   const [rows, setRows] = useState<MachineUsageRow[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -472,26 +453,26 @@ function MachineUsageTab(): JSX.Element {
   const columns = [
     {
       key: 'name',
-      label: 'Máquina',
+      label: t('reports:machineUsage.columns.machine'),
       render: (row: MachineUsageRow) => <span className="font-medium">{row.name}</span>,
     },
     {
       key: 'type',
-      label: 'Tipo',
+      label: t('reports:machineUsage.columns.type'),
       render: (row: MachineUsageRow) => row.type,
     },
     {
       key: 'totalHours',
-      label: 'Total de Horas',
+      label: t('reports:machineUsage.columns.totalHours'),
       render: (row: MachineUsageRow) => (
         <span className={row.totalHours > 0 ? 'font-medium' : 'text-muted-foreground'}>
-          {Number(row.totalHours).toFixed(1)} h
+          {formatDecimal(row.totalHours, locale)}
         </span>
       ),
     },
     {
       key: 'logCount',
-      label: 'Nº de Registros',
+      label: t('reports:machineUsage.columns.logCount'),
       render: (row: MachineUsageRow) => row.logCount,
     },
   ]
@@ -502,26 +483,26 @@ function MachineUsageTab(): JSX.Element {
   return (
     <div>
       {!loading && rows.length > 0 && (
-        <div className="flex gap-4 mb-4">
+        <div className="mb-4 flex gap-4">
           <div className={reportCardClass}>
-            <p className="text-sm text-muted-foreground">Total de Máquinas</p>
+            <p className="text-sm text-muted-foreground">{t('reports:machineUsage.summary.totalMachines')}</p>
             <p className="text-xl font-semibold">{rows.length}</p>
           </div>
           <div className={reportCardClass}>
-            <p className="text-sm text-muted-foreground">Máquinas com Uso</p>
+            <p className="text-sm text-muted-foreground">{t('reports:machineUsage.summary.activeMachines')}</p>
             <p className="text-xl font-semibold">{activeMachines}</p>
           </div>
           <div className={reportCardClass}>
-            <p className="text-sm text-muted-foreground">Total Horas Registradas</p>
-            <p className="text-xl font-semibold">{totalHours.toFixed(1)} h</p>
+            <p className="text-sm text-muted-foreground">{t('reports:machineUsage.summary.totalHours')}</p>
+            <p className="text-xl font-semibold">{formatDecimal(totalHours, locale)}</p>
           </div>
         </div>
       )}
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Carregando...</p>
+        <p className="text-muted-foreground text-sm">{t('common:loading')}</p>
       ) : rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm">Nenhuma máquina cadastrada.</p>
+        <p className="text-muted-foreground text-sm">{t('reports:machineUsage.empty')}</p>
       ) : (
         <DataTable columns={columns} data={rows} />
       )}
@@ -529,16 +510,9 @@ function MachineUsageTab(): JSX.Element {
   )
 }
 
-// ─── Costs by Category Tab ────────────────────────────────────────────────────
-
-interface CategorySummaryRow {
-  category: CostCategory
-  label: string
-  total: number
-  count: number
-}
-
 function CostsByCategoryTab(): JSX.Element {
+  const { t, i18n } = useTranslation(['reports', 'common'])
+  const locale = i18n.language as SupportedLocale
   const [costs, setCosts] = useState<ProjectCostWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<CostFilters>({})
@@ -568,8 +542,17 @@ function CostsByCategoryTab(): JSX.Element {
     setFilters({})
   }
 
-  const categorySummary: CategorySummaryRow[] = Object.entries(CATEGORY_LABELS).map(
-    ([cat, label]) => {
+  const categoryLabels: Record<CostCategory, string> = {
+    fuel: t('reports:categories.fuel'),
+    labor: t('reports:categories.labor'),
+    maintenance: t('reports:categories.maintenance'),
+    transport: t('reports:categories.transport'),
+    outsourced: t('reports:categories.outsourced'),
+    miscellaneous: t('reports:categories.miscellaneous'),
+  }
+
+  const categorySummary: CategorySummaryRow[] = Object.entries(categoryLabels)
+    .map(([cat, label]) => {
       const catCosts = costs.filter((c) => c.category === cat)
       return {
         category: cat as CostCategory,
@@ -577,8 +560,8 @@ function CostsByCategoryTab(): JSX.Element {
         total: catCosts.reduce((sum, c) => sum + Number(c.amount), 0),
         count: catCosts.length,
       }
-    }
-  ).filter((r) => r.count > 0)
+    })
+    .filter((r) => r.count > 0)
     .sort((a, b) => b.total - a.total)
 
   const grandTotal = costs.reduce((sum, c) => sum + Number(c.amount), 0)
@@ -586,27 +569,27 @@ function CostsByCategoryTab(): JSX.Element {
   const summaryColumns = [
     {
       key: 'label',
-      label: 'Categoria',
+      label: t('reports:costsByCategory.columns.category'),
       render: (row: CategorySummaryRow) => <span className="font-medium">{row.label}</span>,
     },
     {
       key: 'count',
-      label: 'Nº de Lançamentos',
+      label: t('reports:costsByCategory.columns.entries'),
       render: (row: CategorySummaryRow) => row.count,
     },
     {
       key: 'total',
-      label: 'Total',
+      label: t('reports:costsByCategory.columns.total'),
       render: (row: CategorySummaryRow) => (
-        <span className="font-medium">{formatCurrency(row.total)}</span>
+        <span className="font-medium">{formatCurrency(row.total, locale)}</span>
       ),
     },
     {
       key: 'pct',
-      label: '% do Total',
+      label: t('reports:costsByCategory.columns.share'),
       render: (row: CategorySummaryRow) => {
         const pct = grandTotal > 0 ? (row.total / grandTotal) * 100 : 0
-        return `${pct.toFixed(1)}%`
+        return `${formatDecimal(pct, locale)}%`
       },
     },
   ]
@@ -614,28 +597,29 @@ function CostsByCategoryTab(): JSX.Element {
   const detailColumns = [
     {
       key: 'date',
-      label: 'Data',
-      render: (row: ProjectCostWithRelations) => formatDate(row.date),
+      label: t('reports:costsByCategory.detailColumns.date'),
+      render: (row: ProjectCostWithRelations) => formatDate(row.date, locale),
     },
     {
       key: 'projectName',
-      label: 'Projeto',
-      render: (row: ProjectCostWithRelations) => row.projectName ?? '—',
+      label: t('reports:costsByCategory.detailColumns.project'),
+      render: (row: ProjectCostWithRelations) => row.projectName ?? t('common:emptyValue'),
     },
     {
       key: 'category',
-      label: 'Categoria',
-      render: (row: ProjectCostWithRelations) => CATEGORY_LABELS[row.category] ?? row.category,
+      label: t('reports:costsByCategory.detailColumns.category'),
+      render: (row: ProjectCostWithRelations) =>
+        t(`reports:categories.${row.category}`, { defaultValue: row.category }),
     },
     {
       key: 'description',
-      label: 'Descrição',
+      label: t('reports:costsByCategory.detailColumns.description'),
       render: (row: ProjectCostWithRelations) => row.description,
     },
     {
       key: 'amount',
-      label: 'Valor',
-      render: (row: ProjectCostWithRelations) => formatCurrency(Number(row.amount)),
+      label: t('reports:costsByCategory.detailColumns.amount'),
+      render: (row: ProjectCostWithRelations) => formatCurrency(Number(row.amount), locale),
     },
   ]
 
@@ -643,7 +627,7 @@ function CostsByCategoryTab(): JSX.Element {
     <div>
       <FilterPanel>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Projeto</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.project')}</label>
           <Select
             value={filters.projectId !== undefined ? String(filters.projectId) : ''}
             onChange={(e) =>
@@ -654,7 +638,7 @@ function CostsByCategoryTab(): JSX.Element {
             }
             className="min-w-[13rem] text-[15px]"
           >
-            <option value="">Todos os projetos</option>
+            <option value="">{t('reports:filters.allProjects')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -664,24 +648,20 @@ function CostsByCategoryTab(): JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data inicial</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
           <DatePicker
             value={filters.dateFrom ?? ''}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))
-            }
+            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
             className="min-w-[12rem] text-[15px]"
             allowClear
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">Data final</label>
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
           <DatePicker
             value={filters.dateTo ?? ''}
-            onChange={(value) =>
-              setFilters((prev) => ({ ...prev, dateTo: value || undefined }))
-            }
+            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
             className="min-w-[12rem] text-[15px]"
             allowClear
           />
@@ -689,28 +669,28 @@ function CostsByCategoryTab(): JSX.Element {
 
         {hasActiveFilters && (
           <Button variant="outline" onClick={clearFilters}>
-            Limpar filtros
+            {t('reports:filters.clear')}
           </Button>
         )}
       </FilterPanel>
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Carregando...</p>
+        <p className="text-muted-foreground text-sm">{t('common:loading')}</p>
       ) : costs.length === 0 ? (
-        <p className="text-muted-foreground text-sm">Nenhum custo encontrado.</p>
+        <p className="text-muted-foreground text-sm">{t('reports:costsByCategory.empty')}</p>
       ) : (
         <>
           <div className={`${reportCardClass} mb-4 inline-block bg-brand-orange/12`}>
-            <p className="text-sm text-muted-foreground">Total Geral</p>
-            <p className="text-xl font-semibold text-destructive">{formatCurrency(grandTotal)}</p>
+            <p className="text-sm text-muted-foreground">{t('reports:costsByCategory.summary.totalLabel')}</p>
+            <p className="text-xl font-semibold text-destructive">{formatCurrency(grandTotal, locale)}</p>
           </div>
 
-          <h3 className="text-base font-semibold mb-2">Resumo por Categoria</h3>
+          <h3 className="mb-2 text-base font-semibold">{t('reports:costsByCategory.summary.title')}</h3>
           <div className="mb-6">
             <DataTable columns={summaryColumns} data={categorySummary} />
           </div>
 
-          <h3 className="text-base font-semibold mb-2">Todos os Lançamentos</h3>
+          <h3 className="mb-2 text-base font-semibold">{t('reports:costsByCategory.detail.title')}</h3>
           <DataTable columns={detailColumns} data={costs} />
         </>
       )}
@@ -718,34 +698,34 @@ function CostsByCategoryTab(): JSX.Element {
   )
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
 export function ReportsPage(): JSX.Element {
+  const { t } = useTranslation(['reports', 'common'])
+
   return (
     <div>
-      <PageHeader title="Relatórios" />
+      <PageHeader title={t('reports:title')} />
 
-      <Tabs defaultValue="projetos">
+      <Tabs defaultValue="project-summary">
         <TabsList>
-          <TabsTrigger value="projetos">Resumo de Projetos</TabsTrigger>
-          <TabsTrigger value="diarios">Registros Diários</TabsTrigger>
-          <TabsTrigger value="maquinas">Uso de Máquinas</TabsTrigger>
-          <TabsTrigger value="custos">Custos por Categoria</TabsTrigger>
+          <TabsTrigger value="project-summary">{t('reports:tabs.projectSummary')}</TabsTrigger>
+          <TabsTrigger value="daily-logs">{t('reports:tabs.dailyLogs')}</TabsTrigger>
+          <TabsTrigger value="machine-usage">{t('reports:tabs.machineUsage')}</TabsTrigger>
+          <TabsTrigger value="costs-by-category">{t('reports:tabs.costsByCategory')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="projetos">
+        <TabsContent value="project-summary">
           <ProjectSummaryTab />
         </TabsContent>
 
-        <TabsContent value="diarios">
+        <TabsContent value="daily-logs">
           <DailyLogsTab />
         </TabsContent>
 
-        <TabsContent value="maquinas">
+        <TabsContent value="machine-usage">
           <MachineUsageTab />
         </TabsContent>
 
-        <TabsContent value="custos">
+        <TabsContent value="costs-by-category">
           <CostsByCategoryTab />
         </TabsContent>
       </Tabs>

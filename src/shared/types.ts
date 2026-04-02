@@ -129,6 +129,12 @@ export interface DashboardStats {
   recentLogs: DailyLog[]
 }
 
+export type SupportedLocale = 'pt-BR' | 'en' | 'es'
+
+export interface AppPreferences {
+  language: SupportedLocale | null
+}
+
 // ─── Filter Types ─────────────────────────────────────────────────────────────
 
 export interface ProjectFilters {
@@ -214,5 +220,10 @@ export interface ElectronAPI {
   }
   dashboard: {
     stats: () => Promise<DashboardStats>
+  }
+  preferences: {
+    getSystemLocale: () => Promise<string>
+    getSavedLanguage: () => Promise<SupportedLocale | null>
+    setLanguage: (language: SupportedLocale) => Promise<SupportedLocale>
   }
 }
