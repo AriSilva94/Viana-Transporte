@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Shell } from './components/layout/Shell'
 import { Dashboard } from './pages/Dashboard'
@@ -20,12 +21,37 @@ import { CostFormPage } from './pages/costs/CostFormPage'
 import { RevenuesPage } from './pages/revenues'
 import { RevenueFormPage } from './pages/revenues/RevenueFormPage'
 import { ReportsPage } from './pages/reports'
+import { api } from './lib/api'
+import type { LicenseStatus } from '../shared/license'
 
 export default function App(): JSX.Element {
+  const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    void api.license
+      .getStatus()
+      .then((status: LicenseStatus) => {
+        if (isMounted) {
+          setLicenseStatus(status)
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setLicenseStatus(null)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Shell />}>
+        <Route path="/" element={<Shell licenseStatus={licenseStatus} />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
 

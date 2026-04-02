@@ -1,11 +1,11 @@
-import { ipcMain } from 'electron'
 import { eq, like, and } from 'drizzle-orm'
 import { db } from '../db'
 import { operators } from '../db/schema'
 import type { Operator } from '../../shared/types'
+import { handleRead, handleWrite } from './guarded'
 
 export function registerOperatorsHandlers(): void {
-  ipcMain.handle(
+  handleRead(
     'operators:list',
     async (_, filters?: { search?: string; isActive?: boolean }) => {
       const conditions = []
@@ -19,12 +19,12 @@ export function registerOperatorsHandlers(): void {
     }
   )
 
-  ipcMain.handle('operators:get', async (_, id: number) => {
+  handleRead('operators:get', async (_, id: number) => {
     const rows = await db.select().from(operators).where(eq(operators.id, id)).limit(1)
     return rows[0] ?? null
   })
 
-  ipcMain.handle(
+  handleWrite(
     'operators:create',
     async (_, data: Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>) => {
       const rows = await db.insert(operators).values(data).returning()
@@ -32,7 +32,7 @@ export function registerOperatorsHandlers(): void {
     }
   )
 
-  ipcMain.handle(
+  handleWrite(
     'operators:update',
     async (_, id: number, data: Partial<Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>>) => {
       const rows = await db
@@ -44,7 +44,7 @@ export function registerOperatorsHandlers(): void {
     }
   )
 
-  ipcMain.handle('operators:delete', async (_, id: number) => {
+  handleWrite('operators:delete', async (_, id: number) => {
     await db.delete(operators).where(eq(operators.id, id))
   })
 }

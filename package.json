@@ -9,9 +9,16 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "build:full": "npm run db:seed:generate && cross-env DIST_PROFILE=full electron-vite build",
+    "build:trial": "npm run db:seed:generate && cross-env DIST_PROFILE=trial electron-vite build",
+    "dist:win:full": "npm run build:full && npx electron-builder --win --x64 --dir --config.directories.output=dist/full --config.win.signAndEditExecutable=false",
+    "dist:win:trial": "npm run build:trial && npx electron-builder --win --x64 --dir --config.directories.output=dist/trial --config.productName=MightyReptTrial --config.appId=com.mightyrept.trial --config.win.executableName=MightyReptTrial --config.win.signAndEditExecutable=false",
+    "dist:win:all": "npm run dist:win:full && npm run dist:win:trial",
     "preview": "electron-vite preview",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
+    "db:seed:generate": "node scripts/generate-financial-seed.cjs",
+    "db:sync:excel": "node scripts/sync-db-from-excel.cjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit"
@@ -41,7 +48,9 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
     "drizzle-kit": "^0.20.17",
+    "cross-env": "^7.0.3",
     "electron": "^41.1.0",
+    "electron-builder": "^26.0.12",
     "electron-vite": "^2.1.0",
     "jsdom": "^25.0.1",
     "playwright": "^1.48.2",
@@ -51,5 +60,44 @@
     "typescript": "^5.4.3",
     "vitest": "^2.1.9",
     "xlsx": "^0.18.5"
+  },
+  "build": {
+    "appId": "com.mightyrept.app",
+    "productName": "MightyRept",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "extraResources": [
+      {
+        "from": "src/main/db/migrations",
+        "to": "migrations"
+      },
+      {
+        "from": "src/main/db/seeds",
+        "to": "seeds"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "executableName": "MightyRept",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
