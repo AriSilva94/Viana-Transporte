@@ -1,9 +1,9 @@
-import { ipcMain } from 'electron'
 import { eq, and, gte, lte } from 'drizzle-orm'
 import { db } from '../db'
 import { dailyLogs, projects, machines, operators } from '../db/schema'
 import type { DailyLog, DailyLogFilters } from '../../shared/types'
 import { endOfLocalDay, parseLocalDate } from '../../shared/date'
+import { handleRead, handleWrite } from './guarded'
 
 const selectedFields = {
   id: dailyLogs.id,
@@ -24,7 +24,7 @@ const selectedFields = {
 }
 
 export function registerDailyLogsHandlers(): void {
-  ipcMain.handle('dailylogs:list', async (_, filters?: DailyLogFilters) => {
+  handleRead('dailylogs:list', async (_, filters?: DailyLogFilters) => {
     const conditions = []
 
     if (filters?.projectId) conditions.push(eq(dailyLogs.projectId, filters.projectId))
@@ -44,7 +44,7 @@ export function registerDailyLogsHandlers(): void {
     return baseQuery.where(and(...conditions))
   })
 
-  ipcMain.handle('dailylogs:get', async (_, id: number) => {
+  handleRead('dailylogs:get', async (_, id: number) => {
     const rows = await db
       .select(selectedFields)
       .from(dailyLogs)
@@ -56,7 +56,7 @@ export function registerDailyLogsHandlers(): void {
     return rows[0] ?? null
   })
 
-  ipcMain.handle(
+  handleWrite(
     'dailylogs:create',
     async (_, data: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>) => {
       const rows = await db
@@ -70,7 +70,7 @@ export function registerDailyLogsHandlers(): void {
     }
   )
 
-  ipcMain.handle(
+  handleWrite(
     'dailylogs:update',
     async (_, id: number, data: Partial<Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>>) => {
       const payload: typeof data & { updatedAt: Date; date?: Date } = {
@@ -88,7 +88,7 @@ export function registerDailyLogsHandlers(): void {
     }
   )
 
-  ipcMain.handle('dailylogs:delete', async (_, id: number) => {
+  handleWrite('dailylogs:delete', async (_, id: number) => {
     await db.delete(dailyLogs).where(eq(dailyLogs.id, id))
   })
 }

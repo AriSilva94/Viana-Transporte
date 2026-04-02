@@ -60,6 +60,9 @@ const api: ElectronAPI = {
     getSavedLanguage: () => ipcRenderer.invoke('preferences:getSavedLanguage'),
     setLanguage: (language) => ipcRenderer.invoke('preferences:setLanguage', language),
   },
+  license: {
+    getStatus: () => ipcRenderer.invoke('license:status'),
+  },
 }
 
 contextBridge.exposeInMainWorld('api', api)

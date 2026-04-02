@@ -1,11 +1,11 @@
-import { ipcMain } from 'electron'
 import { eq, like, and, or } from 'drizzle-orm'
 import { db } from '../db'
 import { machines } from '../db/schema'
 import type { Machine } from '../../shared/types'
+import { handleRead, handleWrite } from './guarded'
 
 export function registerMachinesHandlers(): void {
-  ipcMain.handle(
+  handleRead(
     'machines:list',
     async (_, filters?: { search?: string; status?: Machine['status'] }) => {
       const conditions = []
@@ -24,12 +24,12 @@ export function registerMachinesHandlers(): void {
     }
   )
 
-  ipcMain.handle('machines:get', async (_, id: number) => {
+  handleRead('machines:get', async (_, id: number) => {
     const rows = await db.select().from(machines).where(eq(machines.id, id)).limit(1)
     return rows[0] ?? null
   })
 
-  ipcMain.handle(
+  handleWrite(
     'machines:create',
     async (_, data: Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>) => {
       const rows = await db.insert(machines).values(data).returning()
@@ -37,7 +37,7 @@ export function registerMachinesHandlers(): void {
     }
   )
 
-  ipcMain.handle(
+  handleWrite(
     'machines:update',
     async (_, id: number, data: Partial<Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>>) => {
       const rows = await db
@@ -49,7 +49,7 @@ export function registerMachinesHandlers(): void {
     }
   )
 
-  ipcMain.handle('machines:delete', async (_, id: number) => {
+  handleWrite('machines:delete', async (_, id: number) => {
     await db.delete(machines).where(eq(machines.id, id))
   })
 }

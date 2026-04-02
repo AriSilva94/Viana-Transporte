@@ -1,0 +1,2334 @@
+{
+  "sourceFile": "docs/assets/Viana Transporte Financeiro.xlsx",
+  "generatedAtIso": "2026-04-02T23:00:12.665Z",
+  "client": {
+    "name": "Viana Transporte e Terraplenagem",
+    "notes": "Importado do Excel financeiro."
+  },
+  "project": {
+    "name": "Financeiro",
+    "status": "active",
+    "description": "Projeto financeiro carregado do arquivo Viana Transporte Financeiro.xlsx"
+  },
+  "revenues": [
+    {
+      "dateIso": "2025-10-03T12:00:00.000Z",
+      "description": "Servico Brasopolis (Biezinho)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-03T12:00:00.000Z",
+      "description": "Natercia, 26.890 toledas puxada",
+      "amount": 1344.5,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-03T12:00:00.000Z",
+      "description": "Natercia, 33.500 toledas puxada",
+      "amount": 1675,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-13T12:00:00.000Z",
+      "description": "Natercia, 27.070 Toneladas puxada",
+      "amount": 1353.5,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-14T12:00:00.000Z",
+      "description": "Natercia, 28.360 Toneladas puxada",
+      "amount": 1418,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-19T12:00:00.000Z",
+      "description": "Servico Baltou/ Draga Itajuba 7 viagens",
+      "amount": 630,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-20T12:00:00.000Z",
+      "description": "Servico Baltou/ Draga Itajuba 15 viagens",
+      "amount": 1350,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-21T12:00:00.000Z",
+      "description": "Servico Baltou/ Draga Itajuba 8 Viagens",
+      "amount": 720,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-22T12:00:00.000Z",
+      "description": "Servico Baltou/ Draga Itajuba 12 Viagens",
+      "amount": 1080,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-24T12:00:00.000Z",
+      "description": "Servico Sao Jose do Alegre/ 7 viagens",
+      "amount": 700,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-25T12:00:00.000Z",
+      "description": "Servico Sao Jose do Alegre/ 15 viagens",
+      "amount": 1500,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-04T12:00:00.000Z",
+      "description": "Servico HWH (R$ 1200.00 a diaria) Meia diaria",
+      "amount": 600,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-04T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-04T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-04T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-04T12:00:00.000Z",
+      "description": "Servico HWH (sem viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-04T12:00:00.000Z",
+      "description": "servico HWH (1 Viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-04T12:00:00.000Z",
+      "description": "Servico HWH (2 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-04T12:00:00.000Z",
+      "description": "servico HWH (1 Viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-04T12:00:00.000Z",
+      "description": "servico HWH (1 Viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-04T12:00:00.000Z",
+      "description": "servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-04T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-14T12:00:00.000Z",
+      "description": "servico HWH (2 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-17T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-21T12:00:00.000Z",
+      "description": "Servico HWH (3 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-22T12:00:00.000Z",
+      "description": "Servico HWH (3 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-23T12:00:00.000Z",
+      "description": "Servico HWH (4 viagem + 2 viagem dfe areia)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-24T12:00:00.000Z",
+      "description": "Servico HWH (2 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-25T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-26T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-28T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-29T12:00:00.000Z",
+      "description": "Servico HWH ( 4 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-30T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-05T12:00:00.000Z",
+      "description": "Servico HWH ( 6 viagens de brita)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-05T12:00:00.000Z",
+      "description": "Servico HWH (3 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-05T12:00:00.000Z",
+      "description": "Servico HWH ( 2 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-05T12:00:00.000Z",
+      "description": "Servico HWH ( 4 viagens de pedra 1 viagem de asfalto",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-05T12:00:00.000Z",
+      "description": "Servico HWH ( 3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-05T12:00:00.000Z",
+      "description": "Servico HWH ( 5 Viagens de pedra e 1 de asfalto)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-05T12:00:00.000Z",
+      "description": "Servico HWH ( 4 viagens )",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-13T12:00:00.000Z",
+      "description": "Servico HWH ( 1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-14T12:00:00.000Z",
+      "description": "Servico HWH (5 viagens de pedra e 1 de asfalto)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-16T12:00:00.000Z",
+      "description": "Servico HWH (1* 18,100 ton x 75x 0.80  + 2* 20 ton X 75 X 0.80)",
+      "amount": 2286,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-17T12:00:00.000Z",
+      "description": "Servico HWH ( 1* 15 ton x75 x0.80 + 2* 18 ton X 75 X 0.80)",
+      "amount": 1980,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-19T12:00:00.000Z",
+      "description": "Servico HWH ( 2 viagens de 18 ton, 2 x 18ton x 75 x 0.80)",
+      "amount": 2160,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-20T12:00:00.000Z",
+      "description": "Servico HWH ( 3 viagens, 1 de 18 ton e 2 de 18,100 ton 3 x18 ton X 75 X 0.80)",
+      "amount": 3252,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-07T12:00:00.000Z",
+      "description": "1 viagem 20.980 ton X 50km X R$ 0.70",
+      "amount": 734.3,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-07T12:00:00.000Z",
+      "description": "1viagem 21.080ton X 50 km X 0.70 (2 viagem 21.040ton X 50km X 0.70)",
+      "amount": 1474.2,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-07T12:00:00.000Z",
+      "description": "1 viagem 20.060ton X 50km X 0.70 (2 viagem 21.960 ton X 50km X 0.70)",
+      "amount": 1470.7,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-07T12:00:00.000Z",
+      "description": "1 viagem 19.480 ton X 50km X 0.70",
+      "amount": 681.8,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-07T12:00:00.000Z",
+      "description": "1 viagem 19.460 ton X 50 km X 0.70",
+      "amount": 681.1,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-07T12:00:00.000Z",
+      "description": "1 Viagem 19.140 Ton X 50km X 0.70 (2 viagem 19.680 Ton X 50km X 0.70)",
+      "amount": 1358.7,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-07T12:00:00.000Z",
+      "description": "1 Viagem (20.740 ton X 50 km X 0.70) 2 viagem 19.400 ton X50km X 0.70",
+      "amount": 1404.9,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-07T12:00:00.000Z",
+      "description": "1 viagem 19.580 Ton X 50km X 0.70 (2 viagem 20.220ton X 50km X 0.70)",
+      "amount": 1393,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-14T12:00:00.000Z",
+      "description": "1 viagem 19.760 ton X 50km X 0.70",
+      "amount": 691.6,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-15T12:00:00.000Z",
+      "description": "1 Viagem 19.860 Ton X 50km X 0.70",
+      "amount": 695.1,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-16T12:00:00.000Z",
+      "description": "1 viagem 20.020 ton X 50km X 0.70 ( 2 viagem 20.200 ton X 50km X 0.70",
+      "amount": 1407.7,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-17T12:00:00.000Z",
+      "description": "1 viagem 20.960 X 50 km X 0.70",
+      "amount": 733.6,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-18T12:00:00.000Z",
+      "description": "1 viagem 20.300 X 50km X 0.70",
+      "amount": 710.5,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-21T12:00:00.000Z",
+      "description": "6 viagens",
+      "amount": 1116,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-22T12:00:00.000Z",
+      "description": "4 viagens",
+      "amount": 744,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-08T12:00:00.000Z",
+      "description": "18 viagens (R$ 600 por 15 viagens e R$ 35 por viagem extra)",
+      "amount": 705,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-08T12:00:00.000Z",
+      "description": "18 viagens (R$ 600 por 15 viagens e R$ 35 por viagem extra)",
+      "amount": 705,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-08T12:00:00.000Z",
+      "description": "13 Viagens",
+      "amount": 520,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-08T12:00:00.000Z",
+      "description": "15 Viagens",
+      "amount": 600,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-08T12:00:00.000Z",
+      "description": "16 Viagens",
+      "amount": 635,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-08T12:00:00.000Z",
+      "description": "19 viagens",
+      "amount": 740,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-08T12:00:00.000Z",
+      "description": "14 Viagens",
+      "amount": 560,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-13T12:00:00.000Z",
+      "description": "17 Viagens",
+      "amount": 670,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-18T12:00:00.000Z",
+      "description": "17 viagens",
+      "amount": 670,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-20T12:00:00.000Z",
+      "description": "15 Viagens",
+      "amount": 600,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-22T12:00:00.000Z",
+      "description": "1 Viagem (13.320 Ton X1.35X 40)",
+      "amount": 719.28,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-26T12:00:00.000Z",
+      "description": "1 Viagem (13780 Ton X 1.35 X 40) + R$ 52.5 pedagio",
+      "amount": 744.12,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-27T12:00:00.000Z",
+      "description": "1 Viagem (13660 Ton X 1.35 X 40) + 63 pedagio",
+      "amount": 737.64,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-28T12:00:00.000Z",
+      "description": "1 Viagem (12380 Ton X 1.35 X 40 ) + 52.5 Pedagio",
+      "amount": 668.52,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-30T12:00:00.000Z",
+      "description": "1 Viagem (14720 Ton X 1.35 X 40) + 52.5 Pedagio",
+      "amount": 794.88,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-09T12:00:00.000Z",
+      "description": "1 Viagem ( 13440 Ton X 1.35 X 40 ) + 52.5 Pedagio",
+      "amount": 725.76,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-09T12:00:00.000Z",
+      "description": "1 Viagem ( 13720 Ton X 1.35 X 40) 52.5 Pedagio",
+      "amount": 740.88,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-09T12:00:00.000Z",
+      "description": "1 Viagem ( 13240 Ton X 1.35 X 40) + 52.50",
+      "amount": 714.96,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-09T12:00:00.000Z",
+      "description": "1 Viagem (12640 ton X 1.35 x 40) + 52.5",
+      "amount": 682.56,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-09T12:00:00.000Z",
+      "description": "1 Viagem (13.320 Ton X1.35X 40) + 63",
+      "amount": 719.28,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-09T12:00:00.000Z",
+      "description": "1 Viagem ( 12.420 Ton X 1.35 X 40) + 52.5",
+      "amount": 670.68,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-09T12:00:00.000Z",
+      "description": "1 Viagem ( 13.020 Ton X 1.35 X 40) + 52.5 + 37.60",
+      "amount": 703.08,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-09T12:00:00.000Z",
+      "description": "1 Viagem ( 13.040 Ton X 1.35 X 40) + 52.5 + 47.00",
+      "amount": 704.16,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-13T12:00:00.000Z",
+      "description": "1 Viagem ( 13.400 ton X 1.35 X 0.40) + 52.5 + 37.60",
+      "amount": 723.6,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-15T12:00:00.000Z",
+      "description": "1 Viagem ( 14.940 ton X 1.35 X .40) + 99.50",
+      "amount": 806.76,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-16T12:00:00.000Z",
+      "description": "1 Viagem ( 13520 TonX 1.35 X .40) + 99.50",
+      "amount": 730.08,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-17T12:00:00.000Z",
+      "description": "1 Viagem (14.960 Ton X 1.35 X .40) + 99.50",
+      "amount": 807.84,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-19T12:00:00.000Z",
+      "description": "1 Viagem ( 13.160 Ton X 1.35 X 75 km) + 99.50",
+      "amount": 1332.45,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-20T12:00:00.000Z",
+      "description": "1 Viagem (15.860 Ton X 1.35 X 76 km) +99.50",
+      "amount": 1627.23,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-25T12:00:00.000Z",
+      "description": "1 viagem (14.660 ton X 1.35 X 77 Km) + 99.50",
+      "amount": 1523.9,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-26T12:00:00.000Z",
+      "description": "1 Viagem (13.980 ton X 1.35 X 80 km) + 99.50",
+      "amount": 1509.84,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-27T12:00:00.000Z",
+      "description": "1 Viagem ( 14,840 Ton X 1.35 X 80km) 99.50",
+      "amount": 1602.72,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-29T12:00:00.000Z",
+      "description": "1 Viagem (14.860 Ton X 1.35 X 83 km) + 99.50",
+      "amount": 1665.06,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-30T12:00:00.000Z",
+      "description": "1 Viagem ( 14.520 Ton X 1.35 X 75 km) + 99.50",
+      "amount": 1470.1,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-10T12:00:00.000Z",
+      "description": "1 viagem ( 13.700  ton X 1.35 X 87 km) +99.50",
+      "amount": 1609.06,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-10T12:00:00.000Z",
+      "description": "1 Viagem (14.140 Ton X 1.35 X 87) + 99.50",
+      "amount": 1660.74,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-10T12:00:00.000Z",
+      "description": "1 Viagem ( 13.920 Ton X 1.35 X 40km) + 52.50 pedagio",
+      "amount": 751.68,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-10T12:00:00.000Z",
+      "description": "1 Viagem ( 13.560Ton X 1.35 X 40km) + 52.50 Pedagio",
+      "amount": 732.24,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-14T12:00:00.000Z",
+      "description": "1viagem (13.080 Ton X 1.35 X 42km) + 52.50 Pedagio",
+      "amount": 741.6,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-15T12:00:00.000Z",
+      "description": "1 Viagem ( 14.080 X 1.35 X 51 km) + 52.50",
+      "amount": 969.4,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-16T12:00:00.000Z",
+      "description": "1 Viagem (13.860 Ton X 1.35 X 53km) + 52.5",
+      "amount": 991.68,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-17T12:00:00.000Z",
+      "description": "1 Viagem ( 14.940 Ton X 1.35 X 40 km) + 97.80",
+      "amount": 806.76,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-20T12:00:00.000Z",
+      "description": "1 Viagem ( 13.700 Tom X 1.35 X 89km) + 99.50 pedagio",
+      "amount": 1646.05,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-21T12:00:00.000Z",
+      "description": "1 Viagem ( 13.420Ton X 1.35 X 93km) 135.10 Pedagio",
+      "amount": 1684.88,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-23T12:00:00.000Z",
+      "description": "1 viagem ( 13.260 Ton X 1.35 X 95 km) + 135.10 Pedagio",
+      "amount": 1700.59,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-24T12:00:00.000Z",
+      "description": "1 Viagem ( 12.760 X 1.35 X 95 km ) 151.10 Pedagio",
+      "amount": 1636.47,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-25T12:00:00.000Z",
+      "description": "1 Viagem ( 13.580 Ton X 1.35 X 95 Km) 151.10 Pedagio",
+      "amount": 1741.63,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-11T12:00:00.000Z",
+      "description": "1 Viagem ( 13 Ton X 1.35 X 95 km) 151.10 Pedagio",
+      "amount": 1667.25,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-11T12:00:00.000Z",
+      "description": "1 Viagem ( 13.500 Ton X 1.35 X 95 km) 151.10 Pedagio",
+      "amount": 1731.37,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-11T12:00:00.000Z",
+      "description": "1 Viagem ( 13.680 Ton X 1.35 X 95 Km) 151.10 Pedagio",
+      "amount": 1754.46,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-11T12:00:00.000Z",
+      "description": "1 Viagem (14.860 Ton X 1.35 X 91 km) + 99.50",
+      "amount": 1825.55,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-19T12:00:00.000Z",
+      "description": "1 viagem 14.520 Ton X 1.35 X 60km) 92.50 Pedagio",
+      "amount": 1176.12,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-25T12:00:00.000Z",
+      "description": "1 Viagem 13.900 Ton X 1.35 X 63 km) 85.40 Pedagio",
+      "amount": 1182.19,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-26T12:00:00.000Z",
+      "description": "1 Viagem 14.390 Ton X 1.35 X 63 KM ) 60.20 Pedagio",
+      "amount": 1223.86,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-27T12:00:00.000Z",
+      "description": "1 Viagem 14070 Ton X 1.35 X 63km) 60.20 Pedagio",
+      "amount": 1196.65,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-28T12:00:00.000Z",
+      "description": "1 Viagem (14130 Ton X 1.35 X 63 km ) 87.30 pedagio",
+      "amount": 1201.75,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-12T12:00:00.000Z",
+      "description": "1 Viagem (14070 Ton X 1.35 X 63 km ) 85.40 Pedagio",
+      "amount": 1196.65,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-04T12:00:00.000Z",
+      "description": "Servico HWH (R$ 1200.00 a diaria) Meia diaria",
+      "amount": 600,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-04T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-04T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-04T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-04T12:00:00.000Z",
+      "description": "Servico HWH (sem viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-04T12:00:00.000Z",
+      "description": "servico HWH (1 Viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-04T12:00:00.000Z",
+      "description": "Servico HWH (2 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-04T12:00:00.000Z",
+      "description": "servico HWH (1 Viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-04T12:00:00.000Z",
+      "description": "servico HWH (1 Viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-04T12:00:00.000Z",
+      "description": "servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-04T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-14T12:00:00.000Z",
+      "description": "servico HWH (2 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-17T12:00:00.000Z",
+      "description": "Servico HWH (1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-21T12:00:00.000Z",
+      "description": "Servico HWH (3 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-22T12:00:00.000Z",
+      "description": "Servico HWH (3 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-23T12:00:00.000Z",
+      "description": "Servico HWH (4 viagem + 2 viagem dfe areia)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-24T12:00:00.000Z",
+      "description": "Servico HWH (2 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-25T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-26T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-28T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-29T12:00:00.000Z",
+      "description": "Servico HWH ( 4 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-30T12:00:00.000Z",
+      "description": "Servico HWH (3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-05T12:00:00.000Z",
+      "description": "Servico HWH ( 6 viagens de brita)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-05T12:00:00.000Z",
+      "description": "Servico HWH (3 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-05T12:00:00.000Z",
+      "description": "Servico HWH ( 2 viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-05T12:00:00.000Z",
+      "description": "Servico HWH ( 4 viagens de pedra 1 viagem de asfalto",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-05T12:00:00.000Z",
+      "description": "Servico HWH ( 3 Viagens)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-05T12:00:00.000Z",
+      "description": "Servico HWH ( 5 Viagens de pedra e 1 de asfalto)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-05T12:00:00.000Z",
+      "description": "Servico HWH ( 4 viagens )",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-13T12:00:00.000Z",
+      "description": "Servico HWH ( 1 viagem)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-14T12:00:00.000Z",
+      "description": "Servico HWH (5 viagens de pedra e 1 de asfalto)",
+      "amount": 1200,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-16T12:00:00.000Z",
+      "description": "Servico HWH (1* 18,100 ton x 80x 0.80  + 2* 20 ton X 80 X 0.80)",
+      "amount": 2438.4,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-17T12:00:00.000Z",
+      "description": "Servico HWH ( 1* 15 ton x80 x0.80 + 2* 18 ton X 80 X 0.80)",
+      "amount": 2112,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-19T12:00:00.000Z",
+      "description": "Servico HWH ( 2 viagens de 18 ton, 2 x 18ton x 80 x 0.80)",
+      "amount": 2304,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-20T12:00:00.000Z",
+      "description": "Servico HWH ( 3 viagens, 1 de 18 ton e 2 de 18,100 ton 3 x18 ton X 80 X 0.80)",
+      "amount": 3468.8,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-17T12:00:00.000Z",
+      "description": "Diesel HWH 2 viagens (cada viagem sao 160 km ida e volta)",
+      "amount": 801.77,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-19T12:00:00.000Z",
+      "description": "Diesel HWH 2 viagens (cada viagem sao 160 km ida e volta)",
+      "amount": 744.78,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-20T12:00:00.000Z",
+      "description": "Diesel HWH 3 viagens (cada viagem sao 160 km ida e volta)",
+      "amount": 825.43,
+      "status": "received",
+      "notes": "Importado do Excel financeiro."
+    }
+  ],
+  "costs": [
+    {
+      "dateIso": "2025-11-03T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 77 Litros  R$ 466.62",
+      "amount": 466.62,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-03T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 76 Litros  R$ 460.56",
+      "amount": 460.56,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-13T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 74 Litros  R$ 448.44",
+      "amount": 448.44,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-14T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 71 Litros  R$ 430.26",
+      "amount": 430.26,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-15T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Oleo Motor - 355",
+      "amount": 355,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-15T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Filtro ar/Filtro oleo/ Bardan B12 - 347",
+      "amount": 347,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Solda Roda - 120",
+      "amount": 120,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "troca de pneu - 160",
+      "amount": 160,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Trinco quebra vento - 37.97",
+      "amount": 37.97,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "macaneta porta - 122.3",
+      "amount": 122.3,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-19T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "6 conexoes de ar - 70",
+      "amount": 70,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-21T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Conserto pneu - 200",
+      "amount": 200,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-21T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 152 Litros",
+      "amount": 152,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-25T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Eletrodo para solda - 22.45",
+      "amount": 22.45,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-25T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Recalchutagem 4 pneus - 2240",
+      "amount": 2240,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-25T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Bombinha Interclima - 31",
+      "amount": 31,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-25T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Moleiro - 1080",
+      "amount": 1080,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-28T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 300",
+      "amount": 300,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-31T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Lona da cacamba dividida em 2X no cartao - 599",
+      "amount": 599,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-31T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "correia e rolamento - 206",
+      "amount": 206,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-04T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "lente lanterna - 22",
+      "amount": 22,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-04T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Niple reducao cuica - 48",
+      "amount": 48,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-04T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pagamento Marcelo - 3500",
+      "amount": 3500,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-04T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Eletricista - 80",
+      "amount": 80,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-04T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Engraxadeira + Graxa - 324",
+      "amount": 324,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-04T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "cartoes + Recibos - 440",
+      "amount": 440,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-28T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Chave Pe de galo quadrada - 104",
+      "amount": 104,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-05T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Polia antivibratoria + pecas - 1115",
+      "amount": 1115,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-05T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Michel emprestou - 6620",
+      "amount": 6620,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-05T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "tapete/suporte antena/bomba de grade/ mangueira - 507",
+      "amount": 507,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-05T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pecas para trocar o retentor ( R$ 1000) 500 pago a vista e 500 no cartao - 500",
+      "amount": 500,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-13T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "reparo do retentor - 300",
+      "amount": 300,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-13T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "reparofuro pneu - 120",
+      "amount": 120,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-13T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "bujao do diferencial - 300",
+      "amount": 300,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-14T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "despachante ( enviou os documentos do caminhao) - 330",
+      "amount": 330,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Diesel HWH 2 viagens (cada viagem sao 150 km ida e volta) - 801.77",
+      "amount": 801.77,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-19T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Diesel HWH 2 viagens (cada viagem sao 150 km ida e volta) - 744.78",
+      "amount": 744.78,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-20T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Diesel HWH 3 viagens (cada viagem sao 150 km ida e volta) - 825.43",
+      "amount": 825.43,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Borracheiro ( roda, bico e montagem) cheque para 30 dias - 240",
+      "amount": 240,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-19T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "eletricista alternador - 380",
+      "amount": 380,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-21T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Mecanico ( troca de filtro de diesel + mao de obra)+ sirene de re - 225",
+      "amount": 225,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-28T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Virabrequin + pecas para o motor - 7327.85",
+      "amount": 7327.85,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-29T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pecas para o motor - 645",
+      "amount": 645,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-30T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "usinagem volante - 280",
+      "amount": 280,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-06T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "mercado livre (cortina ) - 105",
+      "amount": 105,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-06T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "tinta alta temperatura - 115",
+      "amount": 115,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-29T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Michel emprestou para fazer o motor - 15000",
+      "amount": 15000,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-27T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Mecanico (restante da troca do motor) - 1750",
+      "amount": 1750,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "troca de Cabecote motor Cheque para o dia 18/07/2025 - 20000",
+      "amount": 20000,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-25T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "terminal de cobre e cabo - 38.6",
+      "amount": 38.6,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-26T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "esticador de correa vence 26/07 - 85",
+      "amount": 85,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-26T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Pecas para caminhao - 206",
+      "amount": 206,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-26T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Bateria dividido em 3X comeca dia 01/08/2025 - 690",
+      "amount": 690,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-05T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "troca de oleo diferencial - 1000",
+      "amount": 1000,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-30T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "eletricista - 200",
+      "amount": 200,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-30T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "borracheiro - 20",
+      "amount": 20,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-30T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "gastos com viagem CCL engenharia - 96",
+      "amount": 96,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "oleo direcao - 42",
+      "amount": 42,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-07T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento CCL engenharia - 901.11",
+      "amount": 901.11,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-04-07T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abasteciemnto CCL engenharia - 901",
+      "amount": 901,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "emprestimo michel - 3450",
+      "amount": 3450,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "hotel - 90",
+      "amount": 90,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-27T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "emprestimo Marcela - 200",
+      "amount": 200,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-20T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "lampada cartao Marcela - 127",
+      "amount": 127,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "sofa cama dividido em 5x no cartao da marcela comeca dia 05/08/2025 e termina dia 05/12/2025 - 1500",
+      "amount": 1500,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-16T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "tinta da roda - 97",
+      "amount": 97,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-16T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "alfamec lameiro + rolamento + faixa refletiva do parachoque - 361",
+      "amount": 361,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-16T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "ferragem reforco da tampa - 56",
+      "amount": 56,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-06T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Marcelo pagamento - 2600",
+      "amount": 2600,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Marcelo pagamento 3500 + 900 q faltou do mes junho - 4400",
+      "amount": 4400,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Nacional Simples ( DAE) - 2675.91",
+      "amount": 2675.91,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Borracheiro Compra de roda pago R$ 325 e R$ 325 para 11/08 - 650",
+      "amount": 650,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "despachante - 272",
+      "amount": 272,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-07T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "borracheiro - 40",
+      "amount": 40,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-07T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento CCL engenharia - 897",
+      "amount": 897,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-14T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pedagio - 120",
+      "amount": 120,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-07T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento CCL engenharia - 662",
+      "amount": 662,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-15T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento CCL engenharia - 812.86",
+      "amount": 812.86,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "correa - 200",
+      "amount": 200,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-18T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento CCL engenharia - 820.47",
+      "amount": 820.47,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-22T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento Ouro Pav - 739.59",
+      "amount": 739.59,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-30T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Pedagio para o trabalho da CCL R$ 60.00 cada idea cada volta - 240",
+      "amount": 240,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-19T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Forra para cacamba do caminhao dividido em duas vezes no cheque 1x 19/08 e 2x 19/09 - 1500",
+      "amount": 1500,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-19T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "gastos para forra cantoneira, parafuso e broca - 114.7",
+      "amount": 114.7,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-21T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pedagio + janta ( trabalho ouro pav) - 44",
+      "amount": 44,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-22T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pedagio + janta ( trabalho ouro pav) - 50",
+      "amount": 50,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-22T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Despachante (pagamento dos documentos do caminhao) - 647",
+      "amount": 647,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-08T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento Diesel - 193.03",
+      "amount": 193.03,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-08T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "troca do bico pneu - 60",
+      "amount": 60,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-08T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Pedagio - 20",
+      "amount": 20,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-08T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "filtro de ar para 11/09/2025 na conta - 200",
+      "amount": 200,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-08T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "borracha de porta no cartao da Marcela - 200",
+      "amount": 200,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "bomba rele (mercado livre) - 140",
+      "amount": 140,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pedagio - 10",
+      "amount": 10,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Antt - 390",
+      "amount": 390,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "DAE - 529",
+      "amount": 529,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "banho e janta - 38",
+      "amount": 38,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-19T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Suporte da mola do caminhao dividido em 4X (termina dia 19/12) - 3050",
+      "amount": 3050,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-19T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 19",
+      "amount": 19,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-20T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "tacografo - 1370",
+      "amount": 1370,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-21T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Taxa governo tacografo - 358.76",
+      "amount": 358.76,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-21T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "lavagem do caminhao - 100",
+      "amount": 100,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-22T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "banho - 10",
+      "amount": 10,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-23T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Pedagio - 60",
+      "amount": 60,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-23T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Diesel - 400",
+      "amount": 400,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-25T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pedagio - 70",
+      "amount": 70,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-30T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Pneu estourou - 800",
+      "amount": 800,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-31T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Almoco - 22",
+      "amount": 22,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-27T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento - 754.74",
+      "amount": 754.74,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Janta - 23",
+      "amount": 23,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pagamento Marcelo - 3500",
+      "amount": 3500,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Pagamento Michel - 2500",
+      "amount": 2500,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Pagamento cartao Marcela (291 sofa cama + 194 borracha de porta + 135 valvula de freio + 83 puxadir de porta)3 - 703",
+      "amount": 703,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Motor de arranque dividido em 3X termina dia (05/01/2026) - 1189",
+      "amount": 1189,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "tacografo - 50",
+      "amount": 50,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-09T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento - 800.44",
+      "amount": 800.44,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 35",
+      "amount": 35,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-09T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento - 711",
+      "amount": 711,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-12-09T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 25",
+      "amount": 25,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-13T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "passagem ida/volta itajuba - 120",
+      "amount": 120,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-15T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "banho - 10",
+      "amount": 10,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-15T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 43",
+      "amount": 43,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-16T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 778.13",
+      "amount": 778.13,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-16T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "oleo de direcao - 50",
+      "amount": 50,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Borracharia - 90",
+      "amount": 90,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-22T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "2 Pneus dividido em 6x noi cartao finaliza 23/03/2026 - 3440",
+      "amount": 3440,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-22T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Borracharia troca dos pneus novos - 180",
+      "amount": 180,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-22T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento - 676.54",
+      "amount": 676.54,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-22T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 29",
+      "amount": 29,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-23T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 30",
+      "amount": 30,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-23T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "peca do reduzido - 75",
+      "amount": 75,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-24T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 30",
+      "amount": 30,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-25T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 30",
+      "amount": 30,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-26T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 38",
+      "amount": 38,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-09-30T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 32",
+      "amount": 32,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-10T12:00:00.000Z",
+      "category": "fuel",
+      "description": "tanque de combustivel - 180",
+      "amount": 180,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-10T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 709.52",
+      "amount": 709.52,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-07-10T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 32",
+      "amount": 32,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-10T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Borracha da lona - 50",
+      "amount": 50,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-08-10T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "DAE Simples Nacional - 561.16",
+      "amount": 561.16,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-14T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Retrovisor - 96",
+      "amount": 96,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-14T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 29",
+      "amount": 29,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-15T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 15",
+      "amount": 15,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-16T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Insulfilm - 490",
+      "amount": 490,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-16T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 443",
+      "amount": 443,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "troca de oleo - 499",
+      "amount": 499,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-17T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "contadora - 1380",
+      "amount": 1380,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-20T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Janta - 46",
+      "amount": 46,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-21T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Almoco - 40",
+      "amount": 40,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-23T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento - 754",
+      "amount": 754,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-23T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Adesivo de caminhao - 100",
+      "amount": 100,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-26T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento - 100",
+      "amount": 100,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-27T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Janta - 29",
+      "amount": 29,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-28T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Multa Balanca - 195.23",
+      "amount": 195.23,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-28T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "gasolina - 100",
+      "amount": 100,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-10-28T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Janta - 29",
+      "amount": 29,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-03-11T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "viagem para mogi - 120",
+      "amount": 120,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-05-11T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pagamento Marcelo/Michel - 6000",
+      "amount": 6000,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-06-11T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Comida viagem - 15",
+      "amount": 15,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Simples Nacional - 1314",
+      "amount": 1314,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Gasolina - 200",
+      "amount": 200,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Café da manha - 11",
+      "amount": 11,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-18T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pedagio - 33.3",
+      "amount": 33.3,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-21T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Led para o caminhao - 397",
+      "amount": 397,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-24T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "gasolina - 120",
+      "amount": 120,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-24T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 33",
+      "amount": 33,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-25T12:00:00.000Z",
+      "category": "fuel",
+      "description": "Abastecimento - 432.95",
+      "amount": 432.95,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-26T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Almoco - 22",
+      "amount": 22,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-27T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Almoco - 23",
+      "amount": 23,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-11-28T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Almoco - 24",
+      "amount": 24,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-12T12:00:00.000Z",
+      "category": "fuel",
+      "description": "abastecimento - 877",
+      "amount": 877,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-12T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Gasolina - 115",
+      "amount": 115,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-12T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "pedagio - 30.3",
+      "amount": 30.3,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-01-12T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "Macaco e chave de roda - 530",
+      "amount": 530,
+      "notes": "Importado do Excel financeiro."
+    },
+    {
+      "dateIso": "2025-02-12T12:00:00.000Z",
+      "category": "miscellaneous",
+      "description": "janta - 23",
+      "amount": 23,
+      "notes": "Importado do Excel financeiro."
+    }
+  ]
+}

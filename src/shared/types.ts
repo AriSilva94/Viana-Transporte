@@ -1,3 +1,5 @@
+import type { LicenseStatus } from './license'
+
 // ─── Entity Types ────────────────────────────────────────────────────────────
 
 export interface Client {
@@ -225,5 +227,8 @@ export interface ElectronAPI {
     getSystemLocale: () => Promise<string>
     getSavedLanguage: () => Promise<SupportedLocale | null>
     setLanguage: (language: SupportedLocale) => Promise<SupportedLocale>
+  }
+  license: {
+    getStatus: () => Promise<LicenseStatus>
   }
 }

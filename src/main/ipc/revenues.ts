@@ -1,9 +1,9 @@
-import { ipcMain } from 'electron'
 import { eq, and, gte, lte } from 'drizzle-orm'
 import { db } from '../db'
 import { projectRevenues, projects } from '../db/schema'
 import type { ProjectRevenue, RevenueFilters } from '../../shared/types'
 import { endOfLocalDay, parseLocalDate } from '../../shared/date'
+import { handleRead, handleWrite } from './guarded'
 
 const selectedFields = {
   id: projectRevenues.id,
@@ -19,7 +19,7 @@ const selectedFields = {
 }
 
 export function registerRevenuesHandlers(): void {
-  ipcMain.handle('revenues:list', async (_, filters?: RevenueFilters) => {
+  handleRead('revenues:list', async (_, filters?: RevenueFilters) => {
     const conditions = []
 
     if (filters?.projectId) conditions.push(eq(projectRevenues.projectId, filters.projectId))
@@ -36,7 +36,7 @@ export function registerRevenuesHandlers(): void {
     return baseQuery.where(and(...conditions))
   })
 
-  ipcMain.handle('revenues:get', async (_, id: number) => {
+  handleRead('revenues:get', async (_, id: number) => {
     const rows = await db
       .select(selectedFields)
       .from(projectRevenues)
@@ -46,7 +46,7 @@ export function registerRevenuesHandlers(): void {
     return rows[0] ?? null
   })
 
-  ipcMain.handle(
+  handleWrite(
     'revenues:create',
     async (_, data: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>) => {
       const rows = await db
@@ -60,7 +60,7 @@ export function registerRevenuesHandlers(): void {
     }
   )
 
-  ipcMain.handle(
+  handleWrite(
     'revenues:update',
     async (_, id: number, data: Partial<Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>>) => {
       const payload: typeof data & { updatedAt: Date; date?: Date } = {
@@ -78,7 +78,7 @@ export function registerRevenuesHandlers(): void {
     }
   )
 
-  ipcMain.handle('revenues:delete', async (_, id: number) => {
+  handleWrite('revenues:delete', async (_, id: number) => {
     await db.delete(projectRevenues).where(eq(projectRevenues.id, id))
   })
 }

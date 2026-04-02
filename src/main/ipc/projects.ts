@@ -1,12 +1,12 @@
-import { ipcMain } from 'electron'
 import { eq, like, and, sum } from 'drizzle-orm'
 import { db } from '../db'
 import { projects, clients, dailyLogs, projectCosts, projectRevenues } from '../db/schema'
 import type { Project, ProjectFilters } from '../../shared/types'
 import { parseLocalDate } from '../../shared/date'
+import { handleRead, handleWrite } from './guarded'
 
 export function registerProjectsHandlers(): void {
-  ipcMain.handle('projects:list', async (_, filters?: ProjectFilters) => {
+  handleRead('projects:list', async (_, filters?: ProjectFilters) => {
     const conditions = []
     if (filters?.search) conditions.push(like(projects.name, `%${filters.search}%`))
     if (filters?.status) conditions.push(eq(projects.status, filters.status))
@@ -34,7 +34,7 @@ export function registerProjectsHandlers(): void {
     return baseQuery.where(and(...conditions))
   })
 
-  ipcMain.handle('projects:get', async (_, id: number) => {
+  handleRead('projects:get', async (_, id: number) => {
     const rows = await db
       .select({
         id: projects.id,
@@ -57,7 +57,7 @@ export function registerProjectsHandlers(): void {
     return rows[0] ?? null
   })
 
-  ipcMain.handle(
+  handleWrite(
     'projects:create',
     async (_, data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
       const rows = await db
@@ -72,7 +72,7 @@ export function registerProjectsHandlers(): void {
     }
   )
 
-  ipcMain.handle(
+  handleWrite(
     'projects:update',
     async (_, id: number, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>) => {
       const rows = await db
@@ -89,11 +89,11 @@ export function registerProjectsHandlers(): void {
     }
   )
 
-  ipcMain.handle('projects:delete', async (_, id: number) => {
+  handleWrite('projects:delete', async (_, id: number) => {
     await db.delete(projects).where(eq(projects.id, id))
   })
 
-  ipcMain.handle('projects:summary', async (_, id: number) => {
+  handleRead('projects:summary', async (_, id: number) => {
     const [costsRow] = await db
       .select({ total: sum(projectCosts.amount) })
       .from(projectCosts)

@@ -7,6 +7,7 @@ import fs from 'fs'
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Fixtures = {
+  e2eDbPath: string
   electronApp: ElectronApplication
   page: Page
 }
@@ -112,10 +113,35 @@ export async function confirmDialog(page: Page): Promise<void> {
 // ─── Fixture ──────────────────────────────────────────────────────────────────
 
 export const test = base.extend<Fixtures>({
-  electronApp: async ({}, use) => {
+  e2eDbPath: [
+    async ({}, use) => {
+      const projectRoot = process.cwd()
+      const dbPath = path.join(projectRoot, 'test-results', 'e2e', 'playwright.db')
+      fs.mkdirSync(path.dirname(dbPath), { recursive: true })
+      if (fs.existsSync(dbPath)) {
+        fs.rmSync(dbPath, { force: true })
+      }
+
+      await use(dbPath)
+
+      if (fs.existsSync(dbPath)) {
+        fs.rmSync(dbPath, { force: true })
+      }
+    },
+    { scope: 'worker' },
+  ],
+
+  electronApp: async ({ e2eDbPath }, use) => {
     const projectRoot = process.cwd()
-    const launchEnv = { ...process.env }
+    const launchEnv = Object.fromEntries(
+      Object.entries(process.env).filter((entry): entry is [string, string] => {
+        return typeof entry[1] === 'string'
+      })
+    )
     delete launchEnv.ELECTRON_RUN_AS_NODE
+    launchEnv.MIGHTYREPT_DB_PATH = e2eDbPath
+    launchEnv.MIGHTYREPT_SKIP_INITIAL_SEED = '1'
+
     const app = await electron.launch({ args: ['.'], cwd: projectRoot, env: launchEnv })
     await use(app)
     await app.close()
