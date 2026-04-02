@@ -2,22 +2,103 @@
 
 ## Overview
 
-Build a desktop application for a small earthmoving / land grading business.
+Desktop application for **Viana Transporte e Terraplenagem** — a small transport and earthmoving business.
 
 This project is **not** a generic ERP.  
-It is a focused operational management system for companies that execute services such as:
+It is a focused operational management system for a company that executes services such as:
 
-- earthmoving
-- land grading
+- material transport (caminhão)
+- earthmoving and land grading
 - soil removal
-- material transport
 - excavation support
 - machine-based field services tied to construction projects
 
+The business operates primarily with a **truck (caminhão)** and two drivers (**Marcelo** and **Michel**). Revenue is tracked per service, trip, daily rate, or by tonnage formula. Costs include fuel, maintenance, driver payments, and taxes.
+
 The goal of this MVP is to help the business owner or manager control the **daily operation of projects**, the **use of machines**, and the **financial result per project**.
 
-This file defines **what the product must include**.  
-Use the installed Electron development skill for **how the project should be implemented**.
+This file defines **what the product must include**.
+
+---
+
+## MVP Delivery Status
+
+**All 6 phases are complete as of 2026-04-01.**
+
+| Phase | Description | Status |
+| ----- | ----------- | ------ |
+| Phase 1 | Foundation — project setup, routing, DB, shared UI | ✅ Done |
+| Phase 2 | Core CRUD — Clients, Projects, Machines, Operators | ✅ Done |
+| Phase 3 | Operational Core — Daily Logs, project detail views | ✅ Done |
+| Phase 4 | Financial Core — Costs, Revenues, profitability | ✅ Done |
+| Phase 5 | Management Overview — Dashboard, Reports | ✅ Done |
+| Phase 6 | Refinement — loading states, toast notifications, detail pages | ✅ Done |
+
+Known bugs exist and will be addressed in the next iteration. The system is functional and covers all MVP success criteria.
+
+---
+
+## Technical Stack
+
+- **Framework:** Electron 41 with `electron-vite`
+- **Frontend:** React 18 + TypeScript
+- **Routing:** React Router 6 with `HashRouter` (required for `file://` protocol)
+- **Database:** LibSQL (SQLite) via `@libsql/client` + Drizzle ORM (async queries)
+- **IPC pattern:** `ipcMain.handle('entity:action', async (_, ...args) => {...})` in main; `contextBridge` exposes typed `window.api`
+- **UI components:** Custom shadcn-style components (forwardRef, cn(), CSS variables) — no Radix UI except where already installed
+- **Styling:** Tailwind CSS with custom brand tokens
+
+### Design System
+
+The application uses a custom brand palette defined in `tailwind.config.cjs` and `src/renderer/index.css`. **Do not change colors, fonts, or visual tokens without the user's explicit instruction.**
+
+Brand tokens:
+
+- `brand.deep` — #3852B4 (primary blue)
+- `brand.sky` — #5E7AC4
+- `brand.sand` — #F3BE7A (accent/warm)
+- `brand.orange` — #F08D39
+- `brand.cream` — #FFF8EF
+- `brand.ink` — #22315F (text dark)
+
+CSS variable radius: `--radius: 0.9rem`  
+Font stack: Segoe UI → Inter → Roboto → Helvetica Neue
+
+Key component patterns:
+
+- Cards/sections use `rounded-[28px] border border-border/80 bg-white/84 shadow-sm backdrop-blur-sm`
+- Form container: `FormCard` component
+- Detail page sections: `SurfaceSection` component
+- Filter bars: `FilterPanel` component
+
+---
+
+## Application Structure (implemented)
+
+| Route | Page |
+| ----- | ---- |
+| `/dashboard` | Dashboard overview |
+| `/clients` | Clients list |
+| `/clients/new`, `/clients/:id/edit` | Client form |
+| `/clients/:id` | Client detail (with projects) |
+| `/projects` | Projects list with status filter |
+| `/projects/new`, `/projects/:id/edit` | Project form |
+| `/projects/:id` | Project detail (tabs: Geral, Registros, Custos, Receitas, Resumo) |
+| `/machines` | Machines list |
+| `/machines/new`, `/machines/:id/edit` | Machine form |
+| `/machines/:id` | Machine detail (with usage history) |
+| `/operators` | Operators list |
+| `/operators/new`, `/operators/:id/edit` | Operator form |
+| `/operators/:id` | Operator detail (with daily logs) |
+| `/daily-logs` | Daily logs with filters (project, machine, operator, date) |
+| `/daily-logs/new`, `/daily-logs/:id/edit` | Daily log form |
+| `/costs` | Costs with filters (project, category, date) |
+| `/costs/new`, `/costs/:id/edit` | Cost form |
+| `/revenues` | Revenues with filters (project, status, date) |
+| `/revenues/new`, `/revenues/:id/edit` | Revenue form |
+| `/reports` | Reports (4 tabs: Projetos, Registros, Máquinas, Custos) |
+
+---
 
 ---
 
