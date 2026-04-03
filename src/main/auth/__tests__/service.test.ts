@@ -7,8 +7,18 @@ const { createClientMock } = vi.hoisted(() => ({
   createClientMock: vi.fn(),
 }))
 
+const { ipcHandleMock } = vi.hoisted(() => ({
+  ipcHandleMock: vi.fn(),
+}))
+
 vi.mock('@supabase/supabase-js', () => ({
   createClient: createClientMock,
+}))
+
+vi.mock('electron', () => ({
+  ipcMain: {
+    handle: ipcHandleMock,
+  },
 }))
 
 import { createSupabaseAuthClientFromEnv } from '../client'
@@ -403,6 +413,38 @@ describe('createAuthService', () => {
       })
     } finally {
       await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('registerAuthHandlers', () => {
+  it('registers auth ipc channels against the active service', async () => {
+    const fakeAuthService = {
+      getState: vi.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      requestPasswordReset: vi.fn(),
+      updatePassword: vi.fn(),
+      signOut: vi.fn(),
+      handleCallbackUrl: vi.fn(),
+    }
+
+    const { setAuthService } = await import('../runtime')
+    setAuthService(fakeAuthService)
+
+    try {
+      const { registerAuthHandlers } = await import('../../ipc/auth')
+      registerAuthHandlers()
+
+      expect(ipcHandleMock).toHaveBeenCalledWith('auth:getSession', expect.any(Function))
+      expect(ipcHandleMock).toHaveBeenCalledWith('auth:signIn', expect.any(Function))
+      expect(ipcHandleMock).toHaveBeenCalledWith('auth:signUp', expect.any(Function))
+      expect(ipcHandleMock).toHaveBeenCalledWith('auth:requestPasswordReset', expect.any(Function))
+      expect(ipcHandleMock).toHaveBeenCalledWith('auth:updatePassword', expect.any(Function))
+      expect(ipcHandleMock).toHaveBeenCalledWith('auth:signOut', expect.any(Function))
+    } finally {
+      setAuthService(null)
+      ipcHandleMock.mockReset()
     }
   })
 })
