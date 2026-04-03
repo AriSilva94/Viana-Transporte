@@ -150,6 +150,14 @@ export interface AuthState {
   pendingPasswordReset: boolean
 }
 
+export interface AuthSignUpResult {
+  emailConfirmationSent: true
+}
+
+export interface AuthPasswordResetResult {
+  emailSent: true
+}
+
 // ─── Filter Types ─────────────────────────────────────────────────────────────
 
 export interface ProjectFilters {
@@ -244,8 +252,8 @@ export interface ElectronAPI {
   auth: {
     getSession: () => Promise<AuthState>
     signIn: (email: string, password: string) => Promise<AuthState>
-    signUp: (email: string, password: string) => Promise<{ emailConfirmationSent: true }>
-    requestPasswordReset: (email: string) => Promise<{ emailSent: true }>
+    signUp: (email: string, password: string) => Promise<AuthSignUpResult>
+    requestPasswordReset: (email: string) => Promise<AuthPasswordResetResult>
     updatePassword: (password: string) => Promise<AuthState>
     signOut: () => Promise<void>
   }

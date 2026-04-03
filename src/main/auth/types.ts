@@ -1,4 +1,8 @@
-import type { AuthState } from '../../shared/types'
+import type {
+  AuthPasswordResetResult,
+  AuthSignUpResult,
+  AuthState,
+} from '../../shared/types'
 
 export interface AuthCredentials {
   email: string
@@ -13,12 +17,4 @@ export interface AuthPasswordUpdate {
   password: string
 }
 
-export interface SignUpResult {
-  emailConfirmationSent: true
-}
-
-export interface PasswordResetResult {
-  emailSent: true
-}
-
-export type { AuthState }
+export type { AuthState, AuthSignUpResult, AuthPasswordResetResult }
