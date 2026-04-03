@@ -110,7 +110,7 @@ describe('App auth flow', () => {
 
     await user.type(screen.getByLabelText(/e-mail/i), 'a@b.com')
     await user.type(screen.getByLabelText(/senha/i), '123456')
-    await user.click(screen.getAllByRole('button', { name: /entrar/i })[1])
+    await user.click(screen.getByTestId('auth-submit'))
 
     await waitFor(() => {
       expect(window.api.auth.signIn).toHaveBeenCalledWith('a@b.com', '123456')
@@ -150,7 +150,7 @@ describe('App auth flow', () => {
 
     await user.type(screen.getByLabelText(/e-mail/i), 'a@b.com')
     await user.type(screen.getByLabelText(/senha/i), '123456')
-    await user.click(screen.getAllByRole('button', { name: /entrar/i })[1])
+    await user.click(screen.getByTestId('auth-submit'))
 
     await waitFor(() => {
       expect(screen.getByText('invalid credentials')).toBeInTheDocument()
