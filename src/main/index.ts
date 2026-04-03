@@ -4,6 +4,7 @@ import { loadMainEnv } from './config/load-env'
 import { initDataProvider, resolveDataProviderFromEnv } from './data/provider'
 import { registerAllHandlers } from './ipc'
 import { createAuthService } from './auth/service'
+import { setAuthService } from './auth/runtime'
 import { initLicenseState } from './services/license'
 
 function createWindow(): BrowserWindow {
@@ -40,6 +41,7 @@ async function bootstrap(): Promise<void> {
   await initLicenseState()
   await initDataProvider(resolveDataProviderFromEnv())
   const authService = createAuthService({ userDataPath: app.getPath('userData') })
+  setAuthService(authService)
   await authService.getState()
   registerAllHandlers()
   createWindow()
