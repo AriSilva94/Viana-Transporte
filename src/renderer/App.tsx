@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Shell } from './components/layout/Shell'
+import { useAuth } from './context/AuthContext'
 import { Dashboard } from './pages/Dashboard'
+import { AuthPage } from './pages/auth/AuthPage'
 import { ClientsListPage } from './pages/clients'
 import { ClientFormPage } from './pages/clients/ClientFormPage'
 import { ClientDetailPage } from './pages/clients/ClientDetailPage'
@@ -25,6 +27,7 @@ import { api } from './lib/api'
 import type { LicenseStatus } from '../shared/license'
 
 export default function App(): JSX.Element {
+  const { state: authState, loading: authLoading } = useAuth()
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
 
   useEffect(() => {
@@ -47,6 +50,18 @@ export default function App(): JSX.Element {
       isMounted = false
     }
   }, [])
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(14,71,116,0.16),_transparent_45%),linear-gradient(180deg,#f6f3ec_0%,#ece6da_100%)] px-6">
+        <p className="text-sm font-medium text-muted-foreground">Carregando autenticação...</p>
+      </div>
+    )
+  }
+
+  if (!authState?.session) {
+    return <AuthPage />
+  }
 
   return (
     <HashRouter>

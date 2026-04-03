@@ -1,4 +1,7 @@
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { AuthProvider } from '../context/AuthContext'
 
 const { invokeMock } = vi.hoisted(() => ({
   invokeMock: vi.fn(),
@@ -50,5 +53,67 @@ describe('window.api auth bridge', () => {
       password: '654321',
     })
     expect(invokeMock).toHaveBeenNthCalledWith(6, 'auth:signOut')
+  })
+})
+
+describe('App auth flow', () => {
+  beforeEach(() => {
+    invokeMock.mockReset()
+    invokeMock.mockResolvedValue(undefined)
+
+    window.api = {
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          session: null,
+          pendingPasswordReset: false,
+        }),
+        signIn: vi.fn().mockResolvedValue({
+          session: null,
+          pendingPasswordReset: false,
+        }),
+        signUp: vi.fn(),
+        requestPasswordReset: vi.fn(),
+        updatePassword: vi.fn(),
+        signOut: vi.fn(),
+      },
+      preferences: {
+        getSystemLocale: vi.fn().mockResolvedValue('pt-BR'),
+        getSavedLanguage: vi.fn().mockResolvedValue(null),
+        setLanguage: vi.fn(),
+      },
+      license: {
+        getStatus: vi.fn().mockResolvedValue({
+          distributionMode: 'full',
+          firstRunAtMs: null,
+          expiresAtMs: null,
+          isExpired: false,
+          readOnly: false,
+          daysRemaining: null,
+        }),
+      },
+    } as Window['api']
+  })
+
+  it('renders the login screen when there is no session and submits signIn', async () => {
+    const user = userEvent.setup()
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+    })
+
+    await user.type(screen.getByLabelText(/e-mail/i), 'a@b.com')
+    await user.type(screen.getByLabelText(/senha/i), '123456')
+    await user.click(screen.getAllByRole('button', { name: /entrar/i })[1])
+
+    await waitFor(() => {
+      expect(window.api.auth.signIn).toHaveBeenCalledWith('a@b.com', '123456')
+    })
   })
 })
