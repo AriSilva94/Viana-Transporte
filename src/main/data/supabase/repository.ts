@@ -56,13 +56,14 @@ function firstItem<T>(data: T | T[] | null): T | null {
   return Array.isArray(data) ? data[0] ?? null : data
 }
 
-function ensureItem<T>(result: SupabaseResult<T | null>): T {
+function ensureItem<T>(result: SupabaseResult<T | T[] | null>): T {
   throwIfError(result.error)
-  if (!result.data) {
-    throw new Error('Record not found')
+  const item = firstItem(result.data)
+  if (!item) {
+    throw new Error('Supabase returned no rows')
   }
 
-  return result.data
+  return item
 }
 
 export async function createSupabaseRepository(): Promise<DomainRepository> {
@@ -97,9 +98,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .from<Client>('clients')
           .insert(mapClientToSupabaseInsert(data))
           .select('*')
-          
 
-        return mapSupabaseClientRow(ensureItem(result as SupabaseResult<never>))
+        return mapSupabaseClientRow(ensureItem(result as SupabaseResult<Client[] | Client | null>))
       },
       async update(id: number, data: Partial<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>) {
         const result = await client
@@ -107,9 +107,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .update({ ...data, updated_at: new Date().toISOString() })
           .eq('id', id)
           .select('*')
-          
 
-        return mapSupabaseClientRow(ensureItem(result as SupabaseResult<never>))
+        return mapSupabaseClientRow(ensureItem(result as SupabaseResult<Client[] | Client | null>))
       },
       async delete(id: number) {
         const result = await client.from('clients').delete().eq('id', id)
@@ -148,9 +147,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .from<Machine>('machines')
           .insert(mapMachineToSupabaseInsert(data))
           .select('*')
-          
 
-        return mapSupabaseMachineRow(ensureItem(result as SupabaseResult<never>))
+        return mapSupabaseMachineRow(ensureItem(result as SupabaseResult<Machine[] | Machine | null>))
       },
       async update(id: number, data: Partial<Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>>) {
         const result = await client
@@ -158,9 +156,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .update({ ...data, updated_at: new Date().toISOString() })
           .eq('id', id)
           .select('*')
-          
 
-        return mapSupabaseMachineRow(ensureItem(result as SupabaseResult<never>))
+        return mapSupabaseMachineRow(ensureItem(result as SupabaseResult<Machine[] | Machine | null>))
       },
       async delete(id: number) {
         const result = await client.from('machines').delete().eq('id', id)
@@ -199,9 +196,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .from<Operator>('operators')
           .insert(mapOperatorToSupabaseInsert(data))
           .select('*')
-          
 
-        return mapSupabaseOperatorRow(ensureItem(result as SupabaseResult<never>))
+        return mapSupabaseOperatorRow(ensureItem(result as SupabaseResult<Operator[] | Operator | null>))
       },
       async update(id: number, data: Partial<Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>>) {
         const result = await client
@@ -209,9 +205,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .update({ ...data, updated_at: new Date().toISOString() })
           .eq('id', id)
           .select('*')
-          
 
-        return mapSupabaseOperatorRow(ensureItem(result as SupabaseResult<never>))
+        return mapSupabaseOperatorRow(ensureItem(result as SupabaseResult<Operator[] | Operator | null>))
       },
       async delete(id: number) {
         const result = await client.from('operators').delete().eq('id', id)
