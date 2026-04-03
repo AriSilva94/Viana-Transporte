@@ -3,6 +3,8 @@ import { Sidebar } from './Sidebar'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { ToastProvider } from '@renderer/context/ToastContext'
 import { ToastContainer } from '@renderer/components/ui/toast'
+import { Button } from '@renderer/components/ui/button'
+import { useAuth } from '@renderer/context/AuthContext'
 import type { LicenseStatus } from '../../../shared/license'
 
 interface ShellProps {
@@ -39,6 +41,7 @@ function buildLicenseMessage(licenseStatus: LicenseStatus | null): string | null
 }
 
 export function Shell({ licenseStatus }: ShellProps): JSX.Element {
+  const { signOut } = useAuth()
   const licenseMessage = buildLicenseMessage(licenseStatus)
 
   return (
@@ -54,7 +57,12 @@ export function Shell({ licenseStatus }: ShellProps): JSX.Element {
                 </p>
               ) : null}
             </div>
-            <LanguageSwitcher />
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher />
+              <Button type="button" variant="outline" onClick={() => void signOut()} data-testid="logout-button">
+                Sair
+              </Button>
+            </div>
           </header>
           <main className="relative z-0 min-h-0 flex-1 overflow-hidden p-6 lg:p-8">
             <div className="h-full overflow-y-auto">

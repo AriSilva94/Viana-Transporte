@@ -74,7 +74,7 @@ describe('App auth flow', () => {
         signUp: vi.fn(),
         requestPasswordReset: vi.fn(),
         updatePassword: vi.fn(),
-        signOut: vi.fn(),
+        signOut: vi.fn().mockResolvedValue(undefined),
       },
       preferences: {
         getSystemLocale: vi.fn().mockResolvedValue('pt-BR'),
@@ -90,6 +90,49 @@ describe('App auth flow', () => {
           readOnly: false,
           daysRemaining: null,
         }),
+      },
+      projects: {
+        list: vi.fn().mockResolvedValue([]),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+        summary: vi.fn(),
+      },
+      machines: {
+        list: vi.fn().mockResolvedValue([]),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      },
+      operators: {
+        list: vi.fn().mockResolvedValue([]),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      },
+      dailylogs: {
+        list: vi.fn().mockResolvedValue([]),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      },
+      costs: {
+        list: vi.fn().mockResolvedValue([]),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      },
+      revenues: {
+        list: vi.fn().mockResolvedValue([]),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
       },
     } as Window['api']
   })
@@ -154,6 +197,38 @@ describe('App auth flow', () => {
 
     await waitFor(() => {
       expect(screen.getByText('invalid credentials')).toBeInTheDocument()
+    })
+  })
+
+  it('renders protected shell content and exposes logout when a session exists', async () => {
+    const user = userEvent.setup()
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: {
+        accessToken: 'token',
+        refreshToken: 'refresh',
+        userId: 'user-1',
+        email: 'a@b.com',
+        expiresAt: null,
+      },
+      pendingPasswordReset: false,
+    })
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument()
+      expect(screen.getByTestId('logout-button')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByTestId('logout-button'))
+
+    await waitFor(() => {
+      expect(window.api.auth.signOut).toHaveBeenCalledTimes(1)
     })
   })
 })
