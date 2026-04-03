@@ -459,7 +459,7 @@ describe('registerAuthHandlers', () => {
   })
 })
 
-describe('registerAuthDeepLinkHandlers', () => {
+describe('createAuthDeepLinkRuntime', () => {
   it('registers protocol handlers and forwards recovery deep links to the auth service', async () => {
     const callbacks = new Map<string, (...args: unknown[]) => unknown>()
     appMock.on.mockImplementation((event: string, handler: (...args: unknown[]) => unknown) => {
@@ -481,8 +481,8 @@ describe('registerAuthDeepLinkHandlers', () => {
       }),
     }
 
-    const { registerAuthDeepLinkHandlers } = await import('../deep-link')
-    registerAuthDeepLinkHandlers(authService)
+    const { createAuthDeepLinkRuntime } = await import('../deep-link')
+    const runtime = createAuthDeepLinkRuntime()
 
     expect(appMock.setAsDefaultProtocolClient).toHaveBeenCalledWith('mightyrept')
     expect(appMock.requestSingleInstanceLock).toHaveBeenCalled()
@@ -495,8 +495,63 @@ describe('registerAuthDeepLinkHandlers', () => {
 
     await secondInstance?.({}, ['mightyrept://auth/callback#type=recovery'])
     await openUrl?.({ preventDefault: vi.fn() }, 'mightyrept://auth/callback?type=recovery')
+    runtime.attachAuthService(authService)
 
     expect(authService.handleCallbackUrl).toHaveBeenCalledWith('mightyrept://auth/callback#type=recovery')
     expect(authService.handleCallbackUrl).toHaveBeenCalledWith('mightyrept://auth/callback?type=recovery')
+  })
+
+  it('queues cold start deep links until the auth service is attached', async () => {
+    const originalArgv = process.argv
+    process.argv = ['electron', 'mightyrept://auth/callback#type=recovery']
+
+    try {
+      appMock.on.mockImplementation((event: string, handler: (...args: unknown[]) => unknown) => {
+        return appMock
+      })
+      appMock.requestSingleInstanceLock.mockReturnValue(true)
+
+      const authService = {
+        getState: vi.fn(),
+        signIn: vi.fn(),
+        signUp: vi.fn(),
+        requestPasswordReset: vi.fn(),
+        updatePassword: vi.fn(),
+        signOut: vi.fn(),
+        handleCallbackUrl: vi.fn(),
+      }
+
+      const { createAuthDeepLinkRuntime } = await import('../deep-link')
+      const runtime = createAuthDeepLinkRuntime()
+
+      expect(runtime.shouldQuit).toBe(false)
+      expect(authService.handleCallbackUrl).not.toHaveBeenCalled()
+
+      runtime.attachAuthService(authService)
+
+      expect(authService.handleCallbackUrl).toHaveBeenCalledWith('mightyrept://auth/callback#type=recovery')
+    } finally {
+      process.argv = originalArgv
+      appMock.on.mockReset()
+      appMock.quit.mockReset()
+      appMock.setAsDefaultProtocolClient.mockReset()
+      appMock.requestSingleInstanceLock.mockReset()
+    }
+  })
+
+  it('signals shouldQuit when the single instance lock cannot be acquired', async () => {
+    appMock.on.mockImplementation(() => appMock)
+    appMock.requestSingleInstanceLock.mockReturnValue(false)
+
+    const { createAuthDeepLinkRuntime } = await import('../deep-link')
+    const runtime = createAuthDeepLinkRuntime()
+
+    expect(runtime.shouldQuit).toBe(true)
+    expect(appMock.quit).toHaveBeenCalled()
+
+    appMock.on.mockReset()
+    appMock.quit.mockReset()
+    appMock.setAsDefaultProtocolClient.mockReset()
+    appMock.requestSingleInstanceLock.mockReset()
   })
 })
