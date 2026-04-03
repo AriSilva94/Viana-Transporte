@@ -1,5 +1,8 @@
-import { initDb } from '../db'
-import type { DataProvider } from './types'
+import { db, initDb } from '../db'
+import type { DataProvider, DomainRepository } from './types'
+import { createSqliteRepository } from './sqlite/repository'
+
+export let repository: DomainRepository | undefined
 
 export function resolveDataProviderFromEnv(): DataProvider {
   const rawProvider = process.env.MIGHTYREPT_DATA_PROVIDER?.trim()
@@ -21,5 +24,6 @@ export async function initDataProvider(provider: DataProvider): Promise<DataProv
   }
 
   await initDb()
+  repository = createSqliteRepository(db)
   return 'sqlite'
 }
