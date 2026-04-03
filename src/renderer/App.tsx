@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Shell } from './components/layout/Shell'
 import { useAuth } from './context/AuthContext'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { Dashboard } from './pages/Dashboard'
 import { AuthPage } from './pages/auth/AuthPage'
 import { ClientsListPage } from './pages/clients'
@@ -59,14 +60,18 @@ export default function App(): JSX.Element {
     )
   }
 
-  if (!authState?.session) {
-    return <AuthPage />
-  }
-
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Shell licenseStatus={licenseStatus} />}>
+        <Route path="/auth" element={<AuthPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Shell licenseStatus={licenseStatus} />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
 
