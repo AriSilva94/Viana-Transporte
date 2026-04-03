@@ -49,8 +49,8 @@ describe('createSupabaseRepository', () => {
     }
 
     const machineSelect = createQueryMock({ data: [machineRow], error: null })
-    const machineInsert = createQueryMock({ data: machineRow, error: null })
-    const machineUpdate = createQueryMock({ data: machineRow, error: null })
+    const machineInsert = createQueryMock({ data: [machineRow], error: null })
+    const machineUpdate = createQueryMock({ data: [machineRow], error: null })
     const machineDelete = createQueryMock({ data: null, error: null })
 
     const supabase = {
@@ -102,6 +102,42 @@ describe('createSupabaseRepository', () => {
     expect(machineSelect.eq).toHaveBeenCalledWith('status', 'available')
   })
 
+  it('throws when a machines create returns an empty array', async () => {
+    const machineInsert = createQueryMock({ data: [], error: null })
+
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === 'machines') {
+          return {
+            select: vi.fn(() => machineInsert),
+            insert: vi.fn(() => machineInsert),
+            update: vi.fn(() => machineInsert),
+            delete: vi.fn(() => machineInsert),
+            or: machineInsert.or,
+            eq: machineInsert.eq,
+          }
+        }
+
+        throw new Error(`Unexpected table: ${table}`)
+      }),
+    }
+
+    createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
+
+    const repo = await createSupabaseRepository()
+
+    await expect(
+      repo.machines.create({
+        name: 'Escavadeira Vazia',
+        type: 'Escavadeira',
+        identifier: null,
+        brandModel: null,
+        status: 'available',
+        notes: null,
+      })
+    ).rejects.toThrow('Supabase returned no rows')
+  })
+
   it('implements operators CRUD through Supabase client', async () => {
     const operatorRow = {
       id: 11,
@@ -115,8 +151,8 @@ describe('createSupabaseRepository', () => {
     }
 
     const operatorSelect = createQueryMock({ data: [operatorRow], error: null })
-    const operatorInsert = createQueryMock({ data: operatorRow, error: null })
-    const operatorUpdate = createQueryMock({ data: operatorRow, error: null })
+    const operatorInsert = createQueryMock({ data: [operatorRow], error: null })
+    const operatorUpdate = createQueryMock({ data: [operatorRow], error: null })
     const operatorDelete = createQueryMock({ data: null, error: null })
 
     const supabase = {
@@ -164,5 +200,36 @@ describe('createSupabaseRepository', () => {
     expect(supabase.from).toHaveBeenCalledWith('operators')
     expect(operatorSelect.or).toHaveBeenCalledWith('name.ilike.%Operador%')
     expect(operatorSelect.eq).toHaveBeenCalledWith('is_active', true)
+  })
+
+  it('throws when an operators update returns an empty array', async () => {
+    const operatorUpdate = createQueryMock({ data: [], error: null })
+
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === 'operators') {
+          return {
+            select: vi.fn(() => operatorUpdate),
+            insert: vi.fn(() => operatorUpdate),
+            update: vi.fn(() => operatorUpdate),
+            delete: vi.fn(() => operatorUpdate),
+            or: operatorUpdate.or,
+            eq: operatorUpdate.eq,
+          }
+        }
+
+        throw new Error(`Unexpected table: ${table}`)
+      }),
+    }
+
+    createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
+
+    const repo = await createSupabaseRepository()
+
+    await expect(
+      repo.operators.update(99, {
+        notes: 'Falha esperada',
+      })
+    ).rejects.toThrow('Supabase returned no rows')
   })
 })
