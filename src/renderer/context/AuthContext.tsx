@@ -28,10 +28,17 @@ function AuthProvider({ children }: { children: React.ReactNode }): JSX.Element 
   const [loading, setLoading] = React.useState(true)
 
   const refresh = React.useCallback(async (): Promise<AuthState> => {
-    const nextState = await window.api.auth.getSession()
-    setState(nextState)
-    setLoading(false)
-    return nextState
+    try {
+      const nextState = await window.api.auth.getSession()
+      setState(nextState)
+      return nextState
+    } catch {
+      const safeState: AuthState = { session: null, pendingPasswordReset: false }
+      setState(safeState)
+      return safeState
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   React.useEffect(() => {
