@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { mkdtemp, rm } from 'fs/promises'
+import { mkdtemp, rm, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { tmpdir } from 'os'
 
@@ -182,6 +182,131 @@ describe('createAuthService', () => {
       await expect(restored.getState()).resolves.toMatchObject({
         session: null,
         pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects signIn errors and does not persist session', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: { session: null },
+          error: { message: 'invalid credentials' },
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await expect(service.signIn({ email: 'a@b.com', password: '123456' })).rejects.toThrow('invalid credentials')
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects signOut errors', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              user: {
+                id: 'user-1',
+                email: 'a@b.com',
+              },
+              expires_at: 123,
+            },
+          },
+          error: null,
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        signOut: vi.fn().mockResolvedValue({ error: { message: 'sign out failed' } }),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await service.signIn({ email: 'a@b.com', password: '123456' })
+      await expect(service.signOut()).rejects.toThrow('sign out failed')
+      await expect(service.getState()).resolves.toMatchObject({
+        session: {
+          accessToken: 'access-token',
+          refreshToken: 'refresh-token',
+          userId: 'user-1',
+          email: 'a@b.com',
+          expiresAt: 123,
+        },
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('returns default state when persisted session JSON is corrupted', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+
+    try {
+      await writeFile(join(userDataPath, 'auth-session.json'), '{ invalid json', 'utf-8')
+
+      const service = await createAuthService({
+        authClient: {
+          auth: {
+            signInWithPassword: vi.fn(),
+            signUp: vi.fn(),
+            resetPasswordForEmail: vi.fn(),
+            updateUser: vi.fn(),
+            signOut: vi.fn(),
+          },
+        },
+        userDataPath,
+      })
+
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('marks recovery state when callback url uses query string type', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await expect(service.handleCallbackUrl('mightyrept://auth/callback?type=recovery')).resolves.toMatchObject({
+        session: null,
+        pendingPasswordReset: true,
       })
     } finally {
       await rm(userDataPath, { recursive: true, force: true })

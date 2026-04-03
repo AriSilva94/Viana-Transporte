@@ -74,9 +74,33 @@ function mapSupabaseSession(session: SupabaseSessionLike | null): AuthSession | 
   }
 }
 
+function getErrorMessage(error: unknown, fallbackMessage: string): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string' && message.trim()) {
+      return message
+    }
+  }
+
+  return fallbackMessage
+}
+
+function throwIfSupabaseError(error: unknown, fallbackMessage: string): void {
+  if (!error) {
+    return
+  }
+
+  throw new Error(getErrorMessage(error, fallbackMessage))
+}
+
 function parseAuthCallbackType(url: string): string | null {
   try {
     const callbackUrl = new URL(url)
+    const queryType = callbackUrl.searchParams.get('type')
+    if (queryType) {
+      return queryType
+    }
+
     const hash = callbackUrl.hash.startsWith('#') ? callbackUrl.hash.slice(1) : callbackUrl.hash
     const params = new URLSearchParams(hash)
     return params.get('type')
@@ -123,6 +147,7 @@ export function createAuthService({
     async signIn({ email, password }) {
       const client = await resolveAuthClient()
       const result = await client.auth.signInWithPassword({ email, password })
+      throwIfSupabaseError(result.error, 'Failed to sign in')
       const nextState = {
         session: mapSupabaseSession(result.data.session),
         pendingPasswordReset: false,
@@ -132,7 +157,8 @@ export function createAuthService({
     },
     async signUp({ email, password }) {
       const client = await resolveAuthClient()
-      await client.auth.signUp({ email, password })
+      const result = await client.auth.signUp({ email, password })
+      throwIfSupabaseError(result.error, 'Failed to sign up')
       return {
         emailConfirmationSent: true,
       }
@@ -140,7 +166,8 @@ export function createAuthService({
     async requestPasswordReset({ email }) {
       const client = await resolveAuthClient()
       const redirectTo = process.env.SUPABASE_AUTH_REDIRECT_URL?.trim()
-      await client.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined)
+      const result = await client.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined)
+      throwIfSupabaseError(result.error, 'Failed to request password reset')
 
       const currentState = await readState()
       await writeState({
@@ -154,14 +181,16 @@ export function createAuthService({
     },
     async updatePassword({ password }) {
       const client = await resolveAuthClient()
-      await client.auth.updateUser({ password })
+      const result = await client.auth.updateUser({ password })
+      throwIfSupabaseError(result.error, 'Failed to update password')
 
       const currentState = await readState()
       return writeState(createAuthStateFromCurrentState(currentState))
     },
     async signOut() {
       const client = await resolveAuthClient()
-      await client.auth.signOut()
+      const result = await client.auth.signOut()
+      throwIfSupabaseError(result.error, 'Failed to sign out')
       await sessionStore.clearState()
     },
     async handleCallbackUrl(url) {
