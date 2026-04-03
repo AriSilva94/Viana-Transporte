@@ -1,9 +1,8 @@
-import { resolveDataProviderFromEnv as resolveSharedDataProviderFromEnv } from '../../shared/data-provider'
 import { initDb } from '../db'
 import type { DataProvider } from './types'
 
 export function resolveDataProviderFromEnv(): DataProvider {
-  return resolveSharedDataProviderFromEnv()
+  return process.env.MIGHTYREPT_DATA_PROVIDER === 'supabase' ? 'supabase' : 'sqlite'
 }
 
 export async function initDataProvider(provider: DataProvider): Promise<DataProvider> {
