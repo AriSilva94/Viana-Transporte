@@ -77,7 +77,7 @@ describe('resolveDbPath', () => {
 
       const resolveDataProviderFromEnv = await loadResolveDataProviderFromEnv()
 
-      expect(resolveDataProviderFromEnv()).toBe('sqlite')
+      expect(() => resolveDataProviderFromEnv()).toThrow('MIGHTYREPT_DATA_PROVIDER')
     } finally {
       if (originalProvider === undefined) {
         delete process.env.MIGHTYREPT_DATA_PROVIDER

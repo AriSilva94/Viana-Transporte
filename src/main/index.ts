@@ -34,7 +34,7 @@ function createWindow(): BrowserWindow {
   return win
 }
 
-app.whenReady().then(async () => {
+async function bootstrap(): Promise<void> {
   await initLicenseState()
   await initDataProvider(resolveDataProviderFromEnv())
   await ensureInitialFinancialSeed()
@@ -46,7 +46,14 @@ app.whenReady().then(async () => {
       createWindow()
     }
   })
-})
+}
+
+void app.whenReady()
+  .then(bootstrap)
+  .catch((error: unknown) => {
+    console.error('Failed to start MightyRept:', error)
+    app.exit(1)
+  })
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
