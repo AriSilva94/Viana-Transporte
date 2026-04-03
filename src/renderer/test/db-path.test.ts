@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { resolveDbPath } from '../../shared/db-path'
+import { resolveDataProviderFromEnv } from '../../main/data/provider'
 
 describe('resolveDbPath', () => {
   it('uses env override absolute path when provided', () => {
@@ -42,5 +43,21 @@ describe('resolveDbPath', () => {
     })
 
     expect(resolved.replaceAll('\\', '/')).toBe('C:/users/data/mightyrept.db')
+  })
+
+  it('resolves supabase provider from env', () => {
+    const originalProvider = process.env.MIGHTYREPT_DATA_PROVIDER
+
+    try {
+      process.env.MIGHTYREPT_DATA_PROVIDER = 'supabase'
+
+      expect(resolveDataProviderFromEnv()).toBe('supabase')
+    } finally {
+      if (originalProvider === undefined) {
+        delete process.env.MIGHTYREPT_DATA_PROVIDER
+      } else {
+        process.env.MIGHTYREPT_DATA_PROVIDER = originalProvider
+      }
+    }
   })
 })

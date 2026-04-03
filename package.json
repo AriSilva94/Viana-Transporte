@@ -8,6 +8,8 @@
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
+    "data:provider:sqlite": "cross-env MIGHTYREPT_DATA_PROVIDER=sqlite electron-vite dev",
+    "data:provider:supabase": "cross-env MIGHTYREPT_DATA_PROVIDER=supabase electron-vite dev",
     "build": "electron-vite build",
     "build:full": "npm run db:seed:generate && cross-env DIST_PROFILE=full electron-vite build",
     "build:trial": "npm run db:seed:generate && cross-env DIST_PROFILE=trial electron-vite build",
