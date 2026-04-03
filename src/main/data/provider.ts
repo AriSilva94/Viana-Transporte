@@ -1,6 +1,7 @@
 import { db, initDb } from '../db'
 import type { DataProvider, DomainRepository } from './types'
 import { createSqliteRepository } from './sqlite/repository'
+import { createSupabaseRepository } from './supabase/repository'
 
 let repository: DomainRepository | null = null
 
@@ -22,7 +23,8 @@ export async function initDataProvider(provider: DataProvider): Promise<DataProv
   repository = null
 
   if (provider === 'supabase') {
-    throw new Error('Supabase provider is not implemented yet')
+    repository = await createSupabaseRepository()
+    return 'supabase'
   }
 
   await initDb()
