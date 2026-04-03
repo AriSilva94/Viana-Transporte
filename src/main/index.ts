@@ -5,8 +5,10 @@ import { initDataProvider, resolveDataProviderFromEnv } from './data/provider'
 import { registerAllHandlers } from './ipc'
 import { createAuthService } from './auth/service'
 import { setAuthService } from './auth/runtime'
-import { registerAuthDeepLinkHandlers } from './auth/deep-link'
+import { createAuthDeepLinkRuntime } from './auth/deep-link'
 import { initLicenseState } from './services/license'
+
+const authDeepLinkRuntime = createAuthDeepLinkRuntime()
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -43,7 +45,7 @@ async function bootstrap(): Promise<void> {
   await initDataProvider(resolveDataProviderFromEnv())
   const authService = createAuthService({ userDataPath: app.getPath('userData') })
   setAuthService(authService)
-  registerAuthDeepLinkHandlers(authService)
+  authDeepLinkRuntime.attachAuthService(authService)
   await authService.getState()
   registerAllHandlers()
   createWindow()
@@ -55,12 +57,16 @@ async function bootstrap(): Promise<void> {
   })
 }
 
-void app.whenReady()
-  .then(bootstrap)
-  .catch((error: unknown) => {
-    console.error('Failed to start MightyRept:', error)
-    app.exit(1)
-  })
+if (authDeepLinkRuntime.shouldQuit) {
+  app.quit()
+} else {
+  void app.whenReady()
+    .then(bootstrap)
+    .catch((error: unknown) => {
+      console.error('Failed to start MightyRept:', error)
+      app.exit(1)
+    })
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
