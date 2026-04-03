@@ -12,14 +12,8 @@ type SupabaseJsModule = {
   ) => SupabaseClientBootstrap
 }
 
-let supabaseJsModulePromise: Promise<SupabaseJsModule> | null = null
-
 async function loadSupabaseJsModule(): Promise<SupabaseJsModule> {
-  if (!supabaseJsModulePromise) {
-    supabaseJsModulePromise = Function('return import("@supabase/supabase-js")')() as Promise<SupabaseJsModule>
-  }
-
-  return supabaseJsModulePromise
+  return import('@supabase/supabase-js') as Promise<SupabaseJsModule>
 }
 
 export async function createSupabaseClientFromEnv(): Promise<SupabaseClientBootstrap> {
