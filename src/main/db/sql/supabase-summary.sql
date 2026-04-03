@@ -10,18 +10,18 @@ stable
 as $$
   with cost_totals as (
     select coalesce(sum(amount), 0) as total_costs
-    from project_costs
-    where project_costs.project_id = p_project_id
+    from public.project_costs
+    where public.project_costs.project_id = p_project_id
   ),
   revenue_totals as (
     select coalesce(sum(amount), 0) as total_revenues
-    from project_revenues
-    where project_revenues.project_id = p_project_id
+    from public.project_revenues
+    where public.project_revenues.project_id = p_project_id
   ),
   hour_totals as (
     select coalesce(sum(hours_worked), 0) as total_hours
-    from daily_logs
-    where daily_logs.project_id = p_project_id
+    from public.daily_logs
+    where public.daily_logs.project_id = p_project_id
   )
   select
     cost_totals.total_costs,
