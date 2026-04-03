@@ -1,1 +1,1 @@
-export type DataProvider = 'sqlite' | 'supabase'
+export type { DataProvider } from '../../shared/data-provider'
