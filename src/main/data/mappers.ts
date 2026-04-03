@@ -12,6 +12,7 @@ import type {
   ProjectSummary,
   ProjectWithClient,
 } from '../../shared/types'
+import { formatLocalDate, parseLocalDate } from '../../shared/date'
 
 export interface SupabaseClientRow {
   id: number
@@ -208,8 +209,8 @@ export function mapSupabaseProjectRow(row: SupabaseProjectRow): Project {
     clientId: row.client_id,
     name: row.name,
     location: row.location,
-    startDate: row.start_date ? new Date(row.start_date) : null,
-    endDate: row.end_date ? new Date(row.end_date) : null,
+    startDate: row.start_date ? parseLocalDate(row.start_date) : null,
+    endDate: row.end_date ? parseLocalDate(row.end_date) : null,
     status: row.status,
     contractAmount: row.contract_amount,
     description: row.description,
@@ -235,8 +236,8 @@ export function mapProjectToSupabaseInsert(
     client_id: project.clientId,
     name: project.name,
     location: project.location,
-    start_date: project.startDate ? project.startDate.toISOString() : null,
-    end_date: project.endDate ? project.endDate.toISOString() : null,
+    start_date: project.startDate ? formatLocalDate(project.startDate) : null,
+    end_date: project.endDate ? formatLocalDate(project.endDate) : null,
     status: project.status,
     contract_amount: project.contractAmount,
     description: project.description,
@@ -255,7 +256,7 @@ export function mapProjectSummaryRow(row: SupabaseProjectSummaryRow): ProjectSum
 export function mapSupabaseDailyLogRow(row: SupabaseDailyLogRow): DailyLog {
   return {
     id: row.id,
-    date: new Date(row.date),
+    date: parseLocalDate(row.date),
     projectId: row.project_id,
     machineId: row.machine_id,
     operatorId: row.operator_id,
@@ -283,7 +284,7 @@ export function mapDailyLogToSupabaseInsert(
   log: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>
 ): Omit<SupabaseDailyLogRow, 'id' | 'created_at' | 'updated_at'> {
   return {
-    date: log.date.toISOString(),
+    date: formatLocalDate(log.date),
     project_id: log.projectId,
     machine_id: log.machineId,
     operator_id: log.operatorId,
@@ -298,7 +299,7 @@ export function mapDailyLogToSupabaseInsert(
 export function mapSupabaseProjectCostRow(row: SupabaseProjectCostRow): ProjectCost {
   return {
     id: row.id,
-    date: new Date(row.date),
+    date: parseLocalDate(row.date),
     projectId: row.project_id,
     machineId: row.machine_id,
     operatorId: row.operator_id,
@@ -325,7 +326,7 @@ export function mapProjectCostToSupabaseInsert(
   cost: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>
 ): Omit<SupabaseProjectCostRow, 'id' | 'created_at' | 'updated_at'> {
   return {
-    date: cost.date.toISOString(),
+    date: formatLocalDate(cost.date),
     project_id: cost.projectId,
     machine_id: cost.machineId,
     operator_id: cost.operatorId,
@@ -339,7 +340,7 @@ export function mapProjectCostToSupabaseInsert(
 export function mapSupabaseProjectRevenueRow(row: SupabaseProjectRevenueRow): ProjectRevenue {
   return {
     id: row.id,
-    date: new Date(row.date),
+    date: parseLocalDate(row.date),
     projectId: row.project_id,
     description: row.description,
     amount: Number(row.amount),
@@ -364,7 +365,7 @@ export function mapProjectRevenueToSupabaseInsert(
   revenue: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>
 ): Omit<SupabaseProjectRevenueRow, 'id' | 'created_at' | 'updated_at'> {
   return {
-    date: revenue.date.toISOString(),
+    date: formatLocalDate(revenue.date),
     project_id: revenue.projectId,
     description: revenue.description,
     amount: revenue.amount,
