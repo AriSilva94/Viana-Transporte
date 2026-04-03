@@ -56,8 +56,10 @@ export function Shell({ licenseStatus }: ShellProps): JSX.Element {
             </div>
             <LanguageSwitcher />
           </header>
-          <main className="relative z-0 min-h-0 flex-1 overflow-y-auto p-6 lg:p-8">
-            <Outlet />
+          <main className="relative z-0 min-h-0 flex-1 overflow-hidden p-6 lg:p-8">
+            <div className="h-full overflow-y-auto">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

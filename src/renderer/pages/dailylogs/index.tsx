@@ -127,7 +127,7 @@ export function DailyLogsPage(): JSX.Element {
   ]
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader
         title={t('dailylogs:title')}
         action={{ label: t('dailylogs:newAction'), onClick: () => navigate('/daily-logs/new') }}
@@ -221,19 +221,21 @@ export function DailyLogsPage(): JSX.Element {
         )}
       </FilterPanel>
 
-      {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
-      ) : logs.length === 0 && !hasActiveFilters ? (
-        <EmptyState
-          message={t('dailylogs:empty')}
-          action={{
-            label: t('dailylogs:createFirst'),
-            onClick: () => navigate('/daily-logs/new'),
-          }}
-        />
-      ) : (
-        <DataTable columns={columns} data={logs} />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
+        ) : logs.length === 0 && !hasActiveFilters ? (
+          <EmptyState
+            message={t('dailylogs:empty')}
+            action={{
+              label: t('dailylogs:createFirst'),
+              onClick: () => navigate('/daily-logs/new'),
+            }}
+          />
+        ) : (
+          <DataTable columns={columns} data={logs} />
+        )}
+      </div>
 
       <ConfirmDialog
         open={deleteId !== null}

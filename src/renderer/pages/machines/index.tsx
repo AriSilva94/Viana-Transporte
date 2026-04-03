@@ -77,26 +77,28 @@ export function MachinesListPage(): JSX.Element {
   ]
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader
         title={t('machines:title')}
         action={{ label: t('machines:newAction'), onClick: () => navigate('/machines/new') }}
       />
-      {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
-      ) : machines.length === 0 && !search ? (
-        <EmptyState
-          message={t('machines:empty')}
-          action={{ label: t('machines:createFirst'), onClick: () => navigate('/machines/new') }}
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={machines}
-          onSearch={(q) => { setSearch(q); loadMachines(q) }}
-          searchPlaceholder={t('machines:searchPlaceholder')}
-        />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
+        ) : machines.length === 0 && !search ? (
+          <EmptyState
+            message={t('machines:empty')}
+            action={{ label: t('machines:createFirst'), onClick: () => navigate('/machines/new') }}
+          />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={machines}
+            onSearch={(q) => { setSearch(q); loadMachines(q) }}
+            searchPlaceholder={t('machines:searchPlaceholder')}
+          />
+        )}
+      </div>
       <ConfirmDialog
         open={deleteId !== null}
         onConfirm={handleDelete}
