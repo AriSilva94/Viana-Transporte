@@ -11,11 +11,21 @@ const { ipcHandleMock } = vi.hoisted(() => ({
   ipcHandleMock: vi.fn(),
 }))
 
+const { appMock } = vi.hoisted(() => ({
+  appMock: {
+    on: vi.fn(),
+    quit: vi.fn(),
+    requestSingleInstanceLock: vi.fn(),
+    setAsDefaultProtocolClient: vi.fn(),
+  },
+}))
+
 vi.mock('@supabase/supabase-js', () => ({
   createClient: createClientMock,
 }))
 
 vi.mock('electron', () => ({
+  app: appMock,
   ipcMain: {
     handle: ipcHandleMock,
   },
@@ -446,5 +456,47 @@ describe('registerAuthHandlers', () => {
       setAuthService(null)
       ipcHandleMock.mockReset()
     }
+  })
+})
+
+describe('registerAuthDeepLinkHandlers', () => {
+  it('registers protocol handlers and forwards recovery deep links to the auth service', async () => {
+    const callbacks = new Map<string, (...args: unknown[]) => unknown>()
+    appMock.on.mockImplementation((event: string, handler: (...args: unknown[]) => unknown) => {
+      callbacks.set(event, handler)
+      return appMock
+    })
+    appMock.requestSingleInstanceLock.mockReturnValue(true)
+
+    const authService = {
+      getState: vi.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      requestPasswordReset: vi.fn(),
+      updatePassword: vi.fn(),
+      signOut: vi.fn(),
+      handleCallbackUrl: vi.fn().mockResolvedValue({
+        session: null,
+        pendingPasswordReset: true,
+      }),
+    }
+
+    const { registerAuthDeepLinkHandlers } = await import('../deep-link')
+    registerAuthDeepLinkHandlers(authService)
+
+    expect(appMock.setAsDefaultProtocolClient).toHaveBeenCalledWith('mightyrept')
+    expect(appMock.requestSingleInstanceLock).toHaveBeenCalled()
+
+    const secondInstance = callbacks.get('second-instance')
+    const openUrl = callbacks.get('open-url')
+
+    expect(secondInstance).toBeTypeOf('function')
+    expect(openUrl).toBeTypeOf('function')
+
+    await secondInstance?.({}, ['mightyrept://auth/callback#type=recovery'])
+    await openUrl?.({ preventDefault: vi.fn() }, 'mightyrept://auth/callback?type=recovery')
+
+    expect(authService.handleCallbackUrl).toHaveBeenCalledWith('mightyrept://auth/callback#type=recovery')
+    expect(authService.handleCallbackUrl).toHaveBeenCalledWith('mightyrept://auth/callback?type=recovery')
   })
 })

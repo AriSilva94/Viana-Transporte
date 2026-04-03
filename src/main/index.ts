@@ -5,6 +5,7 @@ import { initDataProvider, resolveDataProviderFromEnv } from './data/provider'
 import { registerAllHandlers } from './ipc'
 import { createAuthService } from './auth/service'
 import { setAuthService } from './auth/runtime'
+import { registerAuthDeepLinkHandlers } from './auth/deep-link'
 import { initLicenseState } from './services/license'
 
 function createWindow(): BrowserWindow {
@@ -42,6 +43,7 @@ async function bootstrap(): Promise<void> {
   await initDataProvider(resolveDataProviderFromEnv())
   const authService = createAuthService({ userDataPath: app.getPath('userData') })
   setAuthService(authService)
+  registerAuthDeepLinkHandlers(authService)
   await authService.getState()
   registerAllHandlers()
   createWindow()
