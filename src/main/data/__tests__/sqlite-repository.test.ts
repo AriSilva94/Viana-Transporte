@@ -83,4 +83,14 @@ describe('createSqliteRepositoryForTest', () => {
     const afterDelete = await repo.clients.get(created.id)
     expect(afterDelete).toBeNull()
   })
+
+  it('throws when updating a missing client', async () => {
+    const repo = await createSqliteRepositoryForTest()
+
+    await expect(
+      repo.clients.update(999999, {
+        name: 'Cliente Fantasma',
+      })
+    ).rejects.toThrow('Client not found')
+  })
 })
