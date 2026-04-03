@@ -1,9 +1,9 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
-import { initDb } from './db'
+import { loadMainEnv } from './config/load-env'
+import { initDataProvider, resolveDataProviderFromEnv } from './data/provider'
 import { registerAllHandlers } from './ipc'
 import { initLicenseState } from './services/license'
-import { ensureInitialFinancialSeed } from './db/seed'
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -34,10 +34,10 @@ function createWindow(): BrowserWindow {
   return win
 }
 
-app.whenReady().then(async () => {
+async function bootstrap(): Promise<void> {
+  loadMainEnv()
   await initLicenseState()
-  await initDb()
-  await ensureInitialFinancialSeed()
+  await initDataProvider(resolveDataProviderFromEnv())
   registerAllHandlers()
   createWindow()
 
@@ -46,7 +46,14 @@ app.whenReady().then(async () => {
       createWindow()
     }
   })
-})
+}
+
+void app.whenReady()
+  .then(bootstrap)
+  .catch((error: unknown) => {
+    console.error('Failed to start MightyRept:', error)
+    app.exit(1)
+  })
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
