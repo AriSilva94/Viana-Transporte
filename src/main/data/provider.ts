@@ -6,13 +6,10 @@ export function resolveDataProviderFromEnv(): DataProvider {
 }
 
 export async function initDataProvider(provider: DataProvider): Promise<DataProvider> {
-  switch (provider) {
-    case 'supabase':
-      await initDb()
-      return provider
-    case 'sqlite':
-    default:
-      await initDb()
-      return 'sqlite'
+  if (provider === 'supabase') {
+    throw new Error('Supabase provider is not implemented yet')
   }
+
+  await initDb()
+  return 'sqlite'
 }
