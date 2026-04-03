@@ -547,11 +547,51 @@ describe('createAuthDeepLinkRuntime', () => {
     const runtime = createAuthDeepLinkRuntime()
 
     expect(runtime.shouldQuit).toBe(true)
-    expect(appMock.quit).toHaveBeenCalled()
+    expect(appMock.quit).not.toHaveBeenCalled()
 
     appMock.on.mockReset()
     appMock.quit.mockReset()
     appMock.setAsDefaultProtocolClient.mockReset()
     appMock.requestSingleInstanceLock.mockReset()
+  })
+})
+
+describe('startAppLifecycle', () => {
+  it('skips whenReady when shouldQuit is true', async () => {
+    const whenReady = vi.fn()
+    const quit = vi.fn()
+    const bootstrap = vi.fn()
+
+    const { startAppLifecycle } = await import('../../app-lifecycle')
+    startAppLifecycle({
+      shouldQuit: true,
+      whenReady,
+      quit,
+      bootstrap,
+    })
+
+    expect(quit).toHaveBeenCalledOnce()
+    expect(whenReady).not.toHaveBeenCalled()
+    expect(bootstrap).not.toHaveBeenCalled()
+  })
+
+  it('calls whenReady when shouldQuit is false', async () => {
+    const whenReady = vi.fn().mockResolvedValue(undefined)
+    const quit = vi.fn()
+    const bootstrap = vi.fn()
+
+    const { startAppLifecycle } = await import('../../app-lifecycle')
+    startAppLifecycle({
+      shouldQuit: false,
+      whenReady,
+      quit,
+      bootstrap,
+    })
+
+    expect(quit).not.toHaveBeenCalled()
+    expect(whenReady).toHaveBeenCalledOnce()
+    await vi.waitFor(() => {
+      expect(bootstrap).toHaveBeenCalledOnce()
+    })
   })
 })
