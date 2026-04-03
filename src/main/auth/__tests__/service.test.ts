@@ -1,4 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { mkdtemp, rm } from 'fs/promises'
+import { join } from 'path'
+import { tmpdir } from 'os'
 
 const { createClientMock } = vi.hoisted(() => ({
   createClientMock: vi.fn(),
@@ -9,6 +12,7 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 import { createSupabaseAuthClientFromEnv } from '../client'
+import { createAuthService } from '../service'
 
 afterEach(() => {
   createClientMock.mockReset()
@@ -92,6 +96,95 @@ describe('createSupabaseAuthClientFromEnv', () => {
       } else {
         process.env.SUPABASE_ANON_KEY = originalKey
       }
+    }
+  })
+})
+
+describe('createAuthService', () => {
+  it('persists session after signIn and restores it in getState', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              user: {
+                id: 'user-1',
+                email: 'a@b.com',
+              },
+              expires_at: 123,
+            },
+          },
+          error: null,
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await service.signIn({ email: 'a@b.com', password: '123456' })
+
+      const restored = await createAuthService({ authClient, userDataPath })
+      await expect(restored.getState()).resolves.toMatchObject({
+        session: {
+          accessToken: 'access-token',
+          refreshToken: 'refresh-token',
+          userId: 'user-1',
+          email: 'a@b.com',
+          expiresAt: 123,
+        },
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('clears session after signOut', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              user: {
+                id: 'user-1',
+                email: 'a@b.com',
+              },
+              expires_at: 123,
+            },
+          },
+          error: null,
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        signOut: vi.fn().mockResolvedValue({ error: null }),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await service.signIn({ email: 'a@b.com', password: '123456' })
+      await service.signOut()
+
+      const restored = await createAuthService({ authClient, userDataPath })
+      await expect(restored.getState()).resolves.toMatchObject({
+        session: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
     }
   })
 })
