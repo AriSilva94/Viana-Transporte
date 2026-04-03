@@ -23,12 +23,18 @@ describe('window.api auth bridge', () => {
       auth?: {
         getSession?: unknown
         signIn?: unknown
+        signUp?: unknown
+        requestPasswordReset?: unknown
+        updatePassword?: unknown
         signOut?: unknown
       }
     }
 
     expect(typeof api.auth?.getSession).toBe('function')
     expect(typeof api.auth?.signIn).toBe('function')
+    expect(typeof api.auth?.signUp).toBe('function')
+    expect(typeof api.auth?.requestPasswordReset).toBe('function')
+    expect(typeof api.auth?.updatePassword).toBe('function')
     expect(typeof api.auth?.signOut).toBe('function')
   })
 })
