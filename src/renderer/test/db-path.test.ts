@@ -51,7 +51,7 @@ describe('resolveDbPath', () => {
     expect(resolved.replaceAll('\\', '/')).toBe('C:/users/data/mightyrept.db')
   })
 
-  it('falls back to sqlite provider when env is absent', async () => {
+  it('resolves supabase provider when env is absent', async () => {
     const originalProvider = process.env.MIGHTYREPT_DATA_PROVIDER
 
     try {
@@ -59,7 +59,7 @@ describe('resolveDbPath', () => {
 
       const resolveDataProviderFromEnv = await loadResolveDataProviderFromEnv()
 
-      expect(resolveDataProviderFromEnv()).toBe('sqlite')
+      expect(resolveDataProviderFromEnv()).toBe('supabase')
     } finally {
       if (originalProvider === undefined) {
         delete process.env.MIGHTYREPT_DATA_PROVIDER
@@ -69,7 +69,7 @@ describe('resolveDbPath', () => {
     }
   })
 
-  it('falls back to sqlite provider when env is invalid', async () => {
+  it('keeps supabase provider when env is invalid', async () => {
     const originalProvider = process.env.MIGHTYREPT_DATA_PROVIDER
 
     try {
@@ -77,7 +77,7 @@ describe('resolveDbPath', () => {
 
       const resolveDataProviderFromEnv = await loadResolveDataProviderFromEnv()
 
-      expect(() => resolveDataProviderFromEnv()).toThrow('MIGHTYREPT_DATA_PROVIDER')
+      expect(resolveDataProviderFromEnv()).toBe('supabase')
     } finally {
       if (originalProvider === undefined) {
         delete process.env.MIGHTYREPT_DATA_PROVIDER
