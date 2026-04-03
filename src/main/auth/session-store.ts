@@ -34,8 +34,17 @@ export function createAuthSessionStore(userDataPath: string): AuthSessionStore {
           pendingPasswordReset: parsed?.pendingPasswordReset ?? false,
         }
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-          return createDefaultAuthState()
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT' || error instanceof SyntaxError) {
+          const defaultState = createDefaultAuthState()
+
+          try {
+            await mkdir(dirname(stateFilePath), { recursive: true })
+            await writeFile(stateFilePath, JSON.stringify(defaultState, null, 2), 'utf-8')
+          } catch {
+            // Ignore repair failures and fall back to the in-memory default state.
+          }
+
+          return defaultState
         }
 
         throw error
