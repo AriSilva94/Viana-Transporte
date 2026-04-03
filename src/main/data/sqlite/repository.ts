@@ -37,6 +37,11 @@ function createDomainRepository(db: DB): DomainRepository {
           .set({ ...data, updatedAt: new Date() })
           .where(eq(clients.id, id))
           .returning()
+
+        if (!rows[0]) {
+          throw new Error('Client not found')
+        }
+
         return rows[0]
       },
       async delete(id: number) {

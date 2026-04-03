@@ -19,12 +19,15 @@ export function resolveDataProviderFromEnv(): DataProvider {
 }
 
 export async function initDataProvider(provider: DataProvider): Promise<DataProvider> {
+  repository = null
+
   if (provider === 'supabase') {
     throw new Error('Supabase provider is not implemented yet')
   }
 
   await initDb()
-  repository = createSqliteRepository(db)
+  const nextRepository = createSqliteRepository(db)
+  repository = nextRepository
   return 'sqlite'
 }
 
