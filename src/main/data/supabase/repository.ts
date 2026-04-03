@@ -17,7 +17,7 @@ import {
   type SupabaseProjectRow,
   type SupabaseProjectSummaryRow,
 } from '../mappers'
-import type { Client, Machine, Operator, Project, ProjectFilters } from '../../../shared/types'
+import type { Client, Machine, Operator, Project, ProjectFilters, ProjectSummary } from '../../../shared/types'
 
 type SupabaseResult<T> = {
   data: T | null
@@ -71,6 +71,13 @@ function ensureItem<T>(result: SupabaseResult<T | T[] | null>): T {
   return item
 }
 
+function sumNumericValues<T extends Record<string, number | string | null>>(
+  rows: T[],
+  key: keyof T
+): number {
+  return rows.reduce((total, row) => total + Number(row[key] ?? 0), 0)
+}
+
 async function loadClientNameMap(client: SupabaseClientLike): Promise<Map<number, string>> {
   const result = await client.from<Pick<SupabaseClientRow, 'id' | 'name'>[]>('clients').select('id,name')
   const rows = ensureList(result as SupabaseResult<Pick<SupabaseClientRow, 'id' | 'name'>[] | null>)
@@ -97,6 +104,45 @@ async function loadProjectRows(
 
   const result = await query
   return ensureList(result as SupabaseResult<SupabaseProjectRow[] | null>)
+}
+
+async function loadProjectById(client: SupabaseClientLike, id: number): Promise<SupabaseProjectRow | null> {
+  const result = await client.from<SupabaseProjectRow[]>('projects').select('*').eq('id', id)
+  return firstItem(result.data)
+}
+
+async function loadClientNameById(client: SupabaseClientLike, clientId: number): Promise<string | null> {
+  const result = await client.from<Pick<SupabaseClientRow, 'id' | 'name'>[]>('clients').select('id,name').eq('id', clientId)
+  return firstItem(result.data)?.name ?? null
+}
+
+async function loadProjectSummaryFallback(client: SupabaseClientLike, id: number): Promise<ProjectSummary> {
+  const [costsResult, revenuesResult, hoursResult] = await Promise.all([
+    client.from<Array<{ amount: number | string | null }>>('project_costs').select('amount').eq('project_id', id),
+    client.from<Array<{ amount: number | string | null }>>('project_revenues').select('amount').eq('project_id', id),
+    client.from<Array<{ hours_worked: number | string | null }>>('daily_logs')
+      .select('hours_worked')
+      .eq('project_id', id),
+  ])
+
+  throwIfError(costsResult.error)
+  throwIfError(revenuesResult.error)
+  throwIfError(hoursResult.error)
+
+  const costs = (costsResult.data ?? []) as Array<{ amount: number | string | null }>
+  const revenues = (revenuesResult.data ?? []) as Array<{ amount: number | string | null }>
+  const hours = (hoursResult.data ?? []) as Array<{ hours_worked: number | string | null }>
+
+  const totalCosts = sumNumericValues(costs, 'amount')
+  const totalRevenues = sumNumericValues(revenues, 'amount')
+  const totalHours = sumNumericValues(hours, 'hours_worked')
+
+  return {
+    totalCosts,
+    totalRevenues,
+    profit: totalRevenues - totalCosts,
+    totalHours,
+  }
 }
 
 export async function createSupabaseRepository(): Promise<DomainRepository> {
@@ -153,14 +199,13 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         return rows.map((row) => mapSupabaseProjectWithClientRow(row, clientNames.get(row.client_id) ?? null))
       },
       async get(id: number) {
-        const rows = await loadProjectRows(client)
-        const row = rows.find((item) => item.id === id)
+        const row = await loadProjectById(client, id)
         if (!row) {
           return null
         }
 
-        const clientNames = await loadClientNameMap(client)
-        return mapSupabaseProjectWithClientRow(row, clientNames.get(row.client_id) ?? null)
+        const clientName = await loadClientNameById(client, row.client_id)
+        return mapSupabaseProjectWithClientRow(row, clientName)
       },
       async create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) {
         const result = await client.from<SupabaseProjectRow[]>('projects').insert(mapProjectToSupabaseInsert(data)).select('*')
@@ -189,12 +234,18 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         throwIfError(result.error)
       },
       async summary(id: number) {
-        const result = await client.rpc<SupabaseProjectSummaryRow[] | SupabaseProjectSummaryRow>(
-          'project_summary',
-          { project_id: id }
-        )
+        try {
+          const result = await client.rpc<SupabaseProjectSummaryRow[] | SupabaseProjectSummaryRow>(
+            'project_summary',
+            { project_id: id }
+          )
 
-        return mapProjectSummaryRow(ensureItem(result as SupabaseResult<SupabaseProjectSummaryRow[] | SupabaseProjectSummaryRow | null>))
+          return mapProjectSummaryRow(
+            ensureItem(result as SupabaseResult<SupabaseProjectSummaryRow[] | SupabaseProjectSummaryRow | null>)
+          )
+        } catch {
+          return loadProjectSummaryFallback(client, id)
+        }
       },
     },
     machines: {

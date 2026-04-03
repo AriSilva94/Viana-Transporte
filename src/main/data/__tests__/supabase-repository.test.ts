@@ -259,34 +259,46 @@ describe('createSupabaseRepository', () => {
       updated_at: '2026-04-03T10:10:00.000Z',
     }
 
-    const projectSelect = createQueryMock({ data: [projectRow], error: null })
+    const projectListSelect = createQueryMock({ data: [projectRow], error: null })
+    const projectGetSelect = createQueryMock({ data: [projectRow], error: null })
     const projectInsert = createQueryMock({ data: [projectRow], error: null })
     const projectUpdate = createQueryMock({ data: [projectRow], error: null })
     const projectDelete = createQueryMock({ data: null, error: null })
-    const clientSelect = createQueryMock({ data: [clientRow], error: null })
+    const clientListSelect = createQueryMock({ data: [clientRow], error: null })
+    const clientGetSelect = createQueryMock({ data: [clientRow], error: null })
     const summaryRpc = vi.fn().mockResolvedValue({
       data: [{ total_costs: 100, total_revenues: 250, profit: 150, total_hours: 8 }],
       error: null,
     })
 
+    const projectSelect = vi
+      .fn()
+      .mockReturnValueOnce(projectListSelect)
+      .mockReturnValueOnce(projectGetSelect)
+
+    const clientSelect = vi
+      .fn()
+      .mockReturnValueOnce(clientListSelect)
+      .mockReturnValueOnce(clientGetSelect)
+
     const supabase = {
       from: vi.fn((table: string) => {
         if (table === 'projects') {
           return {
-            select: vi.fn(() => projectSelect),
+            select: projectSelect,
             insert: vi.fn(() => projectInsert),
             update: vi.fn(() => projectUpdate),
             delete: vi.fn(() => projectDelete),
-            or: projectSelect.or,
-            eq: projectSelect.eq,
+            or: projectListSelect.or,
+            eq: projectListSelect.eq,
           }
         }
 
         if (table === 'clients') {
           return {
-            select: vi.fn(() => clientSelect),
-            or: clientSelect.or,
-            eq: clientSelect.eq,
+            select: clientSelect,
+            or: clientListSelect.or,
+            eq: clientListSelect.eq,
           }
         }
 
@@ -325,26 +337,63 @@ describe('createSupabaseRepository', () => {
     expect(updated).toMatchObject({ id: 21, name: 'Projeto Aurora' })
     expect(summary).toMatchObject({ totalCosts: 100, totalRevenues: 250, profit: 150, totalHours: 8 })
     expect(summaryRpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
+    expect(projectListSelect.eq).toHaveBeenCalledWith('status', 'active')
+    expect(projectListSelect.eq).toHaveBeenCalledWith('client_id', 5)
+    expect(projectGetSelect.eq).toHaveBeenCalledWith('id', 21)
+    expect(clientGetSelect.eq).toHaveBeenCalledWith('id', 5)
   })
 
-  it('throws when project summary rpc returns no rows', async () => {
+  it('falls back to direct table queries when project summary rpc fails', async () => {
+    const costRows = [{ amount: 40 }, { amount: '60' }]
+    const revenueRows = [{ amount: 200 }, { amount: '50' }]
+    const hoursRows = [{ hours_worked: 3 }, { hours_worked: '5' }]
+
     const supabase = {
-      from: vi.fn(() => ({
-        select: vi.fn().mockReturnThis(),
-        or: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockReturnThis(),
-        update: vi.fn().mockReturnThis(),
-        delete: vi.fn().mockReturnThis(),
-        then: vi.fn(),
-      })),
-      rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
+      from: vi.fn((table: string) => {
+        if (table === 'project_costs') {
+          return {
+            select: vi.fn(() => createQueryMock({ data: costRows, error: null })),
+          }
+        }
+
+        if (table === 'project_revenues') {
+          return {
+            select: vi.fn(() => createQueryMock({ data: revenueRows, error: null })),
+          }
+        }
+
+        if (table === 'daily_logs') {
+          return {
+            select: vi.fn(() => createQueryMock({ data: hoursRows, error: null })),
+          }
+        }
+
+        return {
+          select: vi.fn().mockReturnThis(),
+          or: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          insert: vi.fn().mockReturnThis(),
+          update: vi.fn().mockReturnThis(),
+          delete: vi.fn().mockReturnThis(),
+          then: vi.fn(),
+        }
+      }),
+      rpc: vi.fn().mockRejectedValue(new Error('project_summary unavailable')),
     }
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
     const repo = await createSupabaseRepository()
 
-    await expect(repo.projects.summary(21)).rejects.toThrow('Supabase returned no rows')
+    await expect(repo.projects.summary(21)).resolves.toMatchObject({
+      totalCosts: 100,
+      totalRevenues: 250,
+      profit: 150,
+      totalHours: 8,
+    })
+    expect(supabase.rpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
+    expect(supabase.from).toHaveBeenCalledWith('project_costs')
+    expect(supabase.from).toHaveBeenCalledWith('project_revenues')
+    expect(supabase.from).toHaveBeenCalledWith('daily_logs')
   })
 })
