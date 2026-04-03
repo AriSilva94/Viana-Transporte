@@ -1,8 +1,9 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
-import { initDb } from './db'
+import { resolveDataProviderFromEnv } from './data/provider'
 import { registerAllHandlers } from './ipc'
 import { initLicenseState } from './services/license'
+import { initDb } from './db'
 import { ensureInitialFinancialSeed } from './db/seed'
 
 function createWindow(): BrowserWindow {
@@ -36,6 +37,7 @@ function createWindow(): BrowserWindow {
 
 app.whenReady().then(async () => {
   await initLicenseState()
+  resolveDataProviderFromEnv()
   await initDb()
   await ensureInitialFinancialSeed()
   registerAllHandlers()
