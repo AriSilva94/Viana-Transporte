@@ -1,4 +1,17 @@
-import type { Client, Machine, Operator, Project, ProjectSummary, ProjectWithClient } from '../../shared/types'
+import type {
+  Client,
+  DailyLog,
+  DailyLogWithRelations,
+  Machine,
+  Operator,
+  Project,
+  ProjectCost,
+  ProjectCostWithRelations,
+  ProjectRevenue,
+  ProjectRevenueWithRelations,
+  ProjectSummary,
+  ProjectWithClient,
+} from '../../shared/types'
 
 export interface SupabaseClientRow {
   id: number
@@ -53,6 +66,63 @@ export interface SupabaseProjectSummaryRow {
   total_revenues: number | string | null
   profit: number | string | null
   total_hours: number | string | null
+}
+
+export interface SupabaseDailyLogRow {
+  id: number
+  date: string
+  project_id: number
+  machine_id: number | null
+  operator_id: number | null
+  hours_worked: number | string
+  work_description: string | null
+  fuel_quantity: number | string | null
+  downtime_notes: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SupabaseDailyLogWithRelationsRow extends SupabaseDailyLogRow {
+  projectName: string | null
+  machineName: string | null
+  operatorName: string | null
+}
+
+export interface SupabaseProjectCostRow {
+  id: number
+  date: string
+  project_id: number
+  machine_id: number | null
+  operator_id: number | null
+  category: ProjectCost['category']
+  description: string
+  amount: number | string
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SupabaseProjectCostWithRelationsRow extends SupabaseProjectCostRow {
+  projectName: string | null
+  machineName: string | null
+  operatorName: string | null
+}
+
+export interface SupabaseProjectRevenueRow {
+  id: number
+  date: string
+  project_id: number
+  description: string
+  amount: number | string
+  status: ProjectRevenue['status']
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SupabaseProjectRevenueWithRelationsRow extends SupabaseProjectRevenueRow {
+  projectName: string | null
 }
 
 export function mapSupabaseClientRow(row: SupabaseClientRow): Client {
@@ -179,5 +249,126 @@ export function mapProjectSummaryRow(row: SupabaseProjectSummaryRow): ProjectSum
     totalRevenues: Number(row.total_revenues ?? 0),
     profit: Number(row.profit ?? 0),
     totalHours: Number(row.total_hours ?? 0),
+  }
+}
+
+export function mapSupabaseDailyLogRow(row: SupabaseDailyLogRow): DailyLog {
+  return {
+    id: row.id,
+    date: new Date(row.date),
+    projectId: row.project_id,
+    machineId: row.machine_id,
+    operatorId: row.operator_id,
+    hoursWorked: Number(row.hours_worked),
+    workDescription: row.work_description,
+    fuelQuantity: row.fuel_quantity === null ? null : Number(row.fuel_quantity),
+    downtimeNotes: row.downtime_notes,
+    notes: row.notes,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }
+}
+
+export function mapSupabaseDailyLogWithRelationsRow(
+  row: SupabaseDailyLogRow,
+  relations: { projectName: string | null; machineName: string | null; operatorName: string | null }
+): DailyLogWithRelations {
+  return {
+    ...mapSupabaseDailyLogRow(row),
+    ...relations,
+  }
+}
+
+export function mapDailyLogToSupabaseInsert(
+  log: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>
+): Omit<SupabaseDailyLogRow, 'id' | 'created_at' | 'updated_at'> {
+  return {
+    date: log.date.toISOString(),
+    project_id: log.projectId,
+    machine_id: log.machineId,
+    operator_id: log.operatorId,
+    hours_worked: log.hoursWorked,
+    work_description: log.workDescription,
+    fuel_quantity: log.fuelQuantity,
+    downtime_notes: log.downtimeNotes,
+    notes: log.notes,
+  }
+}
+
+export function mapSupabaseProjectCostRow(row: SupabaseProjectCostRow): ProjectCost {
+  return {
+    id: row.id,
+    date: new Date(row.date),
+    projectId: row.project_id,
+    machineId: row.machine_id,
+    operatorId: row.operator_id,
+    category: row.category,
+    description: row.description,
+    amount: Number(row.amount),
+    notes: row.notes,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }
+}
+
+export function mapSupabaseProjectCostWithRelationsRow(
+  row: SupabaseProjectCostRow,
+  relations: { projectName: string | null; machineName: string | null; operatorName: string | null }
+): ProjectCostWithRelations {
+  return {
+    ...mapSupabaseProjectCostRow(row),
+    ...relations,
+  }
+}
+
+export function mapProjectCostToSupabaseInsert(
+  cost: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>
+): Omit<SupabaseProjectCostRow, 'id' | 'created_at' | 'updated_at'> {
+  return {
+    date: cost.date.toISOString(),
+    project_id: cost.projectId,
+    machine_id: cost.machineId,
+    operator_id: cost.operatorId,
+    category: cost.category,
+    description: cost.description,
+    amount: cost.amount,
+    notes: cost.notes,
+  }
+}
+
+export function mapSupabaseProjectRevenueRow(row: SupabaseProjectRevenueRow): ProjectRevenue {
+  return {
+    id: row.id,
+    date: new Date(row.date),
+    projectId: row.project_id,
+    description: row.description,
+    amount: Number(row.amount),
+    status: row.status,
+    notes: row.notes,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }
+}
+
+export function mapSupabaseProjectRevenueWithRelationsRow(
+  row: SupabaseProjectRevenueRow,
+  projectName: string | null
+): ProjectRevenueWithRelations {
+  return {
+    ...mapSupabaseProjectRevenueRow(row),
+    projectName,
+  }
+}
+
+export function mapProjectRevenueToSupabaseInsert(
+  revenue: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>
+): Omit<SupabaseProjectRevenueRow, 'id' | 'created_at' | 'updated_at'> {
+  return {
+    date: revenue.date.toISOString(),
+    project_id: revenue.projectId,
+    description: revenue.description,
+    amount: revenue.amount,
+    status: revenue.status,
+    notes: revenue.notes,
   }
 }

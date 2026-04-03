@@ -9,6 +9,7 @@ import type { DB } from '../../db'
 import * as schema from '../../db/schema'
 import { dailyLogs, projectCosts, projectRevenues } from '../../db/schema'
 import { createSqliteRepository, createSqliteRepositoryForTest } from '../sqlite/repository'
+import { formatLocalDate } from '../../../shared/date'
 
 async function createSqliteRepositoryFixture() {
   const tempDir = await mkdtemp(join(tmpdir(), 'mightyrept-sqlite-projects-'))
@@ -299,5 +300,281 @@ describe('createSqliteRepositoryForTest', () => {
 
     await repo.operators.delete(created.id)
     await expect(repo.operators.get(created.id)).resolves.toBeNull()
+  })
+
+  it('handles dailylogs CRUD and filters through repository contract', async () => {
+    const { db, repo } = await createSqliteRepositoryFixture()
+
+    const client = await repo.clients.create({
+      name: 'Cliente Diário',
+      document: null,
+      phone: null,
+      email: null,
+      notes: null,
+    })
+    const project = await repo.projects.create({
+      clientId: client.id,
+      name: 'Projeto Diário',
+      location: null,
+      startDate: null,
+      endDate: null,
+      status: 'active',
+      contractAmount: null,
+      description: null,
+    })
+    const machine = await repo.machines.create({
+      name: 'Máquina Diário',
+      type: 'Escavadeira',
+      identifier: null,
+      brandModel: null,
+      status: 'available',
+      notes: null,
+    })
+    const operator = await repo.operators.create({
+      name: 'Operador Diário',
+      phone: null,
+      role: null,
+      isActive: true,
+      notes: null,
+    })
+
+    const created = await repo.dailylogs.create({
+      date: new Date('2026-04-03T12:00:00.000Z'),
+      projectId: project.id,
+      machineId: machine.id,
+      operatorId: operator.id,
+      hoursWorked: 7.5,
+      workDescription: 'Descrição diária',
+      fuelQuantity: 12,
+      downtimeNotes: 'Sem paradas',
+      notes: 'Observação',
+    })
+
+    await db.insert(dailyLogs).values({
+      date: new Date('2026-04-06T12:00:00.000Z'),
+      projectId: project.id,
+      machineId: machine.id,
+      operatorId: operator.id,
+      hoursWorked: 4,
+      workDescription: 'Fora do filtro',
+      fuelQuantity: null,
+      downtimeNotes: null,
+      notes: null,
+    })
+
+    const rows = await repo.dailylogs.list({
+      projectId: project.id,
+      machineId: machine.id,
+      operatorId: operator.id,
+      dateFrom: '2026-04-03',
+      dateTo: '2026-04-03',
+    })
+    const loaded = await repo.dailylogs.get(created.id)
+    const updated = await repo.dailylogs.update(created.id, {
+      notes: 'Atualizado',
+      hoursWorked: 8,
+    })
+
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({
+      id: created.id,
+      projectId: project.id,
+      machineId: machine.id,
+      operatorId: operator.id,
+      projectName: 'Projeto Diário',
+      machineName: 'Máquina Diário',
+      operatorName: 'Operador Diário',
+      workDescription: 'Descrição diária',
+    })
+    expect(formatLocalDate(rows[0].date)).toBe('2026-04-03')
+    expect(loaded).toMatchObject({
+      id: created.id,
+      projectName: 'Projeto Diário',
+      machineName: 'Máquina Diário',
+      operatorName: 'Operador Diário',
+    })
+    expect(updated).toMatchObject({
+      id: created.id,
+      notes: 'Atualizado',
+      hoursWorked: 8,
+    })
+
+    await repo.dailylogs.delete(created.id)
+    await expect(repo.dailylogs.get(created.id)).resolves.toBeNull()
+  })
+
+  it('handles costs CRUD and filters through repository contract', async () => {
+    const { db, repo } = await createSqliteRepositoryFixture()
+
+    const client = await repo.clients.create({
+      name: 'Cliente Custo',
+      document: null,
+      phone: null,
+      email: null,
+      notes: null,
+    })
+    const project = await repo.projects.create({
+      clientId: client.id,
+      name: 'Projeto Custo',
+      location: null,
+      startDate: null,
+      endDate: null,
+      status: 'active',
+      contractAmount: null,
+      description: null,
+    })
+    const machine = await repo.machines.create({
+      name: 'Máquina Custo',
+      type: 'Escavadeira',
+      identifier: null,
+      brandModel: null,
+      status: 'available',
+      notes: null,
+    })
+    const operator = await repo.operators.create({
+      name: 'Operador Custo',
+      phone: null,
+      role: null,
+      isActive: true,
+      notes: null,
+    })
+
+    const created = await repo.costs.create({
+      date: new Date('2026-04-04T12:00:00.000Z'),
+      projectId: project.id,
+      machineId: machine.id,
+      operatorId: operator.id,
+      category: 'fuel',
+      description: 'Combustível',
+      amount: 100,
+      notes: 'Nota',
+    })
+
+    await db.insert(projectCosts).values({
+      date: new Date('2026-04-06T12:00:00.000Z'),
+      projectId: project.id,
+      machineId: machine.id,
+      operatorId: operator.id,
+      category: 'maintenance',
+      description: 'Fora do filtro',
+      amount: 50,
+      notes: null,
+    })
+
+    const rows = await repo.costs.list({
+      projectId: project.id,
+      category: 'fuel',
+      dateFrom: '2026-04-04',
+      dateTo: '2026-04-04',
+    })
+    const loaded = await repo.costs.get(created.id)
+    const updated = await repo.costs.update(created.id, {
+      description: 'Combustível atualizado',
+      amount: 125,
+    })
+
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({
+      id: created.id,
+      projectId: project.id,
+      machineId: machine.id,
+      operatorId: operator.id,
+      projectName: 'Projeto Custo',
+      machineName: 'Máquina Custo',
+      operatorName: 'Operador Custo',
+      category: 'fuel',
+      description: 'Combustível',
+    })
+    expect(formatLocalDate(rows[0].date)).toBe('2026-04-04')
+    expect(loaded).toMatchObject({
+      id: created.id,
+      projectName: 'Projeto Custo',
+      machineName: 'Máquina Custo',
+      operatorName: 'Operador Custo',
+    })
+    expect(updated).toMatchObject({
+      id: created.id,
+      description: 'Combustível atualizado',
+      amount: 125,
+    })
+
+    await repo.costs.delete(created.id)
+    await expect(repo.costs.get(created.id)).resolves.toBeNull()
+  })
+
+  it('handles revenues CRUD and filters through repository contract', async () => {
+    const { db, repo } = await createSqliteRepositoryFixture()
+
+    const client = await repo.clients.create({
+      name: 'Cliente Receita',
+      document: null,
+      phone: null,
+      email: null,
+      notes: null,
+    })
+    const project = await repo.projects.create({
+      clientId: client.id,
+      name: 'Projeto Receita',
+      location: null,
+      startDate: null,
+      endDate: null,
+      status: 'active',
+      contractAmount: null,
+      description: null,
+    })
+
+    const created = await repo.revenues.create({
+      date: new Date('2026-04-05T12:00:00.000Z'),
+      projectId: project.id,
+      description: 'Faturamento',
+      amount: 250,
+      status: 'billed',
+      notes: 'Nota fiscal',
+    })
+
+    await db.insert(projectRevenues).values({
+      date: new Date('2026-04-07T12:00:00.000Z'),
+      projectId: project.id,
+      description: 'Fora do filtro',
+      amount: 300,
+      status: 'received',
+      notes: null,
+    })
+
+    const rows = await repo.revenues.list({
+      projectId: project.id,
+      status: 'billed',
+      dateFrom: '2026-04-05',
+      dateTo: '2026-04-05',
+    })
+    const loaded = await repo.revenues.get(created.id)
+    const updated = await repo.revenues.update(created.id, {
+      description: 'Faturamento atualizado',
+      amount: 275,
+    })
+
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({
+      id: created.id,
+      projectId: project.id,
+      projectName: 'Projeto Receita',
+      description: 'Faturamento',
+      amount: 250,
+      status: 'billed',
+    })
+    expect(formatLocalDate(rows[0].date)).toBe('2026-04-05')
+    expect(loaded).toMatchObject({
+      id: created.id,
+      projectName: 'Projeto Receita',
+      description: 'Faturamento',
+    })
+    expect(updated).toMatchObject({
+      id: created.id,
+      description: 'Faturamento atualizado',
+      amount: 275,
+    })
+
+    await repo.revenues.delete(created.id)
+    await expect(repo.revenues.get(created.id)).resolves.toBeNull()
   })
 })

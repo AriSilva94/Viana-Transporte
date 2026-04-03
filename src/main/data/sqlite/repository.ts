@@ -1,5 +1,5 @@
 import { createClient } from '@libsql/client/sqlite3'
-import { and, eq, like, or, sum } from 'drizzle-orm'
+import { and, eq, gte, like, lte, or, sum } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
 import { migrate } from 'drizzle-orm/libsql/migrator'
 import { mkdtemp } from 'fs/promises'
@@ -8,9 +8,21 @@ import { join } from 'path'
 import type { DB } from '../../db'
 import * as schema from '../../db/schema'
 import { clients, dailyLogs, machines, operators, projects, projectCosts, projectRevenues } from '../../db/schema'
-import type { Client, Machine, Operator, Project, ProjectFilters } from '../../../shared/types'
+import type {
+  Client,
+  CostFilters,
+  DailyLog,
+  DailyLogFilters,
+  Machine,
+  Operator,
+  Project,
+  ProjectCost,
+  ProjectFilters,
+  ProjectRevenue,
+  RevenueFilters,
+} from '../../../shared/types'
 import type { DomainRepository } from '../types'
-import { parseLocalDate } from '../../../shared/date'
+import { endOfLocalDay, parseLocalDate } from '../../../shared/date'
 
 const projectSelectFields = {
   id: projects.id,
@@ -25,6 +37,54 @@ const projectSelectFields = {
   createdAt: projects.createdAt,
   updatedAt: projects.updatedAt,
   clientName: clients.name,
+}
+
+const dailyLogSelectFields = {
+  id: dailyLogs.id,
+  date: dailyLogs.date,
+  projectId: dailyLogs.projectId,
+  machineId: dailyLogs.machineId,
+  operatorId: dailyLogs.operatorId,
+  hoursWorked: dailyLogs.hoursWorked,
+  workDescription: dailyLogs.workDescription,
+  fuelQuantity: dailyLogs.fuelQuantity,
+  downtimeNotes: dailyLogs.downtimeNotes,
+  notes: dailyLogs.notes,
+  createdAt: dailyLogs.createdAt,
+  updatedAt: dailyLogs.updatedAt,
+  projectName: projects.name,
+  machineName: machines.name,
+  operatorName: operators.name,
+}
+
+const costSelectFields = {
+  id: projectCosts.id,
+  date: projectCosts.date,
+  projectId: projectCosts.projectId,
+  machineId: projectCosts.machineId,
+  operatorId: projectCosts.operatorId,
+  category: projectCosts.category,
+  description: projectCosts.description,
+  amount: projectCosts.amount,
+  notes: projectCosts.notes,
+  createdAt: projectCosts.createdAt,
+  updatedAt: projectCosts.updatedAt,
+  projectName: projects.name,
+  machineName: machines.name,
+  operatorName: operators.name,
+}
+
+const revenueSelectFields = {
+  id: projectRevenues.id,
+  date: projectRevenues.date,
+  projectId: projectRevenues.projectId,
+  description: projectRevenues.description,
+  amount: projectRevenues.amount,
+  status: projectRevenues.status,
+  notes: projectRevenues.notes,
+  createdAt: projectRevenues.createdAt,
+  updatedAt: projectRevenues.updatedAt,
+  projectName: projects.name,
 }
 
 function createDomainRepository(db: DB): DomainRepository {
@@ -245,6 +305,198 @@ function createDomainRepository(db: DB): DomainRepository {
       },
       async delete(id: number) {
         await db.delete(operators).where(eq(operators.id, id))
+      },
+    },
+    dailylogs: {
+      async list(filters?: DailyLogFilters) {
+        const conditions = []
+
+        if (filters?.projectId) conditions.push(eq(dailyLogs.projectId, filters.projectId))
+        if (filters?.machineId) conditions.push(eq(dailyLogs.machineId, filters.machineId))
+        if (filters?.operatorId) conditions.push(eq(dailyLogs.operatorId, filters.operatorId))
+        if (filters?.dateFrom) conditions.push(gte(dailyLogs.date, parseLocalDate(filters.dateFrom)))
+        if (filters?.dateTo) conditions.push(lte(dailyLogs.date, endOfLocalDay(filters.dateTo)))
+
+        const baseQuery = db
+          .select(dailyLogSelectFields)
+          .from(dailyLogs)
+          .leftJoin(projects, eq(dailyLogs.projectId, projects.id))
+          .leftJoin(machines, eq(dailyLogs.machineId, machines.id))
+          .leftJoin(operators, eq(dailyLogs.operatorId, operators.id))
+
+        return conditions.length === 0 ? baseQuery : baseQuery.where(and(...conditions))
+      },
+      async get(id: number) {
+        const rows = await db
+          .select(dailyLogSelectFields)
+          .from(dailyLogs)
+          .leftJoin(projects, eq(dailyLogs.projectId, projects.id))
+          .leftJoin(machines, eq(dailyLogs.machineId, machines.id))
+          .leftJoin(operators, eq(dailyLogs.operatorId, operators.id))
+          .where(eq(dailyLogs.id, id))
+          .limit(1)
+
+        return rows[0] ?? null
+      },
+      async create(data: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>) {
+        const rows = await db
+          .insert(dailyLogs)
+          .values({
+            ...data,
+            date: parseLocalDate(data.date),
+          })
+          .returning()
+
+        return rows[0]
+      },
+      async update(id: number, data: Partial<Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const payload: typeof data & { updatedAt: Date; date?: Date } = {
+          ...data,
+          updatedAt: new Date(),
+        }
+
+        if (data.date) payload.date = parseLocalDate(data.date)
+
+        const rows = await db
+          .update(dailyLogs)
+          .set(payload)
+          .where(eq(dailyLogs.id, id))
+          .returning()
+
+        if (!rows[0]) {
+          throw new Error('Daily log not found')
+        }
+
+        return rows[0]
+      },
+      async delete(id: number) {
+        await db.delete(dailyLogs).where(eq(dailyLogs.id, id))
+      },
+    },
+    costs: {
+      async list(filters?: CostFilters) {
+        const conditions = []
+
+        if (filters?.projectId) conditions.push(eq(projectCosts.projectId, filters.projectId))
+        if (filters?.category) conditions.push(eq(projectCosts.category, filters.category))
+        if (filters?.dateFrom) conditions.push(gte(projectCosts.date, parseLocalDate(filters.dateFrom)))
+        if (filters?.dateTo) conditions.push(lte(projectCosts.date, endOfLocalDay(filters.dateTo)))
+
+        const baseQuery = db
+          .select(costSelectFields)
+          .from(projectCosts)
+          .leftJoin(projects, eq(projectCosts.projectId, projects.id))
+          .leftJoin(machines, eq(projectCosts.machineId, machines.id))
+          .leftJoin(operators, eq(projectCosts.operatorId, operators.id))
+
+        return conditions.length === 0 ? baseQuery : baseQuery.where(and(...conditions))
+      },
+      async get(id: number) {
+        const rows = await db
+          .select(costSelectFields)
+          .from(projectCosts)
+          .leftJoin(projects, eq(projectCosts.projectId, projects.id))
+          .leftJoin(machines, eq(projectCosts.machineId, machines.id))
+          .leftJoin(operators, eq(projectCosts.operatorId, operators.id))
+          .where(eq(projectCosts.id, id))
+          .limit(1)
+
+        return rows[0] ?? null
+      },
+      async create(data: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>) {
+        const rows = await db
+          .insert(projectCosts)
+          .values({
+            ...data,
+            date: parseLocalDate(data.date),
+          })
+          .returning()
+
+        return rows[0]
+      },
+      async update(id: number, data: Partial<Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const payload: typeof data & { updatedAt: Date; date?: Date } = {
+          ...data,
+          updatedAt: new Date(),
+        }
+
+        if (data.date) payload.date = parseLocalDate(data.date)
+
+        const rows = await db
+          .update(projectCosts)
+          .set(payload)
+          .where(eq(projectCosts.id, id))
+          .returning()
+
+        if (!rows[0]) {
+          throw new Error('Cost not found')
+        }
+
+        return rows[0]
+      },
+      async delete(id: number) {
+        await db.delete(projectCosts).where(eq(projectCosts.id, id))
+      },
+    },
+    revenues: {
+      async list(filters?: RevenueFilters) {
+        const conditions = []
+
+        if (filters?.projectId) conditions.push(eq(projectRevenues.projectId, filters.projectId))
+        if (filters?.status) conditions.push(eq(projectRevenues.status, filters.status))
+        if (filters?.dateFrom) conditions.push(gte(projectRevenues.date, parseLocalDate(filters.dateFrom)))
+        if (filters?.dateTo) conditions.push(lte(projectRevenues.date, endOfLocalDay(filters.dateTo)))
+
+        const baseQuery = db
+          .select(revenueSelectFields)
+          .from(projectRevenues)
+          .leftJoin(projects, eq(projectRevenues.projectId, projects.id))
+
+        return conditions.length === 0 ? baseQuery : baseQuery.where(and(...conditions))
+      },
+      async get(id: number) {
+        const rows = await db
+          .select(revenueSelectFields)
+          .from(projectRevenues)
+          .leftJoin(projects, eq(projectRevenues.projectId, projects.id))
+          .where(eq(projectRevenues.id, id))
+          .limit(1)
+
+        return rows[0] ?? null
+      },
+      async create(data: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>) {
+        const rows = await db
+          .insert(projectRevenues)
+          .values({
+            ...data,
+            date: parseLocalDate(data.date),
+          })
+          .returning()
+
+        return rows[0]
+      },
+      async update(id: number, data: Partial<Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const payload: typeof data & { updatedAt: Date; date?: Date } = {
+          ...data,
+          updatedAt: new Date(),
+        }
+
+        if (data.date) payload.date = parseLocalDate(data.date)
+
+        const rows = await db
+          .update(projectRevenues)
+          .set(payload)
+          .where(eq(projectRevenues.id, id))
+          .returning()
+
+        if (!rows[0]) {
+          throw new Error('Revenue not found')
+        }
+
+        return rows[0]
+      },
+      async delete(id: number) {
+        await db.delete(projectRevenues).where(eq(projectRevenues.id, id))
       },
     },
   }

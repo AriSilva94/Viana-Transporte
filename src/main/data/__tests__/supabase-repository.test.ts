@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { endOfLocalDay, parseLocalDate } from '../../../shared/date'
 
 const { createSupabaseClientFromEnvMock } = vi.hoisted(() => ({
   createSupabaseClientFromEnvMock: vi.fn(),
@@ -15,6 +16,8 @@ function createQueryMock<T>(result: { data: T[] | T | null; error: null }) {
     select: vi.fn().mockReturnThis(),
     or: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    gte: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
@@ -395,5 +398,310 @@ describe('createSupabaseRepository', () => {
     expect(supabase.from).toHaveBeenCalledWith('project_costs')
     expect(supabase.from).toHaveBeenCalledWith('project_revenues')
     expect(supabase.from).toHaveBeenCalledWith('daily_logs')
+  })
+
+  it('implements dailylogs costs and revenues CRUD through Supabase client', async () => {
+    const projectRow = {
+      id: 21,
+      client_id: 5,
+      name: 'Projeto Relacionado',
+      location: null,
+      start_date: null,
+      end_date: null,
+      status: 'active',
+      contract_amount: null,
+      description: null,
+      created_at: '2026-04-03T12:00:00.000Z',
+      updated_at: '2026-04-03T12:10:00.000Z',
+    }
+    const machineRow = {
+      id: 7,
+      name: 'Máquina Relacionada',
+      type: 'Escavadeira',
+      identifier: null,
+      brand_model: null,
+      status: 'available',
+      notes: null,
+      created_at: '2026-04-03T12:00:00.000Z',
+      updated_at: '2026-04-03T12:10:00.000Z',
+    }
+    const operatorRow = {
+      id: 11,
+      name: 'Operador Relacionado',
+      phone: null,
+      role: null,
+      is_active: true,
+      notes: null,
+      created_at: '2026-04-03T12:00:00.000Z',
+      updated_at: '2026-04-03T12:10:00.000Z',
+    }
+    const dailyLogRow = {
+      id: 31,
+      date: '2026-04-03T00:00:00.000Z',
+      project_id: 21,
+      machine_id: 7,
+      operator_id: 11,
+      hours_worked: 7.5,
+      work_description: 'Descrição diária',
+      fuel_quantity: 12,
+      downtime_notes: 'Sem paradas',
+      notes: 'Observação',
+      created_at: '2026-04-03T12:00:00.000Z',
+      updated_at: '2026-04-03T12:10:00.000Z',
+    }
+    const dailyLogUpdatedRow = { ...dailyLogRow, notes: 'Atualizado', hours_worked: 8 }
+    const costRow = {
+      id: 41,
+      date: '2026-04-04T00:00:00.000Z',
+      project_id: 21,
+      machine_id: 7,
+      operator_id: 11,
+      category: 'fuel',
+      description: 'Combustível',
+      amount: 100,
+      notes: 'Nota',
+      created_at: '2026-04-04T12:00:00.000Z',
+      updated_at: '2026-04-04T12:10:00.000Z',
+    }
+    const costUpdatedRow = { ...costRow, description: 'Combustível atualizado', amount: 125 }
+    const revenueRow = {
+      id: 51,
+      date: '2026-04-05T00:00:00.000Z',
+      project_id: 21,
+      description: 'Faturamento',
+      amount: 250,
+      status: 'billed',
+      notes: 'Nota fiscal',
+      created_at: '2026-04-05T12:00:00.000Z',
+      updated_at: '2026-04-05T12:10:00.000Z',
+    }
+    const revenueUpdatedRow = {
+      ...revenueRow,
+      description: 'Faturamento atualizado',
+      amount: 275,
+      notes: 'Atualizado',
+    }
+
+    const projectSelect = createQueryMock({ data: [projectRow], error: null })
+    const machineSelect = createQueryMock({ data: [machineRow], error: null })
+    const operatorSelect = createQueryMock({ data: [operatorRow], error: null })
+
+    const dailyLogListSelect = createQueryMock({ data: [dailyLogRow], error: null })
+    const dailyLogGetSelect = createQueryMock({ data: [dailyLogRow], error: null })
+    const dailyLogInsert = createQueryMock({ data: [dailyLogRow], error: null })
+    const dailyLogUpdate = createQueryMock({ data: [dailyLogUpdatedRow], error: null })
+    const dailyLogDelete = createQueryMock({ data: null, error: null })
+
+    const costListSelect = createQueryMock({ data: [costRow], error: null })
+    const costGetSelect = createQueryMock({ data: [costRow], error: null })
+    const costInsert = createQueryMock({ data: [costRow], error: null })
+    const costUpdate = createQueryMock({ data: [costUpdatedRow], error: null })
+    const costDelete = createQueryMock({ data: null, error: null })
+
+    const revenueSelect = createQueryMock({ data: [revenueRow], error: null })
+    const revenueInsert = createQueryMock({ data: [revenueRow], error: null })
+    const revenueUpdate = createQueryMock({ data: [revenueUpdatedRow], error: null })
+    const revenueDelete = createQueryMock({ data: null, error: null })
+
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === 'projects') {
+          return {
+            select: vi.fn(() => projectSelect),
+            or: projectSelect.or,
+            eq: projectSelect.eq,
+          }
+        }
+
+        if (table === 'machines') {
+          return {
+            select: vi.fn(() => machineSelect),
+            or: machineSelect.or,
+            eq: machineSelect.eq,
+          }
+        }
+
+        if (table === 'operators') {
+          return {
+            select: vi.fn(() => operatorSelect),
+            or: operatorSelect.or,
+            eq: operatorSelect.eq,
+          }
+        }
+
+        if (table === 'daily_logs') {
+          return {
+            select: vi.fn(() => dailyLogListSelect),
+            insert: vi.fn(() => dailyLogInsert),
+            update: vi.fn(() => dailyLogUpdate),
+            delete: vi.fn(() => dailyLogDelete),
+            or: dailyLogListSelect.or,
+            eq: dailyLogListSelect.eq,
+            gte: dailyLogListSelect.gte,
+            lte: dailyLogListSelect.lte,
+          }
+        }
+
+        if (table === 'project_costs') {
+          return {
+            select: vi.fn(() => costListSelect),
+            insert: vi.fn(() => costInsert),
+            update: vi.fn(() => costUpdate),
+            delete: vi.fn(() => costDelete),
+            or: costListSelect.or,
+            eq: costListSelect.eq,
+            gte: costListSelect.gte,
+            lte: costListSelect.lte,
+          }
+        }
+
+        if (table === 'project_revenues') {
+          return {
+            select: vi.fn(() => revenueSelect),
+            insert: vi.fn(() => revenueInsert),
+            update: vi.fn(() => revenueUpdate),
+            delete: vi.fn(() => revenueDelete),
+            or: revenueSelect.or,
+            eq: revenueSelect.eq,
+            gte: revenueSelect.gte,
+            lte: revenueSelect.lte,
+          }
+        }
+
+        throw new Error(`Unexpected table: ${table}`)
+      }),
+    }
+
+    createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
+
+    const repo = await createSupabaseRepository()
+
+    const dailyLogsList = await repo.dailylogs.list({
+      projectId: 21,
+      machineId: 7,
+      operatorId: 11,
+      dateFrom: '2026-04-03',
+      dateTo: '2026-04-03',
+    })
+    const createdDailyLog = await repo.dailylogs.create({
+      date: new Date('2026-04-03T00:00:00.000Z'),
+      projectId: 21,
+      machineId: 7,
+      operatorId: 11,
+      hoursWorked: 7.5,
+      workDescription: 'Descrição diária',
+      fuelQuantity: 12,
+      downtimeNotes: 'Sem paradas',
+      notes: 'Observação',
+    })
+    const loadedDailyLog = await repo.dailylogs.get(31)
+    const updatedDailyLog = await repo.dailylogs.update(31, { notes: 'Atualizado' })
+    await repo.dailylogs.delete(31)
+
+    const costsList = await repo.costs.list({
+      projectId: 21,
+      category: 'fuel',
+      dateFrom: '2026-04-04',
+      dateTo: '2026-04-04',
+    })
+    const createdCost = await repo.costs.create({
+      date: new Date('2026-04-04T00:00:00.000Z'),
+      projectId: 21,
+      machineId: 7,
+      operatorId: 11,
+      category: 'fuel',
+      description: 'Combustível',
+      amount: 100,
+      notes: 'Nota',
+    })
+    const loadedCost = await repo.costs.get(41)
+    const updatedCost = await repo.costs.update(41, { amount: 125 })
+    await repo.costs.delete(41)
+
+    const revenuesList = await repo.revenues.list({
+      projectId: 21,
+      status: 'billed',
+      dateFrom: '2026-04-05',
+      dateTo: '2026-04-05',
+    })
+    const createdRevenue = await repo.revenues.create({
+      date: new Date('2026-04-05T00:00:00.000Z'),
+      projectId: 21,
+      description: 'Faturamento',
+      amount: 250,
+      status: 'billed',
+      notes: 'Nota fiscal',
+    })
+    const loadedRevenue = await repo.revenues.get(51)
+    const updatedRevenue = await repo.revenues.update(51, { notes: 'Atualizado' })
+    await repo.revenues.delete(51)
+
+    expect(dailyLogsList[0]).toMatchObject({
+      id: 31,
+      projectId: 21,
+      machineId: 7,
+      operatorId: 11,
+      projectName: 'Projeto Relacionado',
+      machineName: 'Máquina Relacionada',
+      operatorName: 'Operador Relacionado',
+      workDescription: 'Descrição diária',
+    })
+    expect(createdDailyLog).toMatchObject({ id: 31, notes: 'Observação' })
+    expect(loadedDailyLog).toMatchObject({
+      id: 31,
+      projectName: 'Projeto Relacionado',
+      machineName: 'Máquina Relacionada',
+      operatorName: 'Operador Relacionado',
+    })
+    expect(updatedDailyLog).toMatchObject({ id: 31, notes: 'Atualizado', hoursWorked: 8 })
+    expect(dailyLogListSelect.gte).toHaveBeenCalledWith('date', parseLocalDate('2026-04-03').toISOString())
+    expect(dailyLogListSelect.lte).toHaveBeenCalledWith('date', endOfLocalDay('2026-04-03').toISOString())
+    expect(dailyLogListSelect.eq).toHaveBeenCalledWith('project_id', 21)
+    expect(dailyLogListSelect.eq).toHaveBeenCalledWith('machine_id', 7)
+    expect(dailyLogListSelect.eq).toHaveBeenCalledWith('operator_id', 11)
+
+    expect(costsList[0]).toMatchObject({
+      id: 41,
+      projectId: 21,
+      machineId: 7,
+      operatorId: 11,
+      projectName: 'Projeto Relacionado',
+      machineName: 'Máquina Relacionada',
+      operatorName: 'Operador Relacionado',
+      category: 'fuel',
+      description: 'Combustível',
+    })
+    expect(createdCost).toMatchObject({ id: 41, amount: 100 })
+    expect(loadedCost).toMatchObject({
+      id: 41,
+      projectName: 'Projeto Relacionado',
+      machineName: 'Máquina Relacionada',
+      operatorName: 'Operador Relacionado',
+    })
+    expect(updatedCost).toMatchObject({ id: 41, amount: 125 })
+    expect(costListSelect.gte).toHaveBeenCalledWith('date', parseLocalDate('2026-04-04').toISOString())
+    expect(costListSelect.lte).toHaveBeenCalledWith('date', endOfLocalDay('2026-04-04').toISOString())
+    expect(costListSelect.eq).toHaveBeenCalledWith('project_id', 21)
+    expect(costListSelect.eq).toHaveBeenCalledWith('category', 'fuel')
+
+    expect(revenuesList[0]).toMatchObject({
+      id: 51,
+      projectId: 21,
+      projectName: 'Projeto Relacionado',
+      description: 'Faturamento',
+      amount: 250,
+      status: 'billed',
+    })
+    expect(createdRevenue).toMatchObject({ id: 51, status: 'billed' })
+    expect(loadedRevenue).toMatchObject({
+      id: 51,
+      projectName: 'Projeto Relacionado',
+      description: 'Faturamento',
+    })
+    expect(updatedRevenue).toMatchObject({ id: 51, notes: 'Atualizado' })
+    expect(revenueSelect.gte).toHaveBeenCalledWith('date', parseLocalDate('2026-04-05').toISOString())
+    expect(revenueSelect.lte).toHaveBeenCalledWith('date', endOfLocalDay('2026-04-05').toISOString())
+    expect(revenueSelect.eq).toHaveBeenCalledWith('project_id', 21)
+    expect(revenueSelect.eq).toHaveBeenCalledWith('status', 'billed')
   })
 })
