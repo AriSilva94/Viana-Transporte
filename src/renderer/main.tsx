@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import { AuthProvider } from './context/AuthContext'
 import { initializeI18n } from './i18n'
 import { DEFAULT_LOCALE } from './i18n/config'
 import { resolveInitialLocale } from './lib/locale'
@@ -27,7 +28,9 @@ async function bootstrap(): Promise<void> {
 
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </React.StrictMode>
   )
 }
