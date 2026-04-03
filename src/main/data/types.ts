@@ -1,4 +1,12 @@
-import type { Client, Machine, Operator } from '../../shared/types'
+import type {
+  Client,
+  Machine,
+  Operator,
+  Project,
+  ProjectFilters,
+  ProjectSummary,
+  ProjectWithClient,
+} from '../../shared/types'
 
 export type DataProvider = 'sqlite' | 'supabase'
 
@@ -26,8 +34,18 @@ export interface OperatorRepository {
   delete(id: number): Promise<void>
 }
 
+export interface ProjectRepository {
+  list(filters?: ProjectFilters): Promise<ProjectWithClient[]>
+  get(id: number): Promise<ProjectWithClient | null>
+  create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<Project>
+  update(id: number, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Project>
+  delete(id: number): Promise<void>
+  summary(id: number): Promise<ProjectSummary>
+}
+
 export interface DomainRepository {
   clients: ClientRepository
+  projects: ProjectRepository
   machines: MachineRepository
   operators: OperatorRepository
 }

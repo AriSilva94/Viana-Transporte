@@ -2,6 +2,7 @@ import { createMissingSupabaseEnvError } from './errors'
 
 export interface SupabaseClientBootstrap {
   from: (table: string) => unknown
+  rpc: (fn: string, params: Record<string, unknown>) => Promise<unknown>
 }
 
 type SupabaseJsModule = {
@@ -13,7 +14,7 @@ type SupabaseJsModule = {
 }
 
 async function loadSupabaseJsModule(): Promise<SupabaseJsModule> {
-  return import('@supabase/supabase-js') as Promise<SupabaseJsModule>
+  return import('@supabase/supabase-js') as unknown as Promise<SupabaseJsModule>
 }
 
 export async function createSupabaseClientFromEnv(): Promise<SupabaseClientBootstrap> {

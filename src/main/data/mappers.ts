@@ -1,4 +1,4 @@
-import type { Client, Machine, Operator } from '../../shared/types'
+import type { Client, Machine, Operator, Project, ProjectSummary, ProjectWithClient } from '../../shared/types'
 
 export interface SupabaseClientRow {
   id: number
@@ -32,6 +32,27 @@ export interface SupabaseOperatorRow {
   notes: string | null
   created_at: string
   updated_at: string
+}
+
+export interface SupabaseProjectRow {
+  id: number
+  client_id: number
+  name: string
+  location: string | null
+  start_date: string | null
+  end_date: string | null
+  status: Project['status']
+  contract_amount: number | null
+  description: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SupabaseProjectSummaryRow {
+  total_costs: number | string | null
+  total_revenues: number | string | null
+  profit: number | string | null
+  total_hours: number | string | null
 }
 
 export function mapSupabaseClientRow(row: SupabaseClientRow): Client {
@@ -108,5 +129,55 @@ export function mapOperatorToSupabaseInsert(
     role: operator.role,
     is_active: operator.isActive,
     notes: operator.notes,
+  }
+}
+
+export function mapSupabaseProjectRow(row: SupabaseProjectRow): Project {
+  return {
+    id: row.id,
+    clientId: row.client_id,
+    name: row.name,
+    location: row.location,
+    startDate: row.start_date ? new Date(row.start_date) : null,
+    endDate: row.end_date ? new Date(row.end_date) : null,
+    status: row.status,
+    contractAmount: row.contract_amount,
+    description: row.description,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }
+}
+
+export function mapSupabaseProjectWithClientRow(
+  row: SupabaseProjectRow,
+  clientName: string | null
+): ProjectWithClient {
+  return {
+    ...mapSupabaseProjectRow(row),
+    clientName,
+  }
+}
+
+export function mapProjectToSupabaseInsert(
+  project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>
+): Omit<SupabaseProjectRow, 'id' | 'created_at' | 'updated_at'> {
+  return {
+    client_id: project.clientId,
+    name: project.name,
+    location: project.location,
+    start_date: project.startDate ? project.startDate.toISOString() : null,
+    end_date: project.endDate ? project.endDate.toISOString() : null,
+    status: project.status,
+    contract_amount: project.contractAmount,
+    description: project.description,
+  }
+}
+
+export function mapProjectSummaryRow(row: SupabaseProjectSummaryRow): ProjectSummary {
+  return {
+    totalCosts: Number(row.total_costs ?? 0),
+    totalRevenues: Number(row.total_revenues ?? 0),
+    profit: Number(row.profit ?? 0),
+    totalHours: Number(row.total_hours ?? 0),
   }
 }
