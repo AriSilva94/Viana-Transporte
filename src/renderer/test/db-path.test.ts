@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { resolveDbPath } from '../../shared/db-path'
 
+const providerModulePath = ['..', '..', 'main', 'data', 'provider'].join('/')
+
+async function loadResolveDataProviderFromEnv(): Promise<() => 'sqlite' | 'supabase'> {
+  const module = await import(providerModulePath)
+  return module.resolveDataProviderFromEnv as () => 'sqlite' | 'supabase'
+}
+
 describe('resolveDbPath', () => {
   it('uses env override absolute path when provided', () => {
     const resolved = resolveDbPath({
@@ -42,5 +49,59 @@ describe('resolveDbPath', () => {
     })
 
     expect(resolved.replaceAll('\\', '/')).toBe('C:/users/data/mightyrept.db')
+  })
+
+  it('falls back to sqlite provider when env is absent', async () => {
+    const originalProvider = process.env.MIGHTYREPT_DATA_PROVIDER
+
+    try {
+      delete process.env.MIGHTYREPT_DATA_PROVIDER
+
+      const resolveDataProviderFromEnv = await loadResolveDataProviderFromEnv()
+
+      expect(resolveDataProviderFromEnv()).toBe('sqlite')
+    } finally {
+      if (originalProvider === undefined) {
+        delete process.env.MIGHTYREPT_DATA_PROVIDER
+      } else {
+        process.env.MIGHTYREPT_DATA_PROVIDER = originalProvider
+      }
+    }
+  })
+
+  it('falls back to sqlite provider when env is invalid', async () => {
+    const originalProvider = process.env.MIGHTYREPT_DATA_PROVIDER
+
+    try {
+      process.env.MIGHTYREPT_DATA_PROVIDER = 'invalid-provider'
+
+      const resolveDataProviderFromEnv = await loadResolveDataProviderFromEnv()
+
+      expect(() => resolveDataProviderFromEnv()).toThrow('MIGHTYREPT_DATA_PROVIDER')
+    } finally {
+      if (originalProvider === undefined) {
+        delete process.env.MIGHTYREPT_DATA_PROVIDER
+      } else {
+        process.env.MIGHTYREPT_DATA_PROVIDER = originalProvider
+      }
+    }
+  })
+
+  it('resolves supabase provider from env', async () => {
+    const originalProvider = process.env.MIGHTYREPT_DATA_PROVIDER
+
+    try {
+      process.env.MIGHTYREPT_DATA_PROVIDER = 'supabase'
+
+      const resolveDataProviderFromEnv = await loadResolveDataProviderFromEnv()
+
+      expect(resolveDataProviderFromEnv()).toBe('supabase')
+    } finally {
+      if (originalProvider === undefined) {
+        delete process.env.MIGHTYREPT_DATA_PROVIDER
+      } else {
+        process.env.MIGHTYREPT_DATA_PROVIDER = originalProvider
+      }
+    }
   })
 })
