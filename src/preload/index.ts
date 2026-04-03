@@ -13,7 +13,7 @@ const api: ElectronAPI = {
     list: (filters) => ipcRenderer.invoke('projects:list', filters),
     get: (id) => ipcRenderer.invoke('projects:get', id),
     create: (data) => ipcRenderer.invoke('projects:create', data),
-    update: (id, data) => ipcRenderer.invoke('clients:update', id, data),
+    update: (id, data) => ipcRenderer.invoke('projects:update', id, data),
     delete: (id) => ipcRenderer.invoke('projects:delete', id),
     summary: (id) => ipcRenderer.invoke('projects:summary', id),
   },
