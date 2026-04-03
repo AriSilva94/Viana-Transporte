@@ -27,9 +27,6 @@ export function createAuthDeepLinkRuntime(): AuthDeepLinkRuntime {
   app.setAsDefaultProtocolClient('mightyrept')
 
   const shouldQuit = !app.requestSingleInstanceLock()
-  if (shouldQuit) {
-    app.quit()
-  }
 
   const initialDeepLink = extractDeepLinkUrlFromArgv(process.argv)
   if (initialDeepLink) {

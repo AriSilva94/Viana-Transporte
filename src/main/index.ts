@@ -6,6 +6,7 @@ import { registerAllHandlers } from './ipc'
 import { createAuthService } from './auth/service'
 import { setAuthService } from './auth/runtime'
 import { createAuthDeepLinkRuntime } from './auth/deep-link'
+import { startAppLifecycle } from './app-lifecycle'
 import { initLicenseState } from './services/license'
 
 const authDeepLinkRuntime = createAuthDeepLinkRuntime()
@@ -57,16 +58,16 @@ async function bootstrap(): Promise<void> {
   })
 }
 
-if (authDeepLinkRuntime.shouldQuit) {
-  app.quit()
-} else {
-  void app.whenReady()
-    .then(bootstrap)
-    .catch((error: unknown) => {
-      console.error('Failed to start MightyRept:', error)
-      app.exit(1)
-    })
-}
+startAppLifecycle({
+  shouldQuit: authDeepLinkRuntime.shouldQuit,
+  whenReady: () => app.whenReady(),
+  quit: () => app.quit(),
+  bootstrap,
+  onError: (error: unknown) => {
+    console.error('Failed to start MightyRept:', error)
+    app.exit(1)
+  },
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
