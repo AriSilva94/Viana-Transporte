@@ -94,7 +94,7 @@ export function ProjectsListPage(): JSX.Element {
   ]
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader
         title={t('projects:title')}
         action={{ label: t('projects:newAction'), onClick: () => navigate('/projects/new') }}
@@ -116,21 +116,23 @@ export function ProjectsListPage(): JSX.Element {
           <option value="canceled">{t('common:status.canceled')}</option>
         </Select>
       </FilterPanel>
-      {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
-      ) : projects.length === 0 ? (
-        <EmptyState
-          message={t('projects:empty')}
-          action={{ label: t('projects:createFirst'), onClick: () => navigate('/projects/new') }}
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={projects}
-          onSearch={(q) => { setSearch(q); loadProjects(q, status) }}
-          searchPlaceholder={t('projects:searchPlaceholder')}
-        />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
+        ) : projects.length === 0 ? (
+          <EmptyState
+            message={t('projects:empty')}
+            action={{ label: t('projects:createFirst'), onClick: () => navigate('/projects/new') }}
+          />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={projects}
+            onSearch={(q) => { setSearch(q); loadProjects(q, status) }}
+            searchPlaceholder={t('projects:searchPlaceholder')}
+          />
+        )}
+      </div>
       <ConfirmDialog
         open={deleteId !== null}
         onConfirm={handleDelete}

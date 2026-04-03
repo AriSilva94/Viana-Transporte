@@ -702,33 +702,35 @@ export function ReportsPage(): JSX.Element {
   const { t } = useTranslation(['reports', 'common'])
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader title={t('reports:title')} />
 
-      <Tabs defaultValue="project-summary">
-        <TabsList>
-          <TabsTrigger value="project-summary">{t('reports:tabs.projectSummary')}</TabsTrigger>
-          <TabsTrigger value="daily-logs">{t('reports:tabs.dailyLogs')}</TabsTrigger>
-          <TabsTrigger value="machine-usage">{t('reports:tabs.machineUsage')}</TabsTrigger>
-          <TabsTrigger value="costs-by-category">{t('reports:tabs.costsByCategory')}</TabsTrigger>
-        </TabsList>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <Tabs defaultValue="project-summary">
+          <TabsList>
+            <TabsTrigger value="project-summary">{t('reports:tabs.projectSummary')}</TabsTrigger>
+            <TabsTrigger value="daily-logs">{t('reports:tabs.dailyLogs')}</TabsTrigger>
+            <TabsTrigger value="machine-usage">{t('reports:tabs.machineUsage')}</TabsTrigger>
+            <TabsTrigger value="costs-by-category">{t('reports:tabs.costsByCategory')}</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="project-summary">
-          <ProjectSummaryTab />
-        </TabsContent>
+          <TabsContent value="project-summary">
+            <ProjectSummaryTab />
+          </TabsContent>
 
-        <TabsContent value="daily-logs">
-          <DailyLogsTab />
-        </TabsContent>
+          <TabsContent value="daily-logs">
+            <DailyLogsTab />
+          </TabsContent>
 
-        <TabsContent value="machine-usage">
-          <MachineUsageTab />
-        </TabsContent>
+          <TabsContent value="machine-usage">
+            <MachineUsageTab />
+          </TabsContent>
 
-        <TabsContent value="costs-by-category">
-          <CostsByCategoryTab />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="costs-by-category">
+            <CostsByCategoryTab />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }

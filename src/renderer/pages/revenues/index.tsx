@@ -124,7 +124,7 @@ export function RevenuesPage(): JSX.Element {
   ]
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader
         title={t('revenues:title')}
         action={{ label: t('revenues:newAction'), onClick: () => navigate('/revenues/new') }}
@@ -198,19 +198,21 @@ export function RevenuesPage(): JSX.Element {
         )}
       </FilterPanel>
 
-      {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
-      ) : revenues.length === 0 && !hasActiveFilters ? (
-        <EmptyState
-          message={t('revenues:empty')}
-          action={{
-            label: t('revenues:createFirst'),
-            onClick: () => navigate('/revenues/new'),
-          }}
-        />
-      ) : (
-        <DataTable columns={columns} data={revenues} />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
+        ) : revenues.length === 0 && !hasActiveFilters ? (
+          <EmptyState
+            message={t('revenues:empty')}
+            action={{
+              label: t('revenues:createFirst'),
+              onClick: () => navigate('/revenues/new'),
+            }}
+          />
+        ) : (
+          <DataTable columns={columns} data={revenues} />
+        )}
+      </div>
 
       <ConfirmDialog
         open={deleteId !== null}

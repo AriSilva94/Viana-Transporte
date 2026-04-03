@@ -130,7 +130,7 @@ export function CostsPage(): JSX.Element {
   ]
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader
         title={t('costs:title')}
         action={{ label: t('costs:newAction'), onClick: () => navigate('/costs/new') }}
@@ -204,19 +204,21 @@ export function CostsPage(): JSX.Element {
         )}
       </FilterPanel>
 
-      {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
-      ) : costs.length === 0 && !hasActiveFilters ? (
-        <EmptyState
-          message={t('costs:empty')}
-          action={{
-            label: t('costs:createFirst'),
-            onClick: () => navigate('/costs/new'),
-          }}
-        />
-      ) : (
-        <DataTable columns={columns} data={costs} />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
+        ) : costs.length === 0 && !hasActiveFilters ? (
+          <EmptyState
+            message={t('costs:empty')}
+            action={{
+              label: t('costs:createFirst'),
+              onClick: () => navigate('/costs/new'),
+            }}
+          />
+        ) : (
+          <DataTable columns={columns} data={costs} />
+        )}
+      </div>
 
       <ConfirmDialog
         open={deleteId !== null}

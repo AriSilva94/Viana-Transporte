@@ -18,6 +18,7 @@
   "new": "Nuevo",
   "emptyValue": "—",
   "selectDate": "Seleccione una fecha",
+  "noResults": "Sin resultados",
   "weekDays": ["D", "L", "M", "X", "J", "V", "S"],
   "status": {
     "planned": "Planificado",

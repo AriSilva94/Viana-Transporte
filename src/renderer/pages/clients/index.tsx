@@ -75,32 +75,34 @@ export function ClientsListPage(): JSX.Element {
   ]
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader
         title={t('clients:title')}
         action={{ label: t('clients:newAction'), onClick: () => navigate('/clients/new') }}
       />
-      {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
-      ) : clients.length === 0 && !search ? (
-        <EmptyState
-          message={t('clients:empty')}
-          action={{
-            label: t('clients:createFirst'),
-            onClick: () => navigate('/clients/new'),
-          }}
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={clients}
-          onSearch={(q) => {
-            setSearch(q)
-            loadClients(q)
-          }}
-          searchPlaceholder={t('clients:searchPlaceholder')}
-        />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
+        ) : clients.length === 0 && !search ? (
+          <EmptyState
+            message={t('clients:empty')}
+            action={{
+              label: t('clients:createFirst'),
+              onClick: () => navigate('/clients/new'),
+            }}
+          />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={clients}
+            onSearch={(q) => {
+              setSearch(q)
+              loadClients(q)
+            }}
+            searchPlaceholder={t('clients:searchPlaceholder')}
+          />
+        )}
+      </div>
       <ConfirmDialog
         open={deleteId !== null}
         onConfirm={handleDelete}

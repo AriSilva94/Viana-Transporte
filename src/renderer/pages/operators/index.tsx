@@ -76,29 +76,31 @@ export function OperatorsListPage(): JSX.Element {
   ]
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <PageHeader
         title={t('operators:title')}
         action={{ label: t('operators:newAction'), onClick: () => navigate('/operators/new') }}
       />
-      {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
-      ) : operators.length === 0 && !search ? (
-        <EmptyState
-          message={t('operators:empty')}
-          action={{
-            label: t('operators:createFirst'),
-            onClick: () => navigate('/operators/new'),
-          }}
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={operators}
-          onSearch={(q) => { setSearch(q); loadOperators(q) }}
-          searchPlaceholder={t('operators:searchPlaceholder')}
-        />
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-muted-foreground text-sm">{t('common:loading')}</div>
+        ) : operators.length === 0 && !search ? (
+          <EmptyState
+            message={t('operators:empty')}
+            action={{
+              label: t('operators:createFirst'),
+              onClick: () => navigate('/operators/new'),
+            }}
+          />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={operators}
+            onSearch={(q) => { setSearch(q); loadOperators(q) }}
+            searchPlaceholder={t('operators:searchPlaceholder')}
+          />
+        )}
+      </div>
       <ConfirmDialog
         open={deleteId !== null}
         onConfirm={handleDelete}
