@@ -1,5 +1,5 @@
 import { createClient } from '@libsql/client/sqlite3'
-import { like } from 'drizzle-orm'
+import { eq, like } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
 import { migrate } from 'drizzle-orm/libsql/migrator'
 import { mkdtemp } from 'fs/promises'
@@ -8,6 +8,7 @@ import { join } from 'path'
 import type { DB } from '../../db'
 import * as schema from '../../db/schema'
 import { clients } from '../../db/schema'
+import type { Client } from '../../../shared/types'
 import type { DomainRepository } from '../types'
 
 function createDomainRepository(db: DB): DomainRepository {
@@ -21,6 +22,25 @@ function createDomainRepository(db: DB): DomainRepository {
         }
 
         return db.select().from(clients)
+      },
+      async get(id: number) {
+        const rows = await db.select().from(clients).where(eq(clients.id, id)).limit(1)
+        return rows[0] ?? null
+      },
+      async create(data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) {
+        const rows = await db.insert(clients).values(data).returning()
+        return rows[0]
+      },
+      async update(id: number, data: Partial<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const rows = await db
+          .update(clients)
+          .set({ ...data, updatedAt: new Date() })
+          .where(eq(clients.id, id))
+          .returning()
+        return rows[0]
+      },
+      async delete(id: number) {
+        await db.delete(clients).where(eq(clients.id, id))
       },
     },
   }
