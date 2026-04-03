@@ -143,7 +143,7 @@ function AuthPage(): JSX.Element {
             </p>
           ) : null}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="auth-submit">
             {mode === 'signIn'
               ? 'Entrar'
               : mode === 'signUp'
