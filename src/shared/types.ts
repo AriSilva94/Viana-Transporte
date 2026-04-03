@@ -137,6 +137,19 @@ export interface AppPreferences {
   language: SupportedLocale | null
 }
 
+export interface AuthSession {
+  accessToken: string
+  refreshToken: string
+  userId: string
+  email: string | null
+  expiresAt: number | null
+}
+
+export interface AuthState {
+  session: AuthSession | null
+  pendingPasswordReset: boolean
+}
+
 // ─── Filter Types ─────────────────────────────────────────────────────────────
 
 export interface ProjectFilters {
@@ -227,6 +240,14 @@ export interface ElectronAPI {
     getSystemLocale: () => Promise<string>
     getSavedLanguage: () => Promise<SupportedLocale | null>
     setLanguage: (language: SupportedLocale) => Promise<SupportedLocale>
+  }
+  auth: {
+    getSession: () => Promise<AuthState>
+    signIn: (email: string, password: string) => Promise<AuthState>
+    signUp: (email: string, password: string) => Promise<{ emailConfirmationSent: true }>
+    requestPasswordReset: (email: string) => Promise<{ emailSent: true }>
+    updatePassword: (password: string) => Promise<AuthState>
+    signOut: () => Promise<void>
   }
   license: {
     getStatus: () => Promise<LicenseStatus>

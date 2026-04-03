@@ -13,7 +13,7 @@ const api: ElectronAPI = {
     list: (filters) => ipcRenderer.invoke('projects:list', filters),
     get: (id) => ipcRenderer.invoke('projects:get', id),
     create: (data) => ipcRenderer.invoke('projects:create', data),
-    update: (id, data) => ipcRenderer.invoke('projects:update', id, data),
+    update: (id, data) => ipcRenderer.invoke('clients:update', id, data),
     delete: (id) => ipcRenderer.invoke('projects:delete', id),
     summary: (id) => ipcRenderer.invoke('projects:summary', id),
   },
@@ -59,6 +59,14 @@ const api: ElectronAPI = {
     getSystemLocale: () => ipcRenderer.invoke('preferences:getSystemLocale'),
     getSavedLanguage: () => ipcRenderer.invoke('preferences:getSavedLanguage'),
     setLanguage: (language) => ipcRenderer.invoke('preferences:setLanguage', language),
+  },
+  auth: {
+    getSession: () => ipcRenderer.invoke('auth:getSession'),
+    signIn: (email, password) => ipcRenderer.invoke('auth:signIn', { email, password }),
+    signUp: (email, password) => ipcRenderer.invoke('auth:signUp', { email, password }),
+    requestPasswordReset: (email) => ipcRenderer.invoke('auth:requestPasswordReset', { email }),
+    updatePassword: (password) => ipcRenderer.invoke('auth:updatePassword', { password }),
+    signOut: () => ipcRenderer.invoke('auth:signOut'),
   },
   license: {
     getStatus: () => ipcRenderer.invoke('license:status'),
