@@ -32,6 +32,48 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         return notImplemented('clients.delete')
       },
     },
+    machines: {
+      async list() {
+        return notImplemented('machines.list')
+      },
+      async get() {
+        return notImplemented('machines.get')
+      },
+      async create(data) {
+        void data
+        return notImplemented('machines.create')
+      },
+      async update(id, data) {
+        void id
+        void data
+        return notImplemented('machines.update')
+      },
+      async delete(id) {
+        void id
+        return notImplemented('machines.delete')
+      },
+    },
+    operators: {
+      async list() {
+        return notImplemented('operators.list')
+      },
+      async get() {
+        return notImplemented('operators.get')
+      },
+      async create(data) {
+        void data
+        return notImplemented('operators.create')
+      },
+      async update(id, data) {
+        void id
+        void data
+        return notImplemented('operators.update')
+      },
+      async delete(id) {
+        void id
+        return notImplemented('operators.delete')
+      },
+    },
   }
 }
 
