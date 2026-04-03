@@ -1,5 +1,28 @@
+import { createClient } from '@libsql/client/sqlite3'
+import { drizzle } from 'drizzle-orm/libsql'
+import { migrate } from 'drizzle-orm/libsql/migrator'
+import { mkdtemp } from 'fs/promises'
+import { tmpdir } from 'os'
+import { join } from 'path'
 import { describe, expect, it } from 'vitest'
-import { createSqliteRepositoryForTest } from '../sqlite/repository'
+import type { DB } from '../../db'
+import * as schema from '../../db/schema'
+import { dailyLogs, projectCosts, projectRevenues } from '../../db/schema'
+import { createSqliteRepository, createSqliteRepositoryForTest } from '../sqlite/repository'
+
+async function createSqliteRepositoryFixture() {
+  const tempDir = await mkdtemp(join(tmpdir(), 'mightyrept-sqlite-projects-'))
+  const client = createClient({ url: `file:${join(tempDir, 'test.db')}` })
+  const db = drizzle(client, { schema })
+
+  await migrate(db, {
+    migrationsFolder: join(process.cwd(), 'src/main/db/migrations'),
+  })
+
+  const typedDb = db as DB
+  const repo = createSqliteRepository(typedDb)
+  return { db: typedDb, repo }
+}
 
 describe('createSqliteRepositoryForTest', () => {
   it('creates and lists clients through repository contract', async () => {
@@ -92,6 +115,93 @@ describe('createSqliteRepositoryForTest', () => {
         name: 'Cliente Fantasma',
       })
     ).rejects.toThrow('Client not found')
+  })
+
+  it('handles projects CRUD and summary through repository contract', async () => {
+    const { db, repo } = await createSqliteRepositoryFixture()
+
+    const client = await repo.clients.create({
+      name: 'Cliente Projeto',
+      document: null,
+      phone: null,
+      email: null,
+      notes: null,
+    })
+
+    const created = await repo.projects.create({
+      clientId: client.id,
+      name: 'Projeto Aurora',
+      location: 'Obra 1',
+      startDate: new Date('2026-04-03T00:00:00.000Z'),
+      endDate: new Date('2026-04-10T00:00:00.000Z'),
+      status: 'active',
+      contractAmount: 1500,
+      description: 'Projeto de teste',
+    })
+
+    const list = await repo.projects.list({ search: 'Aurora', status: 'active', clientId: client.id })
+    const loaded = await repo.projects.get(created.id)
+    const updated = await repo.projects.update(created.id, {
+      name: 'Projeto Aurora Atualizado',
+      contractAmount: 1750,
+    })
+
+    expect(list).toHaveLength(1)
+    expect(list[0]).toMatchObject({
+      id: created.id,
+      clientId: client.id,
+      clientName: 'Cliente Projeto',
+      name: 'Projeto Aurora',
+      status: 'active',
+    })
+    expect(loaded).toMatchObject({
+      id: created.id,
+      clientName: 'Cliente Projeto',
+      name: 'Projeto Aurora',
+    })
+    expect(updated).toMatchObject({
+      id: created.id,
+      name: 'Projeto Aurora Atualizado',
+      contractAmount: 1750,
+    })
+
+    await db.insert(projectCosts).values({
+      date: new Date('2026-04-04T00:00:00.000Z'),
+      projectId: created.id,
+      machineId: null,
+      operatorId: null,
+      category: 'fuel',
+      description: 'Combustível',
+      amount: 100,
+      notes: null,
+    })
+    await db.insert(projectRevenues).values({
+      date: new Date('2026-04-05T00:00:00.000Z'),
+      projectId: created.id,
+      description: 'Receita',
+      amount: 250,
+      status: 'billed',
+      notes: null,
+    })
+    await db.insert(dailyLogs).values({
+      date: new Date('2026-04-06T00:00:00.000Z'),
+      projectId: created.id,
+      machineId: null,
+      operatorId: null,
+      hoursWorked: 8,
+      workDescription: 'Trabalho de teste',
+      fuelQuantity: null,
+      downtimeNotes: null,
+      notes: null,
+    })
+
+    const summary = await repo.projects.summary(created.id)
+    expect(summary).toMatchObject({
+      totalCosts: 100,
+      totalRevenues: 250,
+      profit: 150,
+      totalHours: 8,
+    })
   })
 
   it('handles machines CRUD and filters through repository contract', async () => {

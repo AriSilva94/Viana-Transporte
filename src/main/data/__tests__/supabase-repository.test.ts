@@ -232,4 +232,119 @@ describe('createSupabaseRepository', () => {
       })
     ).rejects.toThrow('Supabase returned no rows')
   })
+
+  it('implements projects CRUD and summary through Supabase client', async () => {
+    const projectRow = {
+      id: 21,
+      client_id: 5,
+      name: 'Projeto Aurora',
+      location: 'Obra 1',
+      start_date: '2026-04-03T00:00:00.000Z',
+      end_date: '2026-04-10T00:00:00.000Z',
+      status: 'active',
+      contract_amount: 1500,
+      description: 'Projeto de teste',
+      created_at: '2026-04-03T12:00:00.000Z',
+      updated_at: '2026-04-03T12:10:00.000Z',
+    }
+
+    const clientRow = {
+      id: 5,
+      name: 'Cliente Projeto',
+      document: null,
+      phone: null,
+      email: null,
+      notes: null,
+      created_at: '2026-04-03T10:00:00.000Z',
+      updated_at: '2026-04-03T10:10:00.000Z',
+    }
+
+    const projectSelect = createQueryMock({ data: [projectRow], error: null })
+    const projectInsert = createQueryMock({ data: [projectRow], error: null })
+    const projectUpdate = createQueryMock({ data: [projectRow], error: null })
+    const projectDelete = createQueryMock({ data: null, error: null })
+    const clientSelect = createQueryMock({ data: [clientRow], error: null })
+    const summaryRpc = vi.fn().mockResolvedValue({
+      data: [{ total_costs: 100, total_revenues: 250, profit: 150, total_hours: 8 }],
+      error: null,
+    })
+
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === 'projects') {
+          return {
+            select: vi.fn(() => projectSelect),
+            insert: vi.fn(() => projectInsert),
+            update: vi.fn(() => projectUpdate),
+            delete: vi.fn(() => projectDelete),
+            or: projectSelect.or,
+            eq: projectSelect.eq,
+          }
+        }
+
+        if (table === 'clients') {
+          return {
+            select: vi.fn(() => clientSelect),
+            or: clientSelect.or,
+            eq: clientSelect.eq,
+          }
+        }
+
+        throw new Error(`Unexpected table: ${table}`)
+      }),
+      rpc: summaryRpc,
+    }
+
+    createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
+
+    const repo = await createSupabaseRepository()
+
+    const list = await repo.projects.list({ search: 'Aurora', status: 'active', clientId: 5 })
+    const created = await repo.projects.create({
+      clientId: 5,
+      name: 'Projeto Aurora',
+      location: 'Obra 1',
+      startDate: new Date('2026-04-03T00:00:00.000Z'),
+      endDate: new Date('2026-04-10T00:00:00.000Z'),
+      status: 'active',
+      contractAmount: 1500,
+      description: 'Projeto de teste',
+    })
+    const loaded = await repo.projects.get(21)
+    const updated = await repo.projects.update(21, { name: 'Projeto Aurora Atualizado' })
+    const summary = await repo.projects.summary(21)
+
+    expect(list[0]).toMatchObject({
+      id: 21,
+      clientId: 5,
+      clientName: 'Cliente Projeto',
+      name: 'Projeto Aurora',
+    })
+    expect(created).toMatchObject({ id: 21, name: 'Projeto Aurora' })
+    expect(loaded).toMatchObject({ id: 21, clientName: 'Cliente Projeto' })
+    expect(updated).toMatchObject({ id: 21, name: 'Projeto Aurora' })
+    expect(summary).toMatchObject({ totalCosts: 100, totalRevenues: 250, profit: 150, totalHours: 8 })
+    expect(summaryRpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
+  })
+
+  it('throws when project summary rpc returns no rows', async () => {
+    const supabase = {
+      from: vi.fn(() => ({
+        select: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        update: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        then: vi.fn(),
+      })),
+      rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }
+
+    createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
+
+    const repo = await createSupabaseRepository()
+
+    await expect(repo.projects.summary(21)).rejects.toThrow('Supabase returned no rows')
+  })
 })

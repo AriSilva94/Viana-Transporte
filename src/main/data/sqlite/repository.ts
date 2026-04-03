@@ -1,5 +1,5 @@
 import { createClient } from '@libsql/client/sqlite3'
-import { and, eq, like, or } from 'drizzle-orm'
+import { and, eq, like, or, sum } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
 import { migrate } from 'drizzle-orm/libsql/migrator'
 import { mkdtemp } from 'fs/promises'
@@ -7,9 +7,25 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import type { DB } from '../../db'
 import * as schema from '../../db/schema'
-import { clients, machines, operators } from '../../db/schema'
-import type { Client, Machine, Operator } from '../../../shared/types'
+import { clients, dailyLogs, machines, operators, projects, projectCosts, projectRevenues } from '../../db/schema'
+import type { Client, Machine, Operator, Project, ProjectFilters } from '../../../shared/types'
 import type { DomainRepository } from '../types'
+import { parseLocalDate } from '../../../shared/date'
+
+const projectSelectFields = {
+  id: projects.id,
+  clientId: projects.clientId,
+  name: projects.name,
+  location: projects.location,
+  startDate: projects.startDate,
+  endDate: projects.endDate,
+  status: projects.status,
+  contractAmount: projects.contractAmount,
+  description: projects.description,
+  createdAt: projects.createdAt,
+  updatedAt: projects.updatedAt,
+  clientName: clients.name,
+}
 
 function createDomainRepository(db: DB): DomainRepository {
   return {
@@ -46,6 +62,99 @@ function createDomainRepository(db: DB): DomainRepository {
       },
       async delete(id: number) {
         await db.delete(clients).where(eq(clients.id, id))
+      },
+    },
+    projects: {
+      async list(filters?: ProjectFilters) {
+        const conditions = []
+
+        if (filters?.search?.trim()) {
+          conditions.push(like(projects.name, `%${filters.search.trim()}%`))
+        }
+
+        if (filters?.status) {
+          conditions.push(eq(projects.status, filters.status))
+        }
+
+        if (filters?.clientId) {
+          conditions.push(eq(projects.clientId, filters.clientId))
+        }
+
+        const baseQuery = db
+          .select(projectSelectFields)
+          .from(projects)
+          .leftJoin(clients, eq(projects.clientId, clients.id))
+
+        return conditions.length === 0 ? baseQuery : baseQuery.where(and(...conditions))
+      },
+      async get(id: number) {
+        const rows = await db
+          .select(projectSelectFields)
+          .from(projects)
+          .leftJoin(clients, eq(projects.clientId, clients.id))
+          .where(eq(projects.id, id))
+          .limit(1)
+
+        return rows[0] ?? null
+      },
+      async create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) {
+        const rows = await db
+          .insert(projects)
+          .values({
+            ...data,
+            startDate: data.startDate ? parseLocalDate(data.startDate) : null,
+            endDate: data.endDate ? parseLocalDate(data.endDate) : null,
+          })
+          .returning()
+
+        return rows[0]
+      },
+      async update(id: number, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const rows = await db
+          .update(projects)
+          .set({
+            ...data,
+            startDate: data.startDate ? parseLocalDate(data.startDate) : data.startDate,
+            endDate: data.endDate ? parseLocalDate(data.endDate) : data.endDate,
+            updatedAt: new Date(),
+          })
+          .where(eq(projects.id, id))
+          .returning()
+
+        if (!rows[0]) {
+          throw new Error('Project not found')
+        }
+
+        return rows[0]
+      },
+      async delete(id: number) {
+        await db.delete(projects).where(eq(projects.id, id))
+      },
+      async summary(id: number) {
+        const [costsRow] = await db
+          .select({ total: sum(projectCosts.amount) })
+          .from(projectCosts)
+          .where(eq(projectCosts.projectId, id))
+
+        const [revenuesRow] = await db
+          .select({ total: sum(projectRevenues.amount) })
+          .from(projectRevenues)
+          .where(eq(projectRevenues.projectId, id))
+
+        const [hoursRow] = await db
+          .select({ total: sum(dailyLogs.hoursWorked) })
+          .from(dailyLogs)
+          .where(eq(dailyLogs.projectId, id))
+
+        const totalCosts = Number(costsRow?.total ?? 0)
+        const totalRevenues = Number(revenuesRow?.total ?? 0)
+
+        return {
+          totalCosts,
+          totalRevenues,
+          profit: totalRevenues - totalCosts,
+          totalHours: Number(hoursRow?.total ?? 0),
+        }
       },
     },
     machines: {
