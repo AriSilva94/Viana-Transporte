@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { resolveDbPath } from '../../shared/db-path'
-import { resolveDataProviderFromEnv } from '../../main/data/provider'
+import { resolveDataProviderFromEnv } from '../../shared/data-provider'
 
 describe('resolveDbPath', () => {
   it('uses env override absolute path when provided', () => {
