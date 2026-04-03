@@ -261,6 +261,99 @@ describe('createAuthService', () => {
     }
   })
 
+  it('rejects signUp errors', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn().mockResolvedValue({
+          data: { session: null },
+          error: { message: 'signup failed' },
+        }),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await expect(service.signUp({ email: 'a@b.com', password: '123456' })).rejects.toThrow('signup failed')
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects password reset errors without changing persisted state', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn().mockResolvedValue({
+          data: {},
+          error: { message: 'reset failed' },
+        }),
+        updateUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await expect(service.requestPasswordReset({ email: 'a@b.com' })).rejects.toThrow('reset failed')
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects updatePassword errors without clearing recovery state', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn().mockResolvedValue({
+          data: {},
+          error: { message: 'update failed' },
+        }),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      await writeFile(
+        join(userDataPath, 'auth-session.json'),
+        JSON.stringify({
+          session: null,
+          pendingPasswordReset: true,
+        }),
+        'utf-8'
+      )
+
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await expect(service.updatePassword({ password: '654321' })).rejects.toThrow('update failed')
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        pendingPasswordReset: true,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
   it('returns default state when persisted session JSON is corrupted', async () => {
     const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
 
