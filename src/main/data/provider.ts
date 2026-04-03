@@ -23,8 +23,15 @@ export async function initDataProvider(provider: DataProvider): Promise<DataProv
   repository = null
 
   if (provider === 'supabase') {
-    repository = await createSupabaseRepository()
-    return 'supabase'
+    try {
+      const nextRepository = await createSupabaseRepository()
+      repository = nextRepository
+      return 'supabase'
+    } catch (error) {
+      repository = null
+      const message = error instanceof Error ? error.message : String(error)
+      throw new Error(`Failed to initialize Supabase data provider: ${message}`)
+    }
   }
 
   await initDb()

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { endOfLocalDay, parseLocalDate } from '../../../shared/date'
+import { formatLocalDate } from '../../../shared/date'
 
 const { createSupabaseClientFromEnvMock } = vi.hoisted(() => ({
   createSupabaseClientFromEnvMock: vi.fn(),
@@ -242,8 +242,8 @@ describe('createSupabaseRepository', () => {
       client_id: 5,
       name: 'Projeto Aurora',
       location: 'Obra 1',
-      start_date: '2026-04-03T00:00:00.000Z',
-      end_date: '2026-04-10T00:00:00.000Z',
+      start_date: '2026-04-03',
+      end_date: '2026-04-10',
       status: 'active',
       contract_amount: 1500,
       description: 'Projeto de teste',
@@ -278,6 +278,8 @@ describe('createSupabaseRepository', () => {
       .fn()
       .mockReturnValueOnce(projectListSelect)
       .mockReturnValueOnce(projectGetSelect)
+    const projectInsertValues = vi.fn()
+    const projectUpdateValues = vi.fn()
 
     const clientSelect = vi
       .fn()
@@ -289,8 +291,14 @@ describe('createSupabaseRepository', () => {
         if (table === 'projects') {
           return {
             select: projectSelect,
-            insert: vi.fn(() => projectInsert),
-            update: vi.fn(() => projectUpdate),
+            insert: vi.fn((values: unknown) => {
+              projectInsertValues(values)
+              return projectInsert
+            }),
+            update: vi.fn((values: unknown) => {
+              projectUpdateValues(values)
+              return projectUpdate
+            }),
             delete: vi.fn(() => projectDelete),
             or: projectListSelect.or,
             eq: projectListSelect.eq,
@@ -319,14 +327,18 @@ describe('createSupabaseRepository', () => {
       clientId: 5,
       name: 'Projeto Aurora',
       location: 'Obra 1',
-      startDate: new Date('2026-04-03T00:00:00.000Z'),
-      endDate: new Date('2026-04-10T00:00:00.000Z'),
+      startDate: new Date('2026-04-03T12:00:00.000Z'),
+      endDate: new Date('2026-04-10T12:00:00.000Z'),
       status: 'active',
       contractAmount: 1500,
       description: 'Projeto de teste',
     })
     const loaded = await repo.projects.get(21)
-    const updated = await repo.projects.update(21, { name: 'Projeto Aurora Atualizado' })
+    const updated = await repo.projects.update(21, {
+      name: 'Projeto Aurora Atualizado',
+      startDate: new Date('2026-04-03T12:00:00.000Z'),
+      endDate: new Date('2026-04-10T12:00:00.000Z'),
+    })
     const summary = await repo.projects.summary(21)
 
     expect(list[0]).toMatchObject({
@@ -338,6 +350,18 @@ describe('createSupabaseRepository', () => {
     expect(created).toMatchObject({ id: 21, name: 'Projeto Aurora' })
     expect(loaded).toMatchObject({ id: 21, clientName: 'Cliente Projeto' })
     expect(updated).toMatchObject({ id: 21, name: 'Projeto Aurora' })
+    expect(projectInsertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        start_date: '2026-04-03',
+        end_date: '2026-04-10',
+      })
+    )
+    expect(projectUpdateValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        start_date: '2026-04-03',
+        end_date: '2026-04-10',
+      })
+    )
     expect(summary).toMatchObject({ totalCosts: 100, totalRevenues: 250, profit: 150, totalHours: 8 })
     expect(summaryRpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
     expect(projectListSelect.eq).toHaveBeenCalledWith('status', 'active')
@@ -437,7 +461,7 @@ describe('createSupabaseRepository', () => {
     }
     const dailyLogRow = {
       id: 31,
-      date: '2026-04-03T00:00:00.000Z',
+      date: '2026-04-03',
       project_id: 21,
       machine_id: 7,
       operator_id: 11,
@@ -452,7 +476,7 @@ describe('createSupabaseRepository', () => {
     const dailyLogUpdatedRow = { ...dailyLogRow, notes: 'Atualizado', hours_worked: 8 }
     const costRow = {
       id: 41,
-      date: '2026-04-04T00:00:00.000Z',
+      date: '2026-04-04',
       project_id: 21,
       machine_id: 7,
       operator_id: 11,
@@ -466,7 +490,7 @@ describe('createSupabaseRepository', () => {
     const costUpdatedRow = { ...costRow, description: 'Combustível atualizado', amount: 125 }
     const revenueRow = {
       id: 51,
-      date: '2026-04-05T00:00:00.000Z',
+      date: '2026-04-05',
       project_id: 21,
       description: 'Faturamento',
       amount: 250,
@@ -491,17 +515,23 @@ describe('createSupabaseRepository', () => {
     const dailyLogInsert = createQueryMock({ data: [dailyLogRow], error: null })
     const dailyLogUpdate = createQueryMock({ data: [dailyLogUpdatedRow], error: null })
     const dailyLogDelete = createQueryMock({ data: null, error: null })
+    const dailyLogInsertValues = vi.fn()
+    const dailyLogUpdateValues = vi.fn()
 
     const costListSelect = createQueryMock({ data: [costRow], error: null })
     const costGetSelect = createQueryMock({ data: [costRow], error: null })
     const costInsert = createQueryMock({ data: [costRow], error: null })
     const costUpdate = createQueryMock({ data: [costUpdatedRow], error: null })
     const costDelete = createQueryMock({ data: null, error: null })
+    const costInsertValues = vi.fn()
+    const costUpdateValues = vi.fn()
 
     const revenueSelect = createQueryMock({ data: [revenueRow], error: null })
     const revenueInsert = createQueryMock({ data: [revenueRow], error: null })
     const revenueUpdate = createQueryMock({ data: [revenueUpdatedRow], error: null })
     const revenueDelete = createQueryMock({ data: null, error: null })
+    const revenueInsertValues = vi.fn()
+    const revenueUpdateValues = vi.fn()
 
     const supabase = {
       from: vi.fn((table: string) => {
@@ -532,8 +562,14 @@ describe('createSupabaseRepository', () => {
         if (table === 'daily_logs') {
           return {
             select: vi.fn(() => dailyLogListSelect),
-            insert: vi.fn(() => dailyLogInsert),
-            update: vi.fn(() => dailyLogUpdate),
+            insert: vi.fn((values: unknown) => {
+              dailyLogInsertValues(values)
+              return dailyLogInsert
+            }),
+            update: vi.fn((values: unknown) => {
+              dailyLogUpdateValues(values)
+              return dailyLogUpdate
+            }),
             delete: vi.fn(() => dailyLogDelete),
             or: dailyLogListSelect.or,
             eq: dailyLogListSelect.eq,
@@ -545,8 +581,14 @@ describe('createSupabaseRepository', () => {
         if (table === 'project_costs') {
           return {
             select: vi.fn(() => costListSelect),
-            insert: vi.fn(() => costInsert),
-            update: vi.fn(() => costUpdate),
+            insert: vi.fn((values: unknown) => {
+              costInsertValues(values)
+              return costInsert
+            }),
+            update: vi.fn((values: unknown) => {
+              costUpdateValues(values)
+              return costUpdate
+            }),
             delete: vi.fn(() => costDelete),
             or: costListSelect.or,
             eq: costListSelect.eq,
@@ -558,8 +600,14 @@ describe('createSupabaseRepository', () => {
         if (table === 'project_revenues') {
           return {
             select: vi.fn(() => revenueSelect),
-            insert: vi.fn(() => revenueInsert),
-            update: vi.fn(() => revenueUpdate),
+            insert: vi.fn((values: unknown) => {
+              revenueInsertValues(values)
+              return revenueInsert
+            }),
+            update: vi.fn((values: unknown) => {
+              revenueUpdateValues(values)
+              return revenueUpdate
+            }),
             delete: vi.fn(() => revenueDelete),
             or: revenueSelect.or,
             eq: revenueSelect.eq,
@@ -584,7 +632,7 @@ describe('createSupabaseRepository', () => {
       dateTo: '2026-04-03',
     })
     const createdDailyLog = await repo.dailylogs.create({
-      date: new Date('2026-04-03T00:00:00.000Z'),
+      date: new Date('2026-04-03T03:00:00.000Z'),
       projectId: 21,
       machineId: 7,
       operatorId: 11,
@@ -595,7 +643,10 @@ describe('createSupabaseRepository', () => {
       notes: 'Observação',
     })
     const loadedDailyLog = await repo.dailylogs.get(31)
-    const updatedDailyLog = await repo.dailylogs.update(31, { notes: 'Atualizado' })
+    const updatedDailyLog = await repo.dailylogs.update(31, {
+      notes: 'Atualizado',
+      date: new Date('2026-04-03T03:00:00.000Z'),
+    })
     await repo.dailylogs.delete(31)
 
     const costsList = await repo.costs.list({
@@ -605,7 +656,7 @@ describe('createSupabaseRepository', () => {
       dateTo: '2026-04-04',
     })
     const createdCost = await repo.costs.create({
-      date: new Date('2026-04-04T00:00:00.000Z'),
+      date: new Date('2026-04-04T03:00:00.000Z'),
       projectId: 21,
       machineId: 7,
       operatorId: 11,
@@ -615,7 +666,10 @@ describe('createSupabaseRepository', () => {
       notes: 'Nota',
     })
     const loadedCost = await repo.costs.get(41)
-    const updatedCost = await repo.costs.update(41, { amount: 125 })
+    const updatedCost = await repo.costs.update(41, {
+      amount: 125,
+      date: new Date('2026-04-04T03:00:00.000Z'),
+    })
     await repo.costs.delete(41)
 
     const revenuesList = await repo.revenues.list({
@@ -625,7 +679,7 @@ describe('createSupabaseRepository', () => {
       dateTo: '2026-04-05',
     })
     const createdRevenue = await repo.revenues.create({
-      date: new Date('2026-04-05T00:00:00.000Z'),
+      date: new Date('2026-04-05T03:00:00.000Z'),
       projectId: 21,
       description: 'Faturamento',
       amount: 250,
@@ -633,7 +687,10 @@ describe('createSupabaseRepository', () => {
       notes: 'Nota fiscal',
     })
     const loadedRevenue = await repo.revenues.get(51)
-    const updatedRevenue = await repo.revenues.update(51, { notes: 'Atualizado' })
+    const updatedRevenue = await repo.revenues.update(51, {
+      notes: 'Atualizado',
+      date: new Date('2026-04-05T03:00:00.000Z'),
+    })
     await repo.revenues.delete(51)
 
     expect(dailyLogsList[0]).toMatchObject({
@@ -654,8 +711,18 @@ describe('createSupabaseRepository', () => {
       operatorName: 'Operador Relacionado',
     })
     expect(updatedDailyLog).toMatchObject({ id: 31, notes: 'Atualizado', hoursWorked: 8 })
-    expect(dailyLogListSelect.gte).toHaveBeenCalledWith('date', parseLocalDate('2026-04-03').toISOString())
-    expect(dailyLogListSelect.lte).toHaveBeenCalledWith('date', endOfLocalDay('2026-04-03').toISOString())
+    expect(dailyLogInsertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: '2026-04-03',
+      })
+    )
+    expect(dailyLogUpdateValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: '2026-04-03',
+      })
+    )
+    expect(dailyLogListSelect.gte).toHaveBeenCalledWith('date', formatLocalDate('2026-04-03'))
+    expect(dailyLogListSelect.lte).toHaveBeenCalledWith('date', formatLocalDate('2026-04-03'))
     expect(dailyLogListSelect.eq).toHaveBeenCalledWith('project_id', 21)
     expect(dailyLogListSelect.eq).toHaveBeenCalledWith('machine_id', 7)
     expect(dailyLogListSelect.eq).toHaveBeenCalledWith('operator_id', 11)
@@ -679,8 +746,18 @@ describe('createSupabaseRepository', () => {
       operatorName: 'Operador Relacionado',
     })
     expect(updatedCost).toMatchObject({ id: 41, amount: 125 })
-    expect(costListSelect.gte).toHaveBeenCalledWith('date', parseLocalDate('2026-04-04').toISOString())
-    expect(costListSelect.lte).toHaveBeenCalledWith('date', endOfLocalDay('2026-04-04').toISOString())
+    expect(costInsertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: '2026-04-04',
+      })
+    )
+    expect(costUpdateValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: '2026-04-04',
+      })
+    )
+    expect(costListSelect.gte).toHaveBeenCalledWith('date', formatLocalDate('2026-04-04'))
+    expect(costListSelect.lte).toHaveBeenCalledWith('date', formatLocalDate('2026-04-04'))
     expect(costListSelect.eq).toHaveBeenCalledWith('project_id', 21)
     expect(costListSelect.eq).toHaveBeenCalledWith('category', 'fuel')
 
@@ -699,8 +776,18 @@ describe('createSupabaseRepository', () => {
       description: 'Faturamento',
     })
     expect(updatedRevenue).toMatchObject({ id: 51, notes: 'Atualizado' })
-    expect(revenueSelect.gte).toHaveBeenCalledWith('date', parseLocalDate('2026-04-05').toISOString())
-    expect(revenueSelect.lte).toHaveBeenCalledWith('date', endOfLocalDay('2026-04-05').toISOString())
+    expect(revenueInsertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: '2026-04-05',
+      })
+    )
+    expect(revenueUpdateValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: '2026-04-05',
+      })
+    )
+    expect(revenueSelect.gte).toHaveBeenCalledWith('date', formatLocalDate('2026-04-05'))
+    expect(revenueSelect.lte).toHaveBeenCalledWith('date', formatLocalDate('2026-04-05'))
     expect(revenueSelect.eq).toHaveBeenCalledWith('project_id', 21)
     expect(revenueSelect.eq).toHaveBeenCalledWith('status', 'billed')
   })

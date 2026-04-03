@@ -43,7 +43,7 @@ import type {
   ProjectSummary,
   RevenueFilters,
 } from '../../../shared/types'
-import { endOfLocalDay, parseLocalDate } from '../../../shared/date'
+import { formatLocalDate } from '../../../shared/date'
 
 type SupabaseResult<T> = {
   data: T | null
@@ -162,12 +162,8 @@ async function loadOperatorNameMap(client: SupabaseClientLike): Promise<Map<numb
   return new Map(rows.map((row) => [row.id, row.name]))
 }
 
-function toIsoStartOfDay(value: Date | string): string {
-  return parseLocalDate(value).toISOString()
-}
-
-function toIsoEndOfDay(value: Date | string): string {
-  return endOfLocalDay(value).toISOString()
+function toDateOnly(value: Date | string | number): string {
+  return formatLocalDate(value)
 }
 
 async function loadDailyLogRows(
@@ -179,8 +175,8 @@ async function loadDailyLogRows(
   if (filters?.projectId) query = query.eq('project_id', filters.projectId)
   if (filters?.machineId) query = query.eq('machine_id', filters.machineId)
   if (filters?.operatorId) query = query.eq('operator_id', filters.operatorId)
-  if (filters?.dateFrom) query = query.gte('date', toIsoStartOfDay(filters.dateFrom))
-  if (filters?.dateTo) query = query.lte('date', toIsoEndOfDay(filters.dateTo))
+  if (filters?.dateFrom) query = query.gte('date', toDateOnly(filters.dateFrom))
+  if (filters?.dateTo) query = query.lte('date', toDateOnly(filters.dateTo))
 
   const result = await query
   return ensureList(result as SupabaseResult<SupabaseDailyLogRow[] | null>)
@@ -196,8 +192,8 @@ async function loadCostRows(client: SupabaseClientLike, filters?: CostFilters): 
 
   if (filters?.projectId) query = query.eq('project_id', filters.projectId)
   if (filters?.category) query = query.eq('category', filters.category)
-  if (filters?.dateFrom) query = query.gte('date', toIsoStartOfDay(filters.dateFrom))
-  if (filters?.dateTo) query = query.lte('date', toIsoEndOfDay(filters.dateTo))
+  if (filters?.dateFrom) query = query.gte('date', toDateOnly(filters.dateFrom))
+  if (filters?.dateTo) query = query.lte('date', toDateOnly(filters.dateTo))
 
   const result = await query
   return ensureList(result as SupabaseResult<SupabaseProjectCostRow[] | null>)
@@ -216,8 +212,8 @@ async function loadRevenueRows(
 
   if (filters?.projectId) query = query.eq('project_id', filters.projectId)
   if (filters?.status) query = query.eq('status', filters.status)
-  if (filters?.dateFrom) query = query.gte('date', toIsoStartOfDay(filters.dateFrom))
-  if (filters?.dateTo) query = query.lte('date', toIsoEndOfDay(filters.dateTo))
+  if (filters?.dateFrom) query = query.gte('date', toDateOnly(filters.dateFrom))
+  if (filters?.dateTo) query = query.lte('date', toDateOnly(filters.dateTo))
 
   const result = await query
   return ensureList(result as SupabaseResult<SupabaseProjectRevenueRow[] | null>)
@@ -333,8 +329,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .from<SupabaseProjectRow[]>('projects')
           .update({
             ...data,
-            start_date: data.startDate ? data.startDate.toISOString() : data.startDate,
-            end_date: data.endDate ? data.endDate.toISOString() : data.endDate,
+            start_date: data.startDate ? formatLocalDate(data.startDate) : data.startDate,
+            end_date: data.endDate ? formatLocalDate(data.endDate) : data.endDate,
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
@@ -509,7 +505,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .from<SupabaseDailyLogRow[]>('daily_logs')
           .update({
             ...data,
-            date: data.date ? data.date.toISOString() : data.date,
+            date: data.date ? formatLocalDate(data.date) : data.date,
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
@@ -574,7 +570,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .from<SupabaseProjectCostRow[]>('project_costs')
           .update({
             ...data,
-            date: data.date ? data.date.toISOString() : data.date,
+            date: data.date ? formatLocalDate(data.date) : data.date,
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
@@ -621,7 +617,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
           .from<SupabaseProjectRevenueRow[]>('project_revenues')
           .update({
             ...data,
-            date: data.date ? data.date.toISOString() : data.date,
+            date: data.date ? formatLocalDate(data.date) : data.date,
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
