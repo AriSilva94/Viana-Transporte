@@ -116,4 +116,44 @@ describe('App auth flow', () => {
       expect(window.api.auth.signIn).toHaveBeenCalledWith('a@b.com', '123456')
     })
   })
+
+  it('falls back to the login screen when getSession fails', async () => {
+    window.api.auth.getSession = vi.fn().mockRejectedValueOnce(new Error('offline'))
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByText(/carregando autenticação/i)).not.toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+    })
+  })
+
+  it('shows an inline error when signIn fails', async () => {
+    const user = userEvent.setup()
+    window.api.auth.signIn = vi.fn().mockRejectedValueOnce(new Error('invalid credentials'))
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+    })
+
+    await user.type(screen.getByLabelText(/e-mail/i), 'a@b.com')
+    await user.type(screen.getByLabelText(/senha/i), '123456')
+    await user.click(screen.getAllByRole('button', { name: /entrar/i })[1])
+
+    await waitFor(() => {
+      expect(screen.getByText('invalid credentials')).toBeInTheDocument()
+    })
+  })
 })

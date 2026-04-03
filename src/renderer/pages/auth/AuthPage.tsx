@@ -13,6 +13,7 @@ function AuthPage(): JSX.Element {
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [message, setMessage] = React.useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   React.useEffect(() => {
@@ -47,6 +48,7 @@ function AuthPage(): JSX.Element {
     event.preventDefault()
     setIsSubmitting(true)
     setMessage(null)
+    setErrorMessage(null)
 
     try {
       if (mode === 'signIn') {
@@ -68,6 +70,10 @@ function AuthPage(): JSX.Element {
 
       await updatePassword(password)
       setMessage('Senha atualizada com sucesso.')
+    } catch (error) {
+      const fallbackMessage = 'Não foi possível concluir a autenticação.'
+      const message = error instanceof Error && error.message.trim() ? error.message : fallbackMessage
+      setErrorMessage(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -128,6 +134,12 @@ function AuthPage(): JSX.Element {
           {message ? (
             <p className="rounded-2xl border border-brand-sand/30 bg-brand-sand/20 px-4 py-3 text-sm text-foreground">
               {message}
+            </p>
+          ) : null}
+
+          {errorMessage ? (
+            <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
             </p>
           ) : null}
 
