@@ -6,6 +6,7 @@ import { ToastProvider } from '@renderer/context/ToastContext'
 import { ToastContainer } from '@renderer/components/ui/toast'
 import { Button } from '@renderer/components/ui/button'
 import { useAuth } from '@renderer/context/AuthContext'
+import { useTranslation } from 'react-i18next'
 import type { LicenseStatus } from '../../../shared/license'
 
 interface ShellProps {
@@ -43,6 +44,7 @@ function buildLicenseMessage(licenseStatus: LicenseStatus | null): string | null
 
 export function Shell({ licenseStatus }: ShellProps): JSX.Element {
   const { signOut } = useAuth()
+  const { t } = useTranslation('auth')
   const [logoutError, setLogoutError] = React.useState<string | null>(null)
   const licenseMessage = buildLicenseMessage(licenseStatus)
 
@@ -52,7 +54,7 @@ export function Shell({ licenseStatus }: ShellProps): JSX.Element {
     try {
       await signOut()
     } catch {
-      setLogoutError('Falha ao sair.')
+      setLogoutError(t('messages.logoutError'))
     }
   }
 
@@ -73,7 +75,7 @@ export function Shell({ licenseStatus }: ShellProps): JSX.Element {
               <LanguageSwitcher />
               <div className="flex flex-col items-end gap-1">
                 <Button type="button" variant="outline" onClick={handleLogout} data-testid="logout-button">
-                  Sair
+                  {t('buttons.logout')}
                 </Button>
                 {logoutError ? <span className="text-xs font-medium text-red-700">{logoutError}</span> : null}
               </div>

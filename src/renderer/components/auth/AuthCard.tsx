@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { cn } from '@renderer/lib/utils'
 
 interface AuthCardProps {
@@ -8,6 +9,8 @@ interface AuthCardProps {
 }
 
 function AuthCard({ title, description, children, className }: AuthCardProps): JSX.Element {
+  const { t } = useTranslation('auth')
+
   return (
     <section
       className={cn(
@@ -16,9 +19,7 @@ function AuthCard({ title, description, children, className }: AuthCardProps): J
       )}
     >
       <div className="mb-6 border-b border-brand-sand/25 pb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
-          MightyRept
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">{t('brand')}</p>
         <h1 className="mt-2 text-3xl font-semibold text-foreground">{title}</h1>
         {description ? <p className="mt-2 text-sm text-muted-foreground">{description}</p> : null}
       </div>

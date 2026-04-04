@@ -7,9 +7,12 @@ import fs from 'fs'
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Fixtures = {
-  e2eDbPath: string
   electronApp: ElectronApplication
   page: Page
+}
+
+type WorkerFixtures = {
+  e2eDbPath: string
 }
 
 // ─── Helper: navigate using HashRouter ───────────────────────────────────────
@@ -112,7 +115,7 @@ export async function confirmDialog(page: Page): Promise<void> {
 
 // ─── Fixture ──────────────────────────────────────────────────────────────────
 
-export const test = base.extend<Fixtures>({
+export const test = base.extend<Fixtures, WorkerFixtures>({
   e2eDbPath: [
     async ({}, use) => {
       const projectRoot = process.cwd()

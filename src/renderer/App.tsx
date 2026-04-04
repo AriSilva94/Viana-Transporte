@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Shell } from './components/layout/Shell'
 import { useAuth } from './context/AuthContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
@@ -29,6 +30,7 @@ import type { LicenseStatus } from '../shared/license'
 
 export default function App(): JSX.Element {
   const { loading: authLoading } = useAuth()
+  const { t } = useTranslation('auth')
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function App(): JSX.Element {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(14,71,116,0.16),_transparent_45%),linear-gradient(180deg,#f6f3ec_0%,#ece6da_100%)] px-6">
-        <p className="text-sm font-medium text-muted-foreground">Carregando autenticação...</p>
+        <p className="text-sm font-medium text-muted-foreground">{t('loading')}</p>
       </div>
     )
   }

@@ -4,11 +4,13 @@ import { Input } from '@renderer/components/ui/input'
 import { Label } from '@renderer/components/ui/label'
 import { AuthCard } from '@renderer/components/auth/AuthCard'
 import { useAuth } from '@renderer/context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 type AuthMode = 'signIn' | 'signUp' | 'requestPasswordReset' | 'updatePassword'
 
 function AuthPage(): JSX.Element {
   const { state, loading, signIn, signUp, requestPasswordReset, updatePassword } = useAuth()
+  const { t } = useTranslation('auth')
   const [mode, setMode] = React.useState<AuthMode>('signIn')
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -25,23 +27,23 @@ function AuthPage(): JSX.Element {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(14,71,116,0.16),_transparent_45%),linear-gradient(180deg,#f6f3ec_0%,#ece6da_100%)] px-6">
-        <p className="text-sm font-medium text-muted-foreground">Carregando autenticação...</p>
+        <p className="text-sm font-medium text-muted-foreground">{t('loading')}</p>
       </div>
     )
   }
 
   const titleByMode: Record<AuthMode, string> = {
-    signIn: 'Entrar',
-    signUp: 'Criar conta',
-    requestPasswordReset: 'Recuperar acesso',
-    updatePassword: 'Nova senha',
+    signIn: t('modes.signIn.title'),
+    signUp: t('modes.signUp.title'),
+    requestPasswordReset: t('modes.requestPasswordReset.title'),
+    updatePassword: t('modes.updatePassword.title'),
   }
 
   const descriptionByMode: Record<AuthMode, string> = {
-    signIn: 'Entre para acessar o painel e continuar sua operação.',
-    signUp: 'Crie sua conta para iniciar o uso da plataforma.',
-    requestPasswordReset: 'Informe seu e-mail para receber o link de redefinição.',
-    updatePassword: 'Defina uma nova senha para concluir a recuperação.',
+    signIn: t('modes.signIn.description'),
+    signUp: t('modes.signUp.description'),
+    requestPasswordReset: t('modes.requestPasswordReset.description'),
+    updatePassword: t('modes.updatePassword.description'),
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
@@ -58,20 +60,20 @@ function AuthPage(): JSX.Element {
 
       if (mode === 'signUp') {
         await signUp(email, password)
-        setMessage('Conta criada. Verifique seu e-mail.')
+        setMessage(t('messages.signUpSuccess'))
         return
       }
 
       if (mode === 'requestPasswordReset') {
         await requestPasswordReset(email)
-        setMessage('Se houver uma conta, você receberá um e-mail de recuperação.')
+        setMessage(t('messages.passwordResetSuccess'))
         return
       }
 
       await updatePassword(password)
-      setMessage('Senha atualizada com sucesso.')
+      setMessage(t('messages.updatePasswordSuccess'))
     } catch (error) {
-      const fallbackMessage = 'Não foi possível concluir a autenticação.'
+      const fallbackMessage = t('messages.submitError')
       const message = error instanceof Error && error.message.trim() ? error.message : fallbackMessage
       setErrorMessage(message)
     } finally {
@@ -86,23 +88,23 @@ function AuthPage(): JSX.Element {
       <AuthCard title={titleByMode[mode]} description={descriptionByMode[mode]}>
         <div className="mb-4 flex flex-wrap gap-2">
           <Button type="button" variant={mode === 'signIn' ? 'default' : 'outline'} onClick={() => setMode('signIn')}>
-            Entrar
+            {t('buttons.signIn')}
           </Button>
           <Button type="button" variant={mode === 'signUp' ? 'default' : 'outline'} onClick={() => setMode('signUp')}>
-            Criar conta
+            {t('buttons.signUp')}
           </Button>
           <Button
             type="button"
             variant={mode === 'requestPasswordReset' ? 'default' : 'outline'}
             onClick={() => setMode('requestPasswordReset')}
           >
-            Recuperar senha
+            {t('buttons.requestPasswordReset')}
           </Button>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="auth-email">E-mail</Label>
+            <Label htmlFor="auth-email">{t('fields.email')}</Label>
             <Input
               id="auth-email"
               type="email"
@@ -110,14 +112,14 @@ function AuthPage(): JSX.Element {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               disabled={isSubmitting}
-              placeholder="a@b.com"
+              placeholder={t('placeholders.email')}
             />
           </div>
 
           {needsPassword ? (
             <div className="space-y-2">
               <Label htmlFor="auth-password">
-                {mode === 'updatePassword' ? 'Nova senha' : 'Senha'}
+                {mode === 'updatePassword' ? t('fields.newPassword') : t('fields.password')}
               </Label>
               <Input
                 id="auth-password"
@@ -126,7 +128,7 @@ function AuthPage(): JSX.Element {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 disabled={isSubmitting}
-                placeholder="••••••••"
+                placeholder={t('placeholders.password')}
               />
             </div>
           ) : null}
@@ -145,19 +147,17 @@ function AuthPage(): JSX.Element {
 
           <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="auth-submit">
             {mode === 'signIn'
-              ? 'Entrar'
+              ? t('buttons.signIn')
               : mode === 'signUp'
-                ? 'Criar conta'
+                ? t('buttons.signUp')
                 : mode === 'requestPasswordReset'
-                  ? 'Enviar recuperação'
-                  : 'Atualizar senha'}
+                  ? t('buttons.sendReset')
+                  : t('buttons.updatePassword')}
           </Button>
         </form>
 
         {state?.pendingPasswordReset ? (
-          <p className="mt-4 text-sm text-secondary">
-            Recuperação detectada. Use a nova senha para concluir.
-          </p>
+          <p className="mt-4 text-sm text-secondary">{t('messages.pendingRecovery')}</p>
         ) : null}
       </AuthCard>
     </div>
