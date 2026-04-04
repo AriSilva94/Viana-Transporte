@@ -35,6 +35,10 @@ export interface SupabaseAuthClientLike {
     getSession?: () => Promise<unknown>
     signInWithPassword: (credentials: AuthCredentials) => Promise<{ data: { session: SupabaseSessionLike | null }; error: unknown | null }>
     signUp: (credentials: AuthCredentials) => Promise<{ data: { session: SupabaseSessionLike | null }; error: unknown | null }>
+    setSession: (session: { access_token: string; refresh_token: string }) => Promise<{
+      data: { session: SupabaseSessionLike | null }
+      error: unknown | null
+    }>
     resetPasswordForEmail: (
       email: string,
       options?: { redirectTo?: string }
@@ -93,19 +97,20 @@ function throwIfSupabaseError(error: unknown, fallbackMessage: string): void {
   throw new Error(getErrorMessage(error, fallbackMessage))
 }
 
-function parseAuthCallbackType(url: string): string | null {
+function getCallbackParams(url: string): URLSearchParams {
   try {
     const callbackUrl = new URL(url)
-    const queryType = callbackUrl.searchParams.get('type')
-    if (queryType) {
-      return queryType
+    const hash = callbackUrl.hash.startsWith('#') ? callbackUrl.hash.slice(1) : callbackUrl.hash
+    const hashParams = new URLSearchParams(hash)
+    const mergedParams = new URLSearchParams(callbackUrl.search)
+
+    for (const [key, value] of hashParams.entries()) {
+      mergedParams.set(key, value)
     }
 
-    const hash = callbackUrl.hash.startsWith('#') ? callbackUrl.hash.slice(1) : callbackUrl.hash
-    const params = new URLSearchParams(hash)
-    return params.get('type')
+    return mergedParams
   } catch {
-    return null
+    return new URLSearchParams()
   }
 }
 
@@ -194,11 +199,26 @@ export function createAuthService({
       await sessionStore.clearState()
     },
     async handleCallbackUrl(url) {
-      const callbackType = parseAuthCallbackType(url)
+      const callbackParams = getCallbackParams(url)
+      const callbackType = callbackParams.get('type')
       if (callbackType === 'recovery') {
+        const accessToken = callbackParams.get('access_token')
+        const refreshToken = callbackParams.get('refresh_token')
+        let session: AuthSession | null = null
+
+        if (accessToken && refreshToken) {
+          const client = await resolveAuthClient()
+          const result = await client.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          throwIfSupabaseError(result.error, 'Failed to establish recovery session')
+          session = mapSupabaseSession(result.data.session)
+        }
+
         const currentState = await readState()
         return writeState({
-          ...currentState,
+          session: session ?? currentState.session,
           pendingPasswordReset: true,
         })
       }
