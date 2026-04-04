@@ -2,9 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { i18n, initializeI18n } from '../i18n'
 import { LanguageSwitcher } from '../components/layout/LanguageSwitcher'
 import { Sidebar } from '../components/layout/Sidebar'
-import { initializeI18n } from '../i18n'
 
 const setLanguage = vi.fn<(...args: ['pt-BR' | 'en' | 'es']) => Promise<'pt-BR' | 'en' | 'es'>>()
 
@@ -87,5 +87,13 @@ describe('LanguageSwitcher', () => {
     expect(screen.getByRole('link', { name: /panel/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /proyectos/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /informes/i })).toBeInTheDocument()
+  })
+
+  it('carrega o namespace auth na inicializacao do i18n', async () => {
+    await initializeI18n('pt-BR')
+
+    expect(i18n.hasResourceBundle('pt-BR', 'auth')).toBe(true)
+    expect(i18n.t('auth:buttons.logout')).toBe('Sair')
+    expect(i18n.t('auth:modes.signIn.title')).toBe('Entrar')
   })
 })

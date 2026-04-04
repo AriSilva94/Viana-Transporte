@@ -16,6 +16,7 @@ const NAMESPACES = [
   'costs',
   'revenues',
   'reports',
+  'auth',
 ] as const
 
 type TranslationNamespace = (typeof NAMESPACES)[number]

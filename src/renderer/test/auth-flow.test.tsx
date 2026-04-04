@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../context/AuthContext'
+import { initializeI18n } from '../i18n'
 
 const { invokeMock } = vi.hoisted(() => ({
   invokeMock: vi.fn(),
@@ -26,7 +27,8 @@ describe('window.api auth bridge', () => {
   })
 
   it('forwards auth calls to the expected IPC channels', async () => {
-    await import('../../preload/index')
+    const preloadModulePath = '../../preload/index'
+    await import(preloadModulePath)
 
     const api = window.api as Window['api']
 
@@ -135,6 +137,10 @@ describe('App auth flow', () => {
         delete: vi.fn(),
       },
     } as Window['api']
+  })
+
+  beforeEach(async () => {
+    await initializeI18n('pt-BR')
   })
 
   it('renders the login screen when there is no session and submits signIn', async () => {
