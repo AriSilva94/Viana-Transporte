@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { LanguageSwitcher } from './LanguageSwitcher'
@@ -42,7 +43,18 @@ function buildLicenseMessage(licenseStatus: LicenseStatus | null): string | null
 
 export function Shell({ licenseStatus }: ShellProps): JSX.Element {
   const { signOut } = useAuth()
+  const [logoutError, setLogoutError] = React.useState<string | null>(null)
   const licenseMessage = buildLicenseMessage(licenseStatus)
+
+  async function handleLogout(): Promise<void> {
+    setLogoutError(null)
+
+    try {
+      await signOut()
+    } catch {
+      setLogoutError('Falha ao sair.')
+    }
+  }
 
   return (
     <ToastProvider>
@@ -59,9 +71,12 @@ export function Shell({ licenseStatus }: ShellProps): JSX.Element {
             </div>
             <div className="flex items-center gap-3">
               <LanguageSwitcher />
-              <Button type="button" variant="outline" onClick={() => void signOut()} data-testid="logout-button">
-                Sair
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <Button type="button" variant="outline" onClick={handleLogout} data-testid="logout-button">
+                  Sair
+                </Button>
+                {logoutError ? <span className="text-xs font-medium text-red-700">{logoutError}</span> : null}
+              </div>
             </div>
           </header>
           <main className="relative z-0 min-h-0 flex-1 overflow-hidden p-6 lg:p-8">

@@ -229,6 +229,7 @@ describe('App auth flow', () => {
 
     await waitFor(() => {
       expect(window.api.auth.signOut).toHaveBeenCalledTimes(1)
+      expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
     })
   })
 })

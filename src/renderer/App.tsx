@@ -28,7 +28,7 @@ import { api } from './lib/api'
 import type { LicenseStatus } from '../shared/license'
 
 export default function App(): JSX.Element {
-  const { state: authState, loading: authLoading } = useAuth()
+  const { loading: authLoading } = useAuth()
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
 
   useEffect(() => {
