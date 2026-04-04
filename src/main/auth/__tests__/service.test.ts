@@ -11,6 +11,12 @@ const { ipcHandleMock } = vi.hoisted(() => ({
   ipcHandleMock: vi.fn(),
 }))
 
+const { assertWriteAllowedMock } = vi.hoisted(() => ({
+  assertWriteAllowedMock: vi.fn(() => {
+    throw new Error('write guard should not be used for auth channels')
+  }),
+}))
+
 const { appMock } = vi.hoisted(() => ({
   appMock: {
     on: vi.fn(),
@@ -29,6 +35,10 @@ vi.mock('electron', () => ({
   ipcMain: {
     handle: ipcHandleMock,
   },
+}))
+
+vi.mock('../../services/license', () => ({
+  assertWriteAllowed: assertWriteAllowedMock,
 }))
 
 import { createSupabaseAuthClientFromEnv } from '../client'
@@ -142,6 +152,7 @@ describe('createAuthService', () => {
         signUp: vi.fn(),
         resetPasswordForEmail: vi.fn(),
         updateUser: vi.fn(),
+        setSession: vi.fn(),
         signOut: vi.fn(),
       },
     }
@@ -188,6 +199,7 @@ describe('createAuthService', () => {
         signUp: vi.fn(),
         resetPasswordForEmail: vi.fn(),
         updateUser: vi.fn(),
+        setSession: vi.fn(),
         signOut: vi.fn().mockResolvedValue({ error: null }),
       },
     }
@@ -219,6 +231,7 @@ describe('createAuthService', () => {
         signUp: vi.fn(),
         resetPasswordForEmail: vi.fn(),
         updateUser: vi.fn(),
+        setSession: vi.fn(),
         signOut: vi.fn(),
       },
     }
@@ -257,6 +270,7 @@ describe('createAuthService', () => {
         signUp: vi.fn(),
         resetPasswordForEmail: vi.fn(),
         updateUser: vi.fn(),
+        setSession: vi.fn(),
         signOut: vi.fn().mockResolvedValue({ error: { message: 'sign out failed' } }),
       },
     }
@@ -292,6 +306,7 @@ describe('createAuthService', () => {
         }),
         resetPasswordForEmail: vi.fn(),
         updateUser: vi.fn(),
+        setSession: vi.fn(),
         signOut: vi.fn(),
       },
     }
@@ -320,6 +335,7 @@ describe('createAuthService', () => {
           error: { message: 'reset failed' },
         }),
         updateUser: vi.fn(),
+        setSession: vi.fn(),
         signOut: vi.fn(),
       },
     }
@@ -348,6 +364,7 @@ describe('createAuthService', () => {
           data: {},
           error: { message: 'update failed' },
         }),
+        setSession: vi.fn(),
         signOut: vi.fn(),
       },
     }
@@ -387,6 +404,7 @@ describe('createAuthService', () => {
             signUp: vi.fn(),
             resetPasswordForEmail: vi.fn(),
             updateUser: vi.fn(),
+            setSession: vi.fn(),
             signOut: vi.fn(),
           },
         },
@@ -410,6 +428,7 @@ describe('createAuthService', () => {
         signUp: vi.fn(),
         resetPasswordForEmail: vi.fn(),
         updateUser: vi.fn(),
+        setSession: vi.fn(),
         signOut: vi.fn(),
       },
     }
@@ -420,6 +439,59 @@ describe('createAuthService', () => {
       await expect(service.handleCallbackUrl('mightyrept://auth/callback?type=recovery')).resolves.toMatchObject({
         session: null,
         pendingPasswordReset: true,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+  it('establishes recovery session from callback tokens before marking recovery state', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'mightyrept-auth-'))
+    const setSessionMock = vi.fn().mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'access-token',
+          refresh_token: 'refresh-token',
+          user: {
+            id: 'user-1',
+            email: 'a@b.com',
+          },
+          expires_at: 456,
+        },
+      },
+      error: null,
+    })
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        setSession: setSessionMock,
+        updateUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, userDataPath })
+
+      await expect(
+        service.handleCallbackUrl(
+          'mightyrept://auth/callback#type=recovery&access_token=access-token&refresh_token=refresh-token'
+        )
+      ).resolves.toMatchObject({
+        session: {
+          accessToken: 'access-token',
+          refreshToken: 'refresh-token',
+          userId: 'user-1',
+          email: 'a@b.com',
+          expiresAt: 456,
+        },
+        pendingPasswordReset: true,
+      })
+
+      expect(setSessionMock).toHaveBeenCalledWith({
+        access_token: 'access-token',
+        refresh_token: 'refresh-token',
       })
     } finally {
       await rm(userDataPath, { recursive: true, force: true })
@@ -443,6 +515,11 @@ describe('registerAuthHandlers', () => {
     setAuthService(fakeAuthService)
 
     try {
+      const handlers = new Map<string, (...args: unknown[]) => unknown>()
+      ipcHandleMock.mockImplementation((channel: string, handler: (...args: unknown[]) => unknown) => {
+        handlers.set(channel, handler)
+      })
+
       const { registerAuthHandlers } = await import('../../ipc/auth')
       registerAuthHandlers()
 
@@ -452,9 +529,21 @@ describe('registerAuthHandlers', () => {
       expect(ipcHandleMock).toHaveBeenCalledWith('auth:requestPasswordReset', expect.any(Function))
       expect(ipcHandleMock).toHaveBeenCalledWith('auth:updatePassword', expect.any(Function))
       expect(ipcHandleMock).toHaveBeenCalledWith('auth:signOut', expect.any(Function))
+
+      const signInHandler = handlers.get('auth:signIn')
+      expect(signInHandler).toBeTypeOf('function')
+
+      await expect(signInHandler?.({}, { email: 'a@b.com', password: '123456' })).resolves.toEqual(undefined)
+
+      expect(fakeAuthService.signIn).toHaveBeenCalledWith({
+        email: 'a@b.com',
+        password: '123456',
+      })
+      expect(assertWriteAllowedMock).not.toHaveBeenCalled()
     } finally {
       setAuthService(null)
       ipcHandleMock.mockReset()
+      assertWriteAllowedMock.mockReset()
     }
   })
 })
