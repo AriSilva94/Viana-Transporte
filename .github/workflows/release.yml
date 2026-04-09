@@ -24,10 +24,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build electron app
-        run: npm run build:full
+      - name: Build and publish full version
+        run: npm run build:full && npx electron-builder --win --x64 --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish release
-        run: npx electron-builder --win --x64 --publish always
+      - name: Build and publish trial version
+        run: npm run build:trial && npx electron-builder --win --x64 --config electron-builder.trial.json --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
