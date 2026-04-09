@@ -1,7 +1,7 @@
 {
-  "appId": "com.viana.transporte.trial",
+  "appId": "com.viana.transporte.trial.v2",
   "productName": "Viana Transporte Trial",
-  "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+  "artifactName": "Viana-Transporte-Trial-${version}-${os}-${arch}.${ext}",
   "files": [
     "out/**/*",
     "package.json"
