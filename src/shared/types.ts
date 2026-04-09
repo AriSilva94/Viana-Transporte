@@ -191,6 +191,7 @@ export interface RevenueFilters {
 // ─── ElectronAPI ──────────────────────────────────────────────────────────────
 
 export interface ElectronAPI {
+  getVersion: () => Promise<string>
   clients: {
     list: (filters?: { search?: string }) => Promise<Client[]>
     get: (id: number) => Promise<Client | null>

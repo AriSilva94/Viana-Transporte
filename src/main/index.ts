@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from 'electron'
+import { app, BrowserWindow, Menu, nativeImage } from 'electron'
 import { join } from 'path'
 import { loadMainEnv } from './config/load-env'
 import { initDataProvider, resolveDataProviderFromEnv } from './data/provider'
@@ -15,12 +15,14 @@ const authDeepLinkRuntime = createAuthDeepLinkRuntime()
 Menu.setApplicationMenu(null)
 
 function createWindow(): BrowserWindow {
+  const iconPath = join(__dirname, '../../build/icon.ico')
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 900,
     minHeight: 600,
     show: false,
+    icon: nativeImage.createFromPath(iconPath),
     titleBarStyle: 'default',
     webPreferences: {
       contextIsolation: true,

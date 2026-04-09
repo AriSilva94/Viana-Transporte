@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -28,6 +29,11 @@ const navItems = [
 
 export function Sidebar(): JSX.Element {
   const { t } = useTranslation('navigation')
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    window.api.getVersion().then(setVersion)
+  }, [])
 
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-white/10 bg-brand-deep text-white shadow-[12px_0_40px_rgba(34,49,95,0.16)]">
@@ -55,6 +61,11 @@ export function Sidebar(): JSX.Element {
           </NavLink>
         ))}
       </nav>
+      {version && (
+        <div className="border-t border-white/10 px-5 py-3 text-center text-xs text-white/40">
+          v{version}
+        </div>
+      )}
     </aside>
   )
 }
