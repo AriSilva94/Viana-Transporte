@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type { ElectronAPI } from '../shared/types'
 
 const api: ElectronAPI = {
+  getVersion: () => ipcRenderer.invoke('app:getVersion'),
   clients: {
     list: (filters) => ipcRenderer.invoke('clients:list', filters),
     get: (id) => ipcRenderer.invoke('clients:get', id),
