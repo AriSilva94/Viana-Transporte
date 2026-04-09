@@ -1,0 +1,99 @@
+{
+  "title": "Relatórios",
+  "tabs": {
+    "projectSummary": "Resumo de Projetos",
+    "dailyLogs": "Registros Diários",
+    "machineUsage": "Uso de Máquinas",
+    "costsByCategory": "Custos por Categoria"
+  },
+  "filters": {
+    "status": "Status",
+    "project": "Projeto",
+    "dateFrom": "Data inicial",
+    "dateTo": "Data final",
+    "allStatuses": "Todos os status",
+    "allProjects": "Todos os projetos",
+    "clear": "Limpar filtros"
+  },
+  "hoursValue": "{{value}} h",
+  "fuelValue": "{{value}} L",
+  "categories": {
+    "fuel": "Combustível",
+    "labor": "Mão de obra",
+    "maintenance": "Manutenção",
+    "transport": "Transporte",
+    "outsourced": "Serviço terceirizado",
+    "miscellaneous": "Diversos"
+  },
+  "projectSummary": {
+    "columns": {
+      "project": "Projeto",
+      "client": "Cliente",
+      "status": "Status",
+      "totalHours": "Horas Totais",
+      "totalCosts": "Total Custos",
+      "totalRevenues": "Total Receitas",
+      "profit": "Resultado"
+    },
+    "summary": {
+      "totalCosts": "Total Custos",
+      "totalRevenues": "Total Receitas",
+      "totalProfit": "Resultado Total",
+      "projects": "Projetos"
+    },
+    "empty": "Nenhum projeto encontrado."
+  },
+  "dailyLogs": {
+    "columns": {
+      "date": "Data",
+      "project": "Projeto",
+      "machine": "Máquina",
+      "operator": "Operador",
+      "hours": "Horas",
+      "fuel": "Combustível",
+      "workDescription": "Serviço"
+    },
+    "summary": {
+      "totalRecords": "Total de Registros",
+      "totalHours": "Total de Horas"
+    },
+    "empty": "Nenhum registro diário encontrado."
+  },
+  "machineUsage": {
+    "columns": {
+      "machine": "Máquina",
+      "type": "Tipo",
+      "totalHours": "Total de Horas",
+      "logCount": "Nº de Registros"
+    },
+    "summary": {
+      "totalMachines": "Total de Máquinas",
+      "activeMachines": "Máquinas com Uso",
+      "totalHours": "Total Horas Registradas"
+    },
+    "empty": "Nenhuma máquina cadastrada."
+  },
+  "costsByCategory": {
+    "summary": {
+      "totalLabel": "Total Geral",
+      "title": "Resumo por Categoria"
+    },
+    "detail": {
+      "title": "Todos os Lançamentos"
+    },
+    "columns": {
+      "category": "Categoria",
+      "entries": "Nº de Lançamentos",
+      "total": "Total",
+      "share": "% do Total"
+    },
+    "detailColumns": {
+      "date": "Data",
+      "project": "Projeto",
+      "category": "Categoria",
+      "description": "Descrição",
+      "amount": "Valor"
+    },
+    "empty": "Nenhum custo encontrado."
+  }
+}

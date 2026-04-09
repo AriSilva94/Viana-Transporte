@@ -1,0 +1,41 @@
+import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+import { config as loadDotenv } from 'dotenv'
+import { existsSync } from 'fs'
+
+// Carrega variáveis de ambiente em tempo de build para embuti-las no bundle
+const buildEnv: Record<string, string> = {}
+for (const file of ['.env.local', '.env']) {
+  const envPath = resolve(process.cwd(), file)
+  if (existsSync(envPath)) {
+    const result = loadDotenv({ path: envPath, processEnv: {} })
+    if (result.parsed) Object.assign(buildEnv, result.parsed)
+  }
+}
+
+const distProfile = process.env.DIST_PROFILE === 'trial' ? 'trial' : 'full'
+
+export default defineConfig({
+  main: {
+    define: {
+      __DIST_PROFILE__: JSON.stringify(distProfile),
+      'process.env.SUPABASE_URL': JSON.stringify(buildEnv.SUPABASE_URL ?? ''),
+      'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(buildEnv.SUPABASE_SERVICE_ROLE_KEY ?? ''),
+      'process.env.SUPABASE_ANON_KEY': JSON.stringify(buildEnv.SUPABASE_ANON_KEY ?? ''),
+      'process.env.SUPABASE_AUTH_REDIRECT_URL': JSON.stringify(buildEnv.SUPABASE_AUTH_REDIRECT_URL ?? ''),
+    },
+    plugins: [externalizeDepsPlugin()]
+  },
+  preload: {
+    plugins: [externalizeDepsPlugin()]
+  },
+  renderer: {
+    resolve: {
+      alias: {
+        '@renderer': resolve('src/renderer')
+      }
+    },
+    plugins: [react()]
+  }
+})

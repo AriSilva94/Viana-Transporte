@@ -1,0 +1,70 @@
+{
+  "title": "Costs",
+  "newAction": "New Cost",
+  "empty": "No cost recorded",
+  "createFirst": "Record first cost",
+  "columns": {
+    "date": "Date",
+    "project": "Project",
+    "category": "Category",
+    "description": "Description",
+    "amount": "Amount",
+    "machine": "Machine",
+    "actions": "Actions"
+  },
+  "filters": {
+    "project": "Project",
+    "category": "Category",
+    "dateFrom": "Start date",
+    "dateTo": "End date",
+    "allProjects": "All projects",
+    "allCategories": "All categories",
+    "clear": "Clear filters"
+  },
+  "categories": {
+    "fuel": "Fuel",
+    "labor": "Labor",
+    "maintenance": "Maintenance",
+    "transport": "Transport",
+    "outsourced": "Outsourced service",
+    "miscellaneous": "Miscellaneous"
+  },
+  "deleteDialog": {
+    "title": "Delete Cost",
+    "description": "Are you sure you want to delete this cost? This action cannot be undone."
+  },
+  "form": {
+    "newTitle": "New Cost",
+    "editTitle": "Edit Cost",
+    "description": "Record expenses with enough context for financial review and operational traceability.",
+    "fields": {
+      "date": "Date *",
+      "project": "Project *",
+      "category": "Category *",
+      "description": "Description *",
+      "amount": "Amount (R$) *",
+      "machine": "Machine",
+      "operator": "Operator",
+      "notes": "Notes"
+    },
+    "placeholders": {
+      "select": "Select...",
+      "none": "None",
+      "description": "Describe the cost...",
+      "amount": "0.00",
+      "notes": "Additional notes..."
+    },
+    "errors": {
+      "requiredDate": "Date is required",
+      "requiredProject": "Project is required",
+      "requiredCategory": "Category is required",
+      "requiredDescription": "Description is required",
+      "requiredAmount": "Amount must be greater than zero",
+      "save": "Error saving cost. Please try again."
+    },
+    "toasts": {
+      "success": "Saved successfully!",
+      "error": "Error saving. Please try again."
+    }
+  }
+}

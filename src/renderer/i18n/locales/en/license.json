@@ -1,0 +1,9 @@
+{
+  "trial": {
+    "expired": "Trial expired on {{date}}. Read-only mode.",
+    "expiredNoDate": "Trial expired. Read-only mode.",
+    "active": "Trial version active.",
+    "expiresIn_one": "Trial version: expires on {{date}} ({{count}} day remaining).",
+    "expiresIn_other": "Trial version: expires on {{date}} ({{count}} days remaining)."
+  }
+}

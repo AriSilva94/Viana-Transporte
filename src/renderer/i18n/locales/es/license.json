@@ -1,0 +1,9 @@
+{
+  "trial": {
+    "expired": "Evaluación expirada el {{date}}. Modo solo lectura.",
+    "expiredNoDate": "Evaluación expirada. Modo solo lectura.",
+    "active": "Versión de evaluación activa.",
+    "expiresIn_one": "Versión de evaluación: expira el {{date}} ({{count}} día restante).",
+    "expiresIn_other": "Versión de evaluación: expira el {{date}} ({{count}} días restantes)."
+  }
+}
