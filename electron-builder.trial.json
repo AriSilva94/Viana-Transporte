@@ -10,6 +10,12 @@
     "output": "dist/trial",
     "buildResources": "build"
   },
+  "publish": {
+    "provider": "github",
+    "owner": "AriSilva94",
+    "repo": "Viana-Transporte",
+    "channel": "trial"
+  },
   "win": {
     "target": [
       {

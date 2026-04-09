@@ -2,6 +2,8 @@ import { autoUpdater } from 'electron-updater'
 import { BrowserWindow } from 'electron'
 import log from 'electron-log'
 
+declare const __DIST_PROFILE__: string
+
 export function initUpdater(mainWindow: BrowserWindow | null): void {
   if (!mainWindow) {
     console.warn('Cannot initialize updater: mainWindow is null')
@@ -11,6 +13,10 @@ export function initUpdater(mainWindow: BrowserWindow | null): void {
   autoUpdater.logger = log
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
+
+  if (__DIST_PROFILE__ === 'trial') {
+    autoUpdater.channel = 'trial'
+  }
 
   autoUpdater.on('update-available', (info) => {
     log.info('Update available:', info)
