@@ -1,0 +1,69 @@
+{
+  "title": "Clientes",
+  "newAction": "Nuevo Cliente",
+  "empty": "No hay clientes registrados",
+  "createFirst": "Crear primer cliente",
+  "searchPlaceholder": "Buscar por nombre...",
+  "columns": {
+    "name": "Nombre",
+    "document": "Documento",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "actions": "Acciones",
+    "status": "Estado",
+    "contractAmount": "Valor del Contrato"
+  },
+  "deleteDialog": {
+    "title": "Eliminar Cliente",
+    "description": "¿Seguro que desea eliminar este cliente? Esta acción no se puede deshacer."
+  },
+  "form": {
+    "newTitle": "Nuevo Cliente",
+    "editTitle": "Editar Cliente",
+    "description": "Registre o actualice la información de contacto para mantener organizada la relación comercial.",
+    "fields": {
+      "name": "Nombre *",
+      "document": "Documento",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "notes": "Notas"
+    },
+    "placeholders": {
+      "name": "Nombre del cliente",
+      "document": "DNI / CIF / NIF",
+      "phone": "(00) 00000-0000",
+      "email": "correo@ejemplo.com",
+      "notes": "Observaciones..."
+    },
+    "errors": {
+      "requiredName": "El nombre es obligatorio",
+      "save": "Error al guardar el cliente. Inténtelo de nuevo."
+    },
+    "toasts": {
+      "success": "¡Guardado con éxito!",
+      "error": "Error al guardar. Inténtelo de nuevo."
+    }
+  },
+  "detail": {
+    "editAction": "Editar",
+    "sections": {
+      "profile": {
+        "eyebrow": "Perfil",
+        "title": "Datos del Cliente",
+        "description": "Información de contacto y referencia comercial para acompañar la relación."
+      },
+      "projects": {
+        "eyebrow": "Relación",
+        "title": "Proyectos Vinculados",
+        "description": "Revise rápidamente los proyectos asociados a este cliente y acceda a sus detalles."
+      }
+    },
+    "fields": {
+      "document": "Documento",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "notes": "Notas"
+    },
+    "emptyProjects": "No hay proyectos vinculados."
+  }
+}

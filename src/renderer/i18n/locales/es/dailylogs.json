@@ -1,0 +1,65 @@
+{
+  "title": "Diarios de Operación",
+  "newAction": "Nuevo Registro",
+  "empty": "No hay diarios de operación registrados",
+  "createFirst": "Crear primer registro",
+  "columns": {
+    "date": "Fecha",
+    "project": "Proyecto",
+    "machine": "Máquina",
+    "operator": "Operador",
+    "hoursWorked": "Horas",
+    "fuelQuantity": "Combustible",
+    "actions": "Acciones"
+  },
+  "filters": {
+    "project": "Proyecto",
+    "machine": "Máquina",
+    "operator": "Operador",
+    "dateFrom": "Fecha inicial",
+    "dateTo": "Fecha final",
+    "allProjects": "Todos los proyectos",
+    "allMachines": "Todas las máquinas",
+    "allOperators": "Todos los operadores",
+    "clear": "Limpiar filtros"
+  },
+  "deleteDialog": {
+    "title": "Eliminar registro",
+    "description": "¿Seguro que deseas eliminar este diario? Esta acción no se puede deshacer."
+  },
+  "form": {
+    "newTitle": "Nuevo Diario de Operación",
+    "editTitle": "Editar Diario de Operación",
+    "description": "Registra la rutina del día con horas, máquina, operador y novedades de forma clara y auditable.",
+    "fields": {
+      "date": "Fecha *",
+      "project": "Proyecto *",
+      "machine": "Máquina",
+      "operator": "Operador",
+      "hoursWorked": "Horas Trabajadas *",
+      "fuelQuantity": "Combustible (L)",
+      "workDescription": "Descripción del Servicio",
+      "downtimeNotes": "Observaciones de Parada",
+      "notes": "Observaciones Generales"
+    },
+    "placeholders": {
+      "select": "Seleccionar...",
+      "none": "Ninguno",
+      "hoursWorked": "0,0",
+      "fuelQuantity": "0,0",
+      "workDescription": "Describe el trabajo realizado...",
+      "downtimeNotes": "Registra incidencias o paradas...",
+      "notes": "Observaciones adicionales..."
+    },
+    "errors": {
+      "requiredDate": "La fecha es obligatoria",
+      "requiredProject": "El proyecto es obligatorio",
+      "requiredHours": "Las horas trabajadas deben ser mayores que cero",
+      "save": "Error al guardar el diario. Intenta de nuevo."
+    },
+    "toasts": {
+      "success": "Guardado con éxito",
+      "error": "Error al guardar. Intenta de nuevo."
+    }
+  }
+}

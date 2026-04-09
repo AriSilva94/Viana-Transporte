@@ -1,0 +1,65 @@
+{
+  "title": "Daily Logs",
+  "newAction": "New Entry",
+  "empty": "No daily log recorded",
+  "createFirst": "Create first entry",
+  "columns": {
+    "date": "Date",
+    "project": "Project",
+    "machine": "Machine",
+    "operator": "Operator",
+    "hoursWorked": "Hours",
+    "fuelQuantity": "Fuel",
+    "actions": "Actions"
+  },
+  "filters": {
+    "project": "Project",
+    "machine": "Machine",
+    "operator": "Operator",
+    "dateFrom": "Start date",
+    "dateTo": "End date",
+    "allProjects": "All projects",
+    "allMachines": "All machines",
+    "allOperators": "All operators",
+    "clear": "Clear filters"
+  },
+  "deleteDialog": {
+    "title": "Delete Entry",
+    "description": "Are you sure you want to delete this daily log? This action cannot be undone."
+  },
+  "form": {
+    "newTitle": "New Daily Log",
+    "editTitle": "Edit Daily Log",
+    "description": "Record the day's activity with hours, machine, operator, and incidents in a clear and auditable way.",
+    "fields": {
+      "date": "Date *",
+      "project": "Project *",
+      "machine": "Machine",
+      "operator": "Operator",
+      "hoursWorked": "Hours Worked *",
+      "fuelQuantity": "Fuel (L)",
+      "workDescription": "Work Description",
+      "downtimeNotes": "Downtime Notes",
+      "notes": "General Notes"
+    },
+    "placeholders": {
+      "select": "Select...",
+      "none": "None",
+      "hoursWorked": "0.0",
+      "fuelQuantity": "0.0",
+      "workDescription": "Describe the work performed...",
+      "downtimeNotes": "Record incidents or downtime...",
+      "notes": "Additional notes..."
+    },
+    "errors": {
+      "requiredDate": "Date is required",
+      "requiredProject": "Project is required",
+      "requiredHours": "Worked hours must be greater than zero",
+      "save": "Error saving daily log. Please try again."
+    },
+    "toasts": {
+      "success": "Saved successfully!",
+      "error": "Error saving. Please try again."
+    }
+  }
+}

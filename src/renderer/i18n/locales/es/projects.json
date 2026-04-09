@@ -1,0 +1,116 @@
+{
+  "title": "Proyectos",
+  "newAction": "Nuevo Proyecto",
+  "empty": "No hay proyectos registrados",
+  "createFirst": "Crear primer proyecto",
+  "searchPlaceholder": "Buscar por nombre...",
+  "filters": {
+    "allStatuses": "Todos los estados"
+  },
+  "columns": {
+    "name": "Nombre",
+    "client": "Cliente",
+    "location": "Ubicación",
+    "status": "Estado",
+    "contractAmount": "Valor del Contrato",
+    "actions": "Acciones",
+    "date": "Fecha",
+    "machine": "Máquina",
+    "operator": "Operador",
+    "hours": "Horas",
+    "workDescription": "Servicio",
+    "category": "Categoría",
+    "description": "Descripción",
+    "amount": "Valor"
+  },
+  "deleteDialog": {
+    "title": "Eliminar Proyecto",
+    "description": "¿Seguro que desea eliminar este proyecto? Esta acción no se puede deshacer."
+  },
+  "form": {
+    "newTitle": "Nuevo Proyecto",
+    "editTitle": "Editar Proyecto",
+    "description": "Defina el contexto de la obra, el cliente, el estado y los valores para seguir el proyecto con claridad.",
+    "fields": {
+      "name": "Nombre *",
+      "client": "Cliente *",
+      "location": "Ubicación",
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Fin",
+      "status": "Estado *",
+      "contractAmount": "Valor del Contrato",
+      "description": "Descripción"
+    },
+    "placeholders": {
+      "name": "Nombre del proyecto",
+      "client": "Seleccione un cliente",
+      "location": "Lugar de la obra",
+      "contractAmount": "0,00",
+      "description": "Describa el proyecto..."
+    },
+    "errors": {
+      "requiredName": "El nombre es obligatorio",
+      "requiredClient": "El cliente es obligatorio",
+      "save": "Error al guardar el proyecto. Inténtelo de nuevo."
+    },
+    "toasts": {
+      "success": "¡Guardado con éxito!",
+      "error": "Error al guardar. Inténtelo de nuevo."
+    }
+  },
+  "detail": {
+    "editAction": "Editar",
+    "tabs": {
+      "general": "General",
+      "logs": "Registros",
+      "costs": "Costos",
+      "revenues": "Ingresos",
+      "summary": "Resumen"
+    },
+    "sections": {
+      "general": {
+        "eyebrow": "Contexto",
+        "title": "Datos Generales",
+        "description": "Información central del proyecto para seguimiento operativo y comercial."
+      },
+      "summary": {
+        "eyebrow": "Indicadores",
+        "title": "Resumen Financiero y Operativo",
+        "description": "Lectura rápida de los principales números del proyecto."
+      }
+    },
+    "fields": {
+      "client": "Cliente",
+      "status": "Estado",
+      "location": "Ubicación",
+      "contractAmount": "Valor del Contrato",
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Fin",
+      "description": "Descripción",
+      "totalCosts": "Total de Costos",
+      "totalRevenues": "Total de Ingresos",
+      "profit": "Ganancia / Pérdida",
+      "totalHours": "Total de Horas"
+    },
+    "actions": {
+      "newLog": "Nuevo Registro",
+      "newCost": "Nuevo Costo",
+      "newRevenue": "Nuevo Ingreso"
+    },
+    "empty": {
+      "logs": "No hay registros diarios para este proyecto.",
+      "costs": "No hay costos registrados para este proyecto.",
+      "revenues": "No hay ingresos registrados para este proyecto."
+    },
+    "totalHoursValue": "{{value}}h"
+  },
+  "categories": {
+    "fuel": "Combustible",
+    "labor": "Mano de obra",
+    "maintenance": "Mantenimiento",
+    "transport": "Transporte",
+    "outsourced_service": "Servicio tercerizado",
+    "outsourced": "Servicio tercerizado",
+    "miscellaneous": "Varios"
+  }
+}

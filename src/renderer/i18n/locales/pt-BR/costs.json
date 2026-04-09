@@ -1,0 +1,70 @@
+{
+  "title": "Custos",
+  "newAction": "Novo Custo",
+  "empty": "Nenhum custo registrado",
+  "createFirst": "Registrar primeiro custo",
+  "columns": {
+    "date": "Data",
+    "project": "Projeto",
+    "category": "Categoria",
+    "description": "Descrição",
+    "amount": "Valor",
+    "machine": "Máquina",
+    "actions": "Ações"
+  },
+  "filters": {
+    "project": "Projeto",
+    "category": "Categoria",
+    "dateFrom": "Data inicial",
+    "dateTo": "Data final",
+    "allProjects": "Todos os projetos",
+    "allCategories": "Todas as categorias",
+    "clear": "Limpar filtros"
+  },
+  "categories": {
+    "fuel": "Combustível",
+    "labor": "Mão de obra",
+    "maintenance": "Manutenção",
+    "transport": "Transporte",
+    "outsourced": "Serviço terceirizado",
+    "miscellaneous": "Diversos"
+  },
+  "deleteDialog": {
+    "title": "Excluir Custo",
+    "description": "Tem certeza que deseja excluir este custo? Esta ação não pode ser desfeita."
+  },
+  "form": {
+    "newTitle": "Novo Custo",
+    "editTitle": "Editar Custo",
+    "description": "Registre despesas com contexto suficiente para leitura financeira e rastreabilidade operacional.",
+    "fields": {
+      "date": "Data *",
+      "project": "Projeto *",
+      "category": "Categoria *",
+      "description": "Descrição *",
+      "amount": "Valor (R$) *",
+      "machine": "Máquina",
+      "operator": "Operador",
+      "notes": "Observações"
+    },
+    "placeholders": {
+      "select": "Selecionar...",
+      "none": "Nenhuma",
+      "description": "Descreva o custo...",
+      "amount": "0,00",
+      "notes": "Observações adicionais..."
+    },
+    "errors": {
+      "requiredDate": "Data é obrigatória",
+      "requiredProject": "Projeto é obrigatório",
+      "requiredCategory": "Categoria é obrigatória",
+      "requiredDescription": "Descrição é obrigatória",
+      "requiredAmount": "Valor deve ser maior que zero",
+      "save": "Erro ao salvar custo. Tente novamente."
+    },
+    "toasts": {
+      "success": "Salvo com sucesso!",
+      "error": "Erro ao salvar. Tente novamente."
+    }
+  }
+}

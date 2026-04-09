@@ -1,0 +1,32 @@
+{
+  "appId": "com.viana.transporte.trial",
+  "productName": "Viana Transporte Trial",
+  "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+  "files": [
+    "out/**/*",
+    "package.json"
+  ],
+  "directories": {
+    "output": "dist/trial",
+    "buildResources": "build"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "executableName": "VianaTransporteTrial",
+    "icon": "build/icon.ico",
+    "signAndEditExecutable": false
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "build/icon.ico",
+    "uninstallerIcon": "build/icon.ico"
+  }
+}

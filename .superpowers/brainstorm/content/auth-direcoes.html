@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auth UI Concepts</title>
+  <style>
+    :root{--bg:#f6f7fb;--ink:#172033;--muted:#64748b;--card:#ffffff;--line:#e8ecf3;--accent:#0ea5e9;--accent2:#22c55e}
+    *{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Arial;background:radial-gradient(1200px 600px at 10% -10%,#dbeafe 0,#f6f7fb 55%),radial-gradient(1000px 500px at 110% 120%,#dcfce7 0,#f6f7fb 50%);color:var(--ink)}
+    .wrap{max-width:1100px;margin:32px auto;padding:0 20px}
+    h1{font-size:28px;margin:0 0 8px} .sub{color:var(--muted);margin:0 0 26px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 8px 30px rgba(9,30,66,.06);cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s}
+    .card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(9,30,66,.12);border-color:#cdd7e6}
+    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .tag{font-size:12px;background:#eef2ff;color:#4338ca;padding:4px 8px;border-radius:999px}
+    .preview{height:220px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff,#f8fafc);padding:12px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+    .bar{height:10px;border-radius:999px;background:#e2e8f0}.bar.a{width:72%}.bar.b{width:48%}.bar.c{width:86%}
+    .tabs{display:flex;gap:8px}.pill{padding:8px 10px;border-radius:10px;border:1px solid var(--line);font-size:12px;color:#334155}.pill.on{background:#e0f2fe;border-color:#7dd3fc;color:#075985}
+    .panel{margin-top:auto;border:1px dashed #cbd5e1;border-radius:10px;padding:10px;background:#fff}
+    .motion{font-size:12px;color:#0f766e;background:#ecfeff;border:1px solid #a5f3fc;padding:8px;border-radius:8px}
+    .footer{margin-top:18px;color:#334155;font-size:14px}
+    .selected{outline:3px solid #38bdf8}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Conceitos de Tela de Login</h1>
+    <p class="sub">Clique em um card para escolher uma direção. Foco: transições suaves entre Entrar / Criar conta / Recuperar senha.</p>
+    <div class="grid">
+      <div class="card" data-choice="A" onclick="pick(this)">
+        <div class="head"><strong>A. Wizard Compacto</strong><span class="tag">Recomendado</span></div>
+        <div class="preview">
+          <div class="tabs"><span class="pill on">Entrar</span><span class="pill">Criar conta</span><span class="pill">Recuperar senha</span></div>
+          <div class="bar a"></div><div class="bar c"></div><div class="bar b"></div>
+          <div class="panel">Troca entre modos com <b>slide + fade</b> (220ms), mantendo altura estável.</div>
+          <div class="motion">Microanimação no CTA e no título do modo ativo.</div>
+        </div>
+      </div>
+      <div class="card" data-choice="B" onclick="pick(this)">
+        <div class="head"><strong>B. Split Hero</strong><span class="tag">Mais visual</span></div>
+        <div class="preview">
+          <div class="bar c"></div><div class="bar a"></div>
+          <div class="panel">Lado esquerdo: mensagem/benefícios. Lado direito: formulário em card.</div>
+          <div class="tabs"><span class="pill on">Entrar</span><span class="pill">Criar</span><span class="pill">Recuperar</span></div>
+          <div class="motion">Transição de fundo com gradient shift + crossfade no formulário.</div>
+        </div>
+      </div>
+      <div class="card" data-choice="C" onclick="pick(this)">
+        <div class="head"><strong>C. Stepper Linear</strong><span class="tag">Didático</span></div>
+        <div class="preview">
+          <div class="tabs"><span class="pill on">1 Entrar</span><span class="pill">2 Criar</span><span class="pill">3 Recuperar</span></div>
+          <div class="bar a"></div><div class="bar b"></div>
+          <div class="panel">Navegação por etapas explícitas com progresso.</div>
+          <div class="motion">Animações de progressão e retorno entre etapas.</div>
+        </div>
+      </div>
+    </div>
+    <p class="footer">Depois de escolher, me diga no chat: <b>A</b>, <b>B</b> ou <b>C</b>.</p>
+  </div>
+  <script>
+    function pick(el){
+      document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+  </script>
+</body>
+</html>
