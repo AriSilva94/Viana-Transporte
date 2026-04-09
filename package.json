@@ -76,8 +76,8 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "GITHUB_USER",
-      "repo": "REPO_NAME"
+      "owner": "AriSilva94",
+      "repo": "Viana-Transporte"
     },
     "win": {
       "target": [
