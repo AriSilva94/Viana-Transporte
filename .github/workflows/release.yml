@@ -28,8 +28,16 @@ jobs:
         run: npm run build:full && npx electron-builder --win --x64 --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_AUTH_REDIRECT_URL: ${{ secrets.SUPABASE_AUTH_REDIRECT_URL }}
 
       - name: Build and publish trial version
         run: npm run build:trial && npx electron-builder --win --x64 --config electron-builder.trial.json --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_AUTH_REDIRECT_URL: ${{ secrets.SUPABASE_AUTH_REDIRECT_URL }}
