@@ -5,12 +5,19 @@ import { config as loadDotenv } from 'dotenv'
 import { existsSync } from 'fs'
 
 // Carrega variáveis de ambiente em tempo de build para embuti-las no bundle
+// Lê de .env/.env.local (dev local) e usa process.env como fallback (CI)
 const buildEnv: Record<string, string> = {}
 for (const file of ['.env.local', '.env']) {
   const envPath = resolve(process.cwd(), file)
   if (existsSync(envPath)) {
     const result = loadDotenv({ path: envPath, processEnv: {} })
     if (result.parsed) Object.assign(buildEnv, result.parsed)
+  }
+}
+const envKeys = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ANON_KEY', 'SUPABASE_AUTH_REDIRECT_URL']
+for (const key of envKeys) {
+  if (!buildEnv[key] && process.env[key]) {
+    buildEnv[key] = process.env[key]!
   }
 }
 
