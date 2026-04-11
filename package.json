@@ -1,6 +1,6 @@
 {
   "name": "viana-transporte",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Earthmoving management desktop application",
   "license": "ISC",
   "author": "",
@@ -65,7 +65,7 @@
   "build": {
     "appId": "com.viana.transporte",
     "productName": "Viana Transporte",
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "artifactName": "Viana-Transporte-${version}-${os}-${arch}.${ext}",
     "files": [
       "out/**/*",
       "package.json"
@@ -89,8 +89,7 @@
         }
       ],
       "executableName": "VianaTransporte",
-      "icon": "build/icon.ico",
-      "signAndEditExecutable": false
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
