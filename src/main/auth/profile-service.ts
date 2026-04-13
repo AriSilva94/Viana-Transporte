@@ -3,6 +3,7 @@ import type { SupabaseClientBootstrap } from '../data/supabase/client'
 
 export interface ProfileRepository {
   getByUserId: (userId: string) => Promise<AuthProfile | null>
+  create: (profile: AuthProfile) => Promise<void>
 }
 
 export interface ProfileServiceDependencies {
@@ -11,6 +12,7 @@ export interface ProfileServiceDependencies {
 
 export interface ProfileService {
   getRequiredProfile: (userId: string) => Promise<AuthProfile>
+  ensureProfile: (userId: string, email: string) => Promise<AuthProfile>
 }
 
 interface SupabaseProfileRow {
@@ -54,6 +56,14 @@ export function createProfileServiceFromSupabaseClient(
 
         return result.data?.[0] ?? null
       },
+      async create(profile: AuthProfile): Promise<void> {
+        const { error } = await (client.from('profiles') as unknown as {
+          insert: (row: SupabaseProfileRow) => Promise<{ error: unknown | null }>
+        }).insert({ id: profile.id, email: profile.email, role: profile.role })
+        if (error) {
+          throw new Error(getErrorMessage(error, 'Failed to create user profile'))
+        }
+      },
     },
   })
 }
@@ -68,6 +78,17 @@ export function createProfileService(deps: ProfileServiceDependencies): ProfileS
       }
 
       return profile
+    },
+
+    async ensureProfile(userId: string, email: string): Promise<AuthProfile> {
+      const existing = await deps.profiles.getByUserId(userId)
+      if (existing) {
+        return existing
+      }
+
+      const newProfile: AuthProfile = { id: userId, email, role: 'employee' }
+      await deps.profiles.create(newProfile)
+      return newProfile
     },
   }
 }
