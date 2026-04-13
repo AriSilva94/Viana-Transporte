@@ -75,7 +75,7 @@ describe('createSupabaseRepository', () => {
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
-    const repo = await createSupabaseRepository()
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-1' })
 
     const list = await repo.machines.list({ search: 'Escavadeira', status: 'available' })
     const created = await repo.machines.create({
@@ -127,7 +127,7 @@ describe('createSupabaseRepository', () => {
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
-    const repo = await createSupabaseRepository()
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-1' })
 
     await expect(
       repo.machines.create({
@@ -177,7 +177,7 @@ describe('createSupabaseRepository', () => {
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
-    const repo = await createSupabaseRepository()
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-1' })
 
     const list = await repo.operators.list({ search: 'Operador', isActive: true })
     const created = await repo.operators.create({
@@ -227,7 +227,7 @@ describe('createSupabaseRepository', () => {
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
-    const repo = await createSupabaseRepository()
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-1' })
 
     await expect(
       repo.operators.update(99, {
@@ -320,7 +320,7 @@ describe('createSupabaseRepository', () => {
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
-    const repo = await createSupabaseRepository()
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-1' })
 
     const list = await repo.projects.list({ search: 'Aurora', status: 'active', clientId: 5 })
     const created = await repo.projects.create({
@@ -363,7 +363,7 @@ describe('createSupabaseRepository', () => {
       })
     )
     expect(summary).toMatchObject({ totalCosts: 100, totalRevenues: 250, profit: 150, totalHours: 8 })
-    expect(summaryRpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
+    expect(summaryRpc).toHaveBeenCalledWith('project_summary', { project_id: 21, p_user_id: 'user-1' })
     expect(projectListSelect.eq).toHaveBeenCalledWith('status', 'active')
     expect(projectListSelect.eq).toHaveBeenCalledWith('client_id', 5)
     expect(projectGetSelect.eq).toHaveBeenCalledWith('id', 21)
@@ -410,7 +410,7 @@ describe('createSupabaseRepository', () => {
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
-    const repo = await createSupabaseRepository()
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-1' })
 
     await expect(repo.projects.summary(21)).resolves.toMatchObject({
       totalCosts: 100,
@@ -418,7 +418,7 @@ describe('createSupabaseRepository', () => {
       profit: 150,
       totalHours: 8,
     })
-    expect(supabase.rpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
+    expect(supabase.rpc).toHaveBeenCalledWith('project_summary', { project_id: 21, p_user_id: 'user-1' })
     expect(supabase.from).toHaveBeenCalledWith('project_costs')
     expect(supabase.from).toHaveBeenCalledWith('project_revenues')
     expect(supabase.from).toHaveBeenCalledWith('daily_logs')
@@ -622,7 +622,7 @@ describe('createSupabaseRepository', () => {
 
     createSupabaseClientFromEnvMock.mockResolvedValue(supabase)
 
-    const repo = await createSupabaseRepository()
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-1' })
 
     const dailyLogsList = await repo.dailylogs.list({
       projectId: 21,
