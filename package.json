@@ -18,7 +18,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
-    "db:bootstrap-admin-ownership": "tsx src/main/db/scripts/bootstrap-admin-ownership.ts"
+    "db:bootstrap-admin-ownership": "tsx src/main/db/scripts/run-bootstrap.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
