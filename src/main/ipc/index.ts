@@ -10,6 +10,7 @@ import { registerPreferencesHandlers } from './preferences'
 import { registerLicenseHandlers } from './license'
 import { registerAuthHandlers } from './auth'
 import { registerUpdaterHandlers } from './updater'
+import { registerUsersHandlers } from './users'
 
 export function registerAllHandlers(): void {
   registerClientsHandlers()
@@ -23,5 +24,6 @@ export function registerAllHandlers(): void {
   registerPreferencesHandlers()
   registerLicenseHandlers()
   registerAuthHandlers()
+  registerUsersHandlers()
   registerUpdaterHandlers()
 }

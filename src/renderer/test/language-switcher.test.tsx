@@ -2,11 +2,46 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { AuthContext } from '../context/AuthContext'
 import { i18n, initializeI18n } from '../i18n'
 import { LanguageSwitcher } from '../components/layout/LanguageSwitcher'
 import { Sidebar } from '../components/layout/Sidebar'
+import type { AuthState, AuthRole } from '../../shared/types'
 
 const setLanguage = vi.fn<(...args: ['pt-BR' | 'en' | 'es']) => Promise<'pt-BR' | 'en' | 'es'>>()
+
+function createAuthState(role: AuthRole): AuthState {
+  return {
+    session: null,
+    profile: {
+      id: 'current-user',
+      email: 'current@test.com',
+      role,
+    },
+    pendingPasswordReset: false,
+  }
+}
+
+function renderSidebar(role: AuthRole): void {
+  render(
+    <AuthContext.Provider
+      value={{
+        state: createAuthState(role),
+        loading: false,
+        refresh: vi.fn(),
+        signIn: vi.fn(),
+        signUp: vi.fn(),
+        requestPasswordReset: vi.fn(),
+        updatePassword: vi.fn(),
+        signOut: vi.fn(),
+      }}
+    >
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Sidebar />
+      </MemoryRouter>
+    </AuthContext.Provider>
+  )
+}
 
 describe('LanguageSwitcher', () => {
   beforeEach(async () => {
@@ -14,6 +49,7 @@ describe('LanguageSwitcher', () => {
     setLanguage.mockResolvedValue('en')
 
     window.api = {
+      getVersion: vi.fn().mockResolvedValue('1.0.10'),
       preferences: {
         getSystemLocale: vi.fn(),
         getSavedLanguage: vi.fn(),
@@ -78,15 +114,43 @@ describe('LanguageSwitcher', () => {
     await initializeI18n('es')
 
     render(
-      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Sidebar />
-      </MemoryRouter>
+      <AuthContext.Provider
+        value={{
+          state: createAuthState('admin'),
+          loading: false,
+          refresh: vi.fn(),
+          signIn: vi.fn(),
+          signUp: vi.fn(),
+          requestPasswordReset: vi.fn(),
+          updatePassword: vi.fn(),
+          signOut: vi.fn(),
+        }}
+      >
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Sidebar />
+        </MemoryRouter>
+      </AuthContext.Provider>
     )
 
     expect(screen.getByText('Gestión operativa y financiera')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /panel/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /proyectos/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /informes/i })).toBeInTheDocument()
+  })
+
+  it('mostra Usuarios na sidebar apenas para admin', async () => {
+    await initializeI18n('pt-BR')
+
+    renderSidebar('admin')
+
+    expect(screen.getByRole('link', { name: /usuarios/i })).toBeInTheDocument()
+  })
+
+  it('oculta Usuarios na sidebar para owner e employee', async () => {
+    await initializeI18n('pt-BR')
+
+    renderSidebar('owner')
+    expect(screen.queryByRole('link', { name: /usuarios/i })).not.toBeInTheDocument()
   })
 
   it('carrega o namespace auth na inicializacao do i18n', async () => {

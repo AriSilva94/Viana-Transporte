@@ -14,7 +14,11 @@ if (!supabaseUrl || !serviceRoleKey || !adminEmail) {
   process.exit(1)
 }
 
-const supabase = createClient(supabaseUrl, serviceRoleKey, {
+const requiredSupabaseUrl = supabaseUrl
+const requiredServiceRoleKey = serviceRoleKey
+const requiredAdminEmail = adminEmail
+
+const supabase = createClient(requiredSupabaseUrl, requiredServiceRoleKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 })
 
@@ -61,11 +65,11 @@ const script = createBootstrapAdminOwnership({
 })
 
 async function main() {
-  console.log(`\nBootstrapping admin ownership for: ${adminEmail}`)
+  console.log(`\nBootstrapping admin ownership for: ${requiredAdminEmail}`)
   console.log('---')
 
   try {
-    const result = await script.run({ adminEmail, adminRole: 'admin' })
+    const result = await script.run({ adminEmail: requiredAdminEmail, adminRole: 'admin' })
     console.log(`\nAdmin user ID: ${result.adminId}`)
     console.log(`Tables updated: ${result.tablesUpdated.join(', ')}`)
     console.log('\nBootstrap completed successfully!')

@@ -167,6 +167,13 @@ export interface AuthPasswordResetResult {
   emailSent: true
 }
 
+export interface UserProfileListItem {
+  id: string
+  email: string
+  role: AuthRole
+  createdAt: string
+}
+
 // ─── Filter Types ─────────────────────────────────────────────────────────────
 
 export interface ProjectFilters {
@@ -267,6 +274,10 @@ export interface ElectronAPI {
     updatePassword: (password: string) => Promise<AuthState>
     signOut: () => Promise<void>
     onSessionChanged: (callback: () => void) => () => void
+  }
+  users: {
+    list: () => Promise<UserProfileListItem[]>
+    updateRole: (userId: string, role: AuthRole) => Promise<void>
   }
   license: {
     getStatus: () => Promise<LicenseStatus>
