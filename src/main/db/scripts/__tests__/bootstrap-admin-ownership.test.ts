@@ -18,6 +18,8 @@ describe('SQL schema contract', () => {
     expect(sql).toContain('alter table public.daily_logs add column if not exists user_id uuid')
     expect(sql).toContain('alter table public.project_costs add column if not exists user_id uuid')
     expect(sql).toContain('alter table public.project_revenues add column if not exists user_id uuid')
+    expect(sql).toContain('alter table public.profiles enable row level security')
+    expect(sql).toContain('enable row level security')
   })
 })
 
