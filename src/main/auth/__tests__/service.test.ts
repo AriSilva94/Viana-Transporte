@@ -42,6 +42,7 @@ vi.mock('../../services/license', () => ({
 }))
 
 import { createSupabaseAuthClientFromEnv } from '../client'
+import { createProfileServiceFromSupabaseClient } from '../profile-service'
 import { createAuthService } from '../service'
 
 afterEach(() => {
@@ -127,6 +128,35 @@ describe('createSupabaseAuthClientFromEnv', () => {
         process.env.SUPABASE_ANON_KEY = originalKey
       }
     }
+  })
+})
+
+describe('createProfileServiceFromSupabaseClient', () => {
+  it('loads the authenticated user profile from the profiles table', async () => {
+    const eq = vi.fn().mockResolvedValue({
+      data: [
+        {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
+      ],
+      error: null,
+    })
+    const select = vi.fn().mockReturnValue({ eq })
+    const from = vi.fn().mockReturnValue({ select })
+    const service = createProfileServiceFromSupabaseClient({
+      from,
+    })
+
+    await expect(service.getRequiredProfile('user-1')).resolves.toEqual({
+      id: 'user-1',
+      email: 'a@b.com',
+      role: 'admin',
+    })
+    expect(from).toHaveBeenCalledWith('profiles')
+    expect(select).toHaveBeenCalledWith('id,email,role')
+    expect(eq).toHaveBeenCalledWith('id', 'user-1')
   })
 })
 
@@ -306,6 +336,51 @@ describe('createAuthService', () => {
       await expect(service.signIn({ email: 'a@b.com', password: '123456' })).rejects.toThrow('invalid credentials')
       await expect(service.getState()).resolves.toMatchObject({
         session: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects signIn when the authenticated user has no profile and does not persist session', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn().mockRejectedValue(new Error('Missing profile for authenticated user user-1')),
+    }
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              user: {
+                id: 'user-1',
+                email: 'a@b.com',
+              },
+              expires_at: 123,
+            },
+          },
+          error: null,
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        setSession: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, profileService, userDataPath })
+
+      await expect(service.signIn({ email: 'a@b.com', password: '123456' })).rejects.toThrow(
+        'Missing profile for authenticated user user-1'
+      )
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        profile: null,
         pendingPasswordReset: false,
       })
     } finally {
