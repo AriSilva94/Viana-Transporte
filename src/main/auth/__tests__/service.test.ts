@@ -131,8 +131,15 @@ describe('createSupabaseAuthClientFromEnv', () => {
 })
 
 describe('createAuthService', () => {
-  it('persists session after signIn and restores it in getState', async () => {
+  it('persists session and profile after signIn and restores them in getState', async () => {
     const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      }),
+    }
     const authClient = {
       auth: {
         signInWithPassword: vi.fn().mockResolvedValue({
@@ -158,11 +165,26 @@ describe('createAuthService', () => {
     }
 
     try {
-      const service = await createAuthService({ authClient, userDataPath })
+      const service = await createAuthService({ authClient, profileService, userDataPath })
 
-      await service.signIn({ email: 'a@b.com', password: '123456' })
+      await expect(service.signIn({ email: 'a@b.com', password: '123456' })).resolves.toMatchObject({
+        session: {
+          accessToken: 'access-token',
+          refreshToken: 'refresh-token',
+          userId: 'user-1',
+          email: 'a@b.com',
+          expiresAt: 123,
+        },
+        profile: {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
+        pendingPasswordReset: false,
+      })
+      expect(profileService.getRequiredProfile).toHaveBeenCalledWith('user-1')
 
-      const restored = await createAuthService({ authClient, userDataPath })
+      const restored = await createAuthService({ authClient, profileService, userDataPath })
       await expect(restored.getState()).resolves.toMatchObject({
         session: {
           accessToken: 'access-token',
@@ -171,7 +193,11 @@ describe('createAuthService', () => {
           email: 'a@b.com',
           expiresAt: 123,
         },
-        profile: null,
+        profile: {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
         pendingPasswordReset: false,
       })
     } finally {
@@ -484,6 +510,13 @@ describe('createAuthService', () => {
   })
   it('establishes recovery session from callback tokens before marking recovery state', async () => {
     const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      }),
+    }
     const setSessionMock = vi.fn().mockResolvedValue({
       data: {
         session: {
@@ -510,7 +543,7 @@ describe('createAuthService', () => {
     }
 
     try {
-      const service = await createAuthService({ authClient, userDataPath })
+      const service = await createAuthService({ authClient, profileService, userDataPath })
 
       await expect(
         service.handleCallbackUrl(
@@ -524,6 +557,11 @@ describe('createAuthService', () => {
           email: 'a@b.com',
           expiresAt: 456,
         },
+        profile: {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
         pendingPasswordReset: true,
       })
 
@@ -531,6 +569,7 @@ describe('createAuthService', () => {
         access_token: 'access-token',
         refresh_token: 'refresh-token',
       })
+      expect(profileService.getRequiredProfile).toHaveBeenCalledWith('user-1')
     } finally {
       await rm(userDataPath, { recursive: true, force: true })
     }
