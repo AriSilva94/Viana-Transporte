@@ -33,7 +33,7 @@ function AuthProvider({ children }: { children: React.ReactNode }): JSX.Element 
       setState(nextState)
       return nextState
     } catch {
-      const safeState: AuthState = { session: null, pendingPasswordReset: false }
+      const safeState: AuthState = { session: null, profile: null, pendingPasswordReset: false }
       setState(safeState)
       return safeState
     } finally {
@@ -85,7 +85,7 @@ function AuthProvider({ children }: { children: React.ReactNode }): JSX.Element 
 
   const signOut = React.useCallback(async (): Promise<void> => {
     await window.api.auth.signOut()
-    const nextState: AuthState = { session: null, pendingPasswordReset: false }
+    const nextState: AuthState = { session: null, profile: null, pendingPasswordReset: false }
     setState(nextState)
   }, [])
 

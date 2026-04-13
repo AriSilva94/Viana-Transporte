@@ -7,6 +7,7 @@ const AUTH_STATE_FILE = 'auth-session.json'
 function createDefaultAuthState(): AuthState {
   return {
     session: null,
+    profile: null,
     pendingPasswordReset: false,
   }
 }
@@ -31,6 +32,7 @@ export function createAuthSessionStore(userDataPath: string): AuthSessionStore {
         const parsed = JSON.parse(content) as Partial<AuthState> | null
         return {
           session: parsed?.session ?? null,
+          profile: parsed?.profile ?? null,
           pendingPasswordReset: parsed?.pendingPasswordReset ?? false,
         }
       } catch (error) {

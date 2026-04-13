@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { AuthProvider } from '../context/AuthContext'
+import { AuthProvider, useAuth } from '../context/AuthContext'
 import { initializeI18n } from '../i18n'
 import { AuthPage } from '../pages/auth/AuthPage'
 import {
@@ -262,7 +262,7 @@ describe('App auth flow', () => {
     })
   })
 
-  it('exposes the profile role in the auth state returned by getSession', async () => {
+  it('exposes the profile role through the auth context to consumers', async () => {
     window.api.auth.getSession = vi.fn().mockResolvedValue({
       session: null,
       profile: {
@@ -273,10 +273,14 @@ describe('App auth flow', () => {
       pendingPasswordReset: false,
     })
 
-    await expect(window.api.auth.getSession()).resolves.toMatchObject({
-      profile: {
-        role: 'admin',
-      },
+    render(
+      <AuthProvider>
+        <AuthRoleProbe />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-role')).toHaveTextContent('admin')
     })
   })
 
@@ -624,6 +628,12 @@ describe('App auth flow', () => {
 })
 
 const mockT = ((key: string) => key) as unknown as TFunction
+
+function AuthRoleProbe() {
+  const { state } = useAuth()
+
+  return <div data-testid="auth-role">{state?.profile?.role ?? 'missing'}</div>
+}
 
 describe('authSchemas', () => {
   describe('signInSchema', () => {
