@@ -1,0 +1,17 @@
+{
+  "pageTitle": "Gerenciamento de Usuarios",
+  "email": "Email",
+  "role": "Perfil",
+  "createdAt": "Criado em",
+  "actions": "Ações",
+  "changeRole": "Alterar Perfil",
+  "roleAdmin": "Admin",
+  "roleOwner": "Proprietario",
+  "roleEmployee": "Funcionario",
+  "updateSuccess": "Perfil atualizado com sucesso",
+  "updateError": "Erro ao atualizar perfil",
+  "cannotChangeSelf": "Voce nao pode alterar seu proprio perfil",
+  "lastAdminError": "Deve existir pelo menos um administrador",
+  "unauthorized": "Acesso restrito a administradores",
+  "emptyState": "Nenhum usuario cadastrado"
+}

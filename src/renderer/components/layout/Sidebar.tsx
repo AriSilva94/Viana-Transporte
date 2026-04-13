@@ -10,12 +10,14 @@ import {
   Receipt,
   TrendingUp,
   BarChart2,
+  Shield,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@renderer/lib/utils'
 import logo from '@renderer/assets/img/logo.png'
+import { useAuth } from '@renderer/context/AuthContext'
 
-const navItems = [
+const baseNavItems = [
   { to: '/dashboard', labelKey: 'dashboard', icon: LayoutDashboard },
   { to: '/clients', labelKey: 'clients', icon: Users },
   { to: '/projects', labelKey: 'projects', icon: FolderOpen },
@@ -29,7 +31,13 @@ const navItems = [
 
 export function Sidebar(): JSX.Element {
   const { t } = useTranslation('navigation')
+  const { state } = useAuth()
   const [version, setVersion] = useState('')
+  const isAdmin = state?.profile?.role === 'admin'
+
+  const navItems = isAdmin
+    ? [...baseNavItems, { to: '/users', labelKey: 'users', icon: Shield }]
+    : baseNavItems
 
   useEffect(() => {
     window.api.getVersion().then(setVersion)
