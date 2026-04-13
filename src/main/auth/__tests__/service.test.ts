@@ -171,6 +171,44 @@ describe('createAuthService', () => {
           email: 'a@b.com',
           expiresAt: 123,
         },
+        profile: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('normalizes legacy persisted auth state without a profile key', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+
+    try {
+      await writeFile(
+        join(userDataPath, 'auth-session.json'),
+        JSON.stringify({
+          session: null,
+          pendingPasswordReset: false,
+        }),
+        'utf-8'
+      )
+
+      const service = await createAuthService({
+        authClient: {
+          auth: {
+            signInWithPassword: vi.fn(),
+            signUp: vi.fn(),
+            resetPasswordForEmail: vi.fn(),
+            updateUser: vi.fn(),
+            setSession: vi.fn(),
+            signOut: vi.fn(),
+          },
+        },
+        userDataPath,
+      })
+
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        profile: null,
         pendingPasswordReset: false,
       })
     } finally {
@@ -573,7 +611,11 @@ describe('createAuthDeepLinkRuntime', () => {
     const { createAuthDeepLinkRuntime } = await import('../deep-link')
     const runtime = createAuthDeepLinkRuntime()
 
-    expect(appMock.setAsDefaultProtocolClient).toHaveBeenCalledWith('viana-transporte')
+    expect(appMock.setAsDefaultProtocolClient).toHaveBeenCalledWith(
+      'viana-transporte',
+      expect.any(String),
+      expect.any(Array)
+    )
     expect(appMock.requestSingleInstanceLock).toHaveBeenCalled()
 
     const secondInstance = callbacks.get('second-instance')
