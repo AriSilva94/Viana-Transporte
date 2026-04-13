@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { AuthProvider } from '../context/AuthContext'
+import { AuthProvider, useAuth } from '../context/AuthContext'
 import { initializeI18n } from '../i18n'
 import { AuthPage } from '../pages/auth/AuthPage'
 import {
@@ -46,6 +46,8 @@ describe('window.api auth bridge', () => {
     await api.auth.requestPasswordReset('a@b.com')
     await api.auth.updatePassword('654321')
     await api.auth.signOut()
+    await api.users.list()
+    await api.users.updateRole('user-2', 'owner')
 
     expect(invokeMock).toHaveBeenNthCalledWith(1, 'auth:getSession')
     expect(invokeMock).toHaveBeenNthCalledWith(2, 'auth:signIn', {
@@ -63,6 +65,11 @@ describe('window.api auth bridge', () => {
       password: '654321',
     })
     expect(invokeMock).toHaveBeenNthCalledWith(6, 'auth:signOut')
+    expect(invokeMock).toHaveBeenNthCalledWith(7, 'users:list')
+    expect(invokeMock).toHaveBeenNthCalledWith(8, 'users:updateRole', {
+      userId: 'user-2',
+      role: 'owner',
+    })
   })
 })
 
@@ -72,13 +79,16 @@ describe('App auth flow', () => {
     invokeMock.mockResolvedValue(undefined)
 
     window.api = {
+      getVersion: vi.fn().mockResolvedValue('1.0.10'),
       auth: {
         getSession: vi.fn().mockResolvedValue({
           session: null,
+          profile: null,
           pendingPasswordReset: false,
         }),
         signIn: vi.fn().mockResolvedValue({
           session: null,
+          profile: null,
           pendingPasswordReset: false,
         }),
         signUp: vi.fn(),
@@ -91,6 +101,10 @@ describe('App auth flow', () => {
             // Return cleanup function
           }
         }),
+      },
+      users: {
+        list: vi.fn().mockResolvedValue([]),
+        updateRole: vi.fn().mockResolvedValue(undefined),
       },
       preferences: {
         getSystemLocale: vi.fn().mockResolvedValue('pt-BR'),
@@ -106,6 +120,15 @@ describe('App auth flow', () => {
           readOnly: false,
           daysRemaining: null,
         }),
+      },
+      updater: {
+        checkForUpdates: vi.fn().mockResolvedValue({ success: true, updateAvailable: false }),
+        installUpdate: vi.fn().mockResolvedValue({ success: true }),
+        onUpdateAvailable: vi.fn().mockImplementation(() => () => undefined),
+        onUpdateDownloaded: vi.fn().mockImplementation(() => () => undefined),
+        onDownloadProgress: vi.fn().mockImplementation(() => () => undefined),
+        onError: vi.fn().mockImplementation(() => () => undefined),
+        onUpdateNotAvailable: vi.fn().mockImplementation(() => () => undefined),
       },
       projects: {
         list: vi.fn().mockResolvedValue([]),
@@ -232,6 +255,11 @@ describe('App auth flow', () => {
         email: 'a@b.com',
         expiresAt: null,
       },
+      profile: {
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      },
       pendingPasswordReset: false,
     })
     const { default: App } = await import('../App')
@@ -252,6 +280,60 @@ describe('App auth flow', () => {
     await waitFor(() => {
       expect(window.api.auth.signOut).toHaveBeenCalledTimes(1)
       expect(screen.getByTestId('auth-mode-title')).toBeInTheDocument()
+    })
+  })
+
+  it('exposes the profile role through the auth context to consumers', async () => {
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: null,
+      profile: {
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      },
+      pendingPasswordReset: false,
+    })
+
+    render(
+      <AuthProvider>
+        <AuthRoleProbe />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-role')).toHaveTextContent('admin')
+    })
+  })
+
+  it('redirects non-admin users away from the users route', async () => {
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: {
+        accessToken: 'token',
+        refreshToken: 'refresh',
+        userId: 'user-1',
+        email: 'owner@b.com',
+        expiresAt: null,
+      },
+      profile: {
+        id: 'user-1',
+        email: 'owner@b.com',
+        role: 'owner',
+      },
+      pendingPasswordReset: false,
+    })
+
+    window.location.hash = '#/users'
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Dashboard', current: 'page' })).toBeInTheDocument()
+      expect(screen.queryByText('Gerenciamento de Usuarios')).not.toBeInTheDocument()
     })
   })
 
@@ -323,7 +405,8 @@ describe('App auth flow', () => {
     window.api.auth.signIn = vi.fn().mockImplementation(
       () =>
         new Promise((resolve) => {
-          resolveSignInRef.current = () => resolve({ session: null, pendingPasswordReset: false })
+          resolveSignInRef.current = () =>
+            resolve({ session: null, profile: null, pendingPasswordReset: false })
         })
     )
 
@@ -598,6 +681,12 @@ describe('App auth flow', () => {
 })
 
 const mockT = ((key: string) => key) as unknown as TFunction
+
+function AuthRoleProbe() {
+  const { state } = useAuth()
+
+  return <div data-testid="auth-role">{state?.profile?.role ?? 'missing'}</div>
+}
 
 describe('authSchemas', () => {
   describe('signInSchema', () => {

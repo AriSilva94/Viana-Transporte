@@ -1,0 +1,17 @@
+{
+  "pageTitle": "User Management",
+  "email": "Email",
+  "role": "Role",
+  "createdAt": "Created at",
+  "actions": "Actions",
+  "changeRole": "Change Role",
+  "roleAdmin": "Admin",
+  "roleOwner": "Owner",
+  "roleEmployee": "Employee",
+  "updateSuccess": "Role updated successfully",
+  "updateError": "Failed to update role",
+  "cannotChangeSelf": "You cannot change your own role",
+  "lastAdminError": "At least one administrator must remain",
+  "unauthorized": "Admin access only",
+  "emptyState": "No users found"
+}

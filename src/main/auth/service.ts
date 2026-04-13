@@ -1,10 +1,12 @@
 import type {
   AuthPasswordResetResult,
+  AuthProfile,
   AuthSession,
   AuthSignUpResult,
   AuthState,
 } from '../../shared/types'
 import { createSupabaseAuthClientFromEnv } from './client'
+import type { ProfileService } from './profile-service'
 import { createAuthSessionStore, type AuthSessionStore } from './session-store'
 
 export interface AuthCredentials {
@@ -61,6 +63,7 @@ export interface AuthService {
 export interface AuthServiceDependencies {
   userDataPath: string
   authClient?: SupabaseAuthClientLike
+  profileService?: ProfileService
   sessionStore?: AuthSessionStore
 }
 
@@ -117,13 +120,26 @@ function getCallbackParams(url: string): URLSearchParams {
 function createAuthStateFromCurrentState(state: AuthState): AuthState {
   return {
     session: state.session,
+    profile: state.profile,
     pendingPasswordReset: false,
   }
+}
+
+async function loadProfileForSession(
+  profileService: ProfileService | undefined,
+  session: AuthSession | null
+): Promise<AuthProfile | null> {
+  if (!profileService || !session?.userId) {
+    return null
+  }
+
+  return profileService.ensureProfile(session.userId, session.email ?? '')
 }
 
 export function createAuthService({
   userDataPath,
   authClient,
+  profileService,
   sessionStore = createAuthSessionStore(userDataPath),
 }: AuthServiceDependencies): AuthService {
   let authClientPromise = authClient ? Promise.resolve(authClient) : null
@@ -153,8 +169,10 @@ export function createAuthService({
       const client = await resolveAuthClient()
       const result = await client.auth.signInWithPassword({ email, password })
       throwIfSupabaseError(result.error, 'Failed to sign in')
+      const session = mapSupabaseSession(result.data.session)
       const nextState = {
-        session: mapSupabaseSession(result.data.session),
+        session,
+        profile: await loadProfileForSession(profileService, session),
         pendingPasswordReset: false,
       }
 
@@ -227,8 +245,12 @@ export function createAuthService({
         }
 
         const currentState = await readState()
+        const profile = session
+          ? await loadProfileForSession(profileService, session)
+          : currentState.profile
         return writeState({
           session: session ?? currentState.session,
+          profile,
           pendingPasswordReset: true,
         })
       }
@@ -245,7 +267,11 @@ export function createAuthService({
           })
           throwIfSupabaseError(result.error, 'Failed to confirm signup')
           const session = mapSupabaseSession(result.data.session)
-          return writeState({ session, pendingPasswordReset: false })
+          return writeState({
+            session,
+            profile: await loadProfileForSession(profileService, session),
+            pendingPasswordReset: false,
+          })
         }
       }
 

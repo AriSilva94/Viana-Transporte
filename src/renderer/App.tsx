@@ -26,8 +26,19 @@ import { CostFormPage } from './pages/costs/CostFormPage'
 import { RevenuesPage } from './pages/revenues'
 import { RevenueFormPage } from './pages/revenues/RevenueFormPage'
 import { ReportsPage } from './pages/reports'
+import { UsersPage } from './pages/users'
 import { api } from './lib/api'
 import type { LicenseStatus } from '../shared/license'
+
+function AdminRoute({ children }: { children: JSX.Element }): JSX.Element {
+  const { state } = useAuth()
+
+  if (state?.profile?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return children
+}
 
 export default function App(): JSX.Element {
   const { loading: authLoading } = useAuth()
@@ -104,6 +115,14 @@ export default function App(): JSX.Element {
           <Route path="revenues/new" element={<RevenueFormPage />} />
           <Route path="revenues/:id/edit" element={<RevenueFormPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route
+            path="users"
+            element={
+              <AdminRoute>
+                <UsersPage />
+              </AdminRoute>
+            }
+          />
         </Route>
       </Routes>
     </HashRouter>

@@ -137,6 +137,14 @@ export interface AppPreferences {
   language: SupportedLocale | null
 }
 
+export type AuthRole = 'admin' | 'owner' | 'employee'
+
+export interface AuthProfile {
+  id: string
+  email: string
+  role: AuthRole
+}
+
 export interface AuthSession {
   accessToken: string
   refreshToken: string
@@ -147,6 +155,7 @@ export interface AuthSession {
 
 export interface AuthState {
   session: AuthSession | null
+  profile: AuthProfile | null
   pendingPasswordReset: boolean
 }
 
@@ -156,6 +165,13 @@ export interface AuthSignUpResult {
 
 export interface AuthPasswordResetResult {
   emailSent: true
+}
+
+export interface UserProfileListItem {
+  id: string
+  email: string
+  role: AuthRole
+  createdAt: string
 }
 
 // ─── Filter Types ─────────────────────────────────────────────────────────────
@@ -258,6 +274,10 @@ export interface ElectronAPI {
     updatePassword: (password: string) => Promise<AuthState>
     signOut: () => Promise<void>
     onSessionChanged: (callback: () => void) => () => void
+  }
+  users: {
+    list: () => Promise<UserProfileListItem[]>
+    updateRole: (userId: string, role: AuthRole) => Promise<void>
   }
   license: {
     getStatus: () => Promise<LicenseStatus>
