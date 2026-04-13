@@ -70,6 +70,11 @@ type SupabaseClientLike = {
   rpc<T = unknown>(fn: string, params: Record<string, unknown>): Promise<SupabaseResult<T>>
 }
 
+export interface SupabaseRepositoryDependencies {
+  client?: SupabaseClientLike
+  getCurrentUserId: () => Promise<string>
+}
+
 function throwIfError(error: { message: string } | null): void {
   if (error) {
     throw new Error(error.message)
@@ -106,17 +111,18 @@ function sumNumericValues<T extends Record<string, number | string | null>>(
   return rows.reduce((total, row) => total + Number(row[key] ?? 0), 0)
 }
 
-async function loadClientNameMap(client: SupabaseClientLike): Promise<Map<number, string>> {
-  const result = await client.from<Pick<SupabaseClientRow, 'id' | 'name'>[]>('clients').select('id,name')
+async function loadClientNameMap(client: SupabaseClientLike, userId: string): Promise<Map<number, string>> {
+  const result = await client.from<Pick<SupabaseClientRow, 'id' | 'name'>[]>('clients').select('id,name').eq('user_id', userId)
   const rows = ensureList(result as SupabaseResult<Pick<SupabaseClientRow, 'id' | 'name'>[] | null>)
   return new Map(rows.map((row) => [row.id, row.name]))
 }
 
 async function loadProjectRows(
   client: SupabaseClientLike,
+  userId: string,
   filters?: ProjectFilters
 ): Promise<SupabaseProjectRow[]> {
-  let query = client.from<SupabaseProjectRow[]>('projects').select('*')
+  let query = client.from<SupabaseProjectRow[]>('projects').select('*').eq('user_id', userId)
 
   if (filters?.search?.trim()) {
     query = query.or(`name.ilike.%${filters.search.trim()}%`)
@@ -134,30 +140,30 @@ async function loadProjectRows(
   return ensureList(result as SupabaseResult<SupabaseProjectRow[] | null>)
 }
 
-async function loadProjectById(client: SupabaseClientLike, id: number): Promise<SupabaseProjectRow | null> {
-  const result = await client.from<SupabaseProjectRow[]>('projects').select('*').eq('id', id)
+async function loadProjectById(client: SupabaseClientLike, userId: string, id: number): Promise<SupabaseProjectRow | null> {
+  const result = await client.from<SupabaseProjectRow[]>('projects').select('*').eq('id', id).eq('user_id', userId)
   return firstItem(result.data)
 }
 
-async function loadClientNameById(client: SupabaseClientLike, clientId: number): Promise<string | null> {
-  const result = await client.from<Pick<SupabaseClientRow, 'id' | 'name'>[]>('clients').select('id,name').eq('id', clientId)
+async function loadClientNameById(client: SupabaseClientLike, userId: string, clientId: number): Promise<string | null> {
+  const result = await client.from<Pick<SupabaseClientRow, 'id' | 'name'>[]>('clients').select('id,name').eq('id', clientId).eq('user_id', userId)
   return firstItem(result.data)?.name ?? null
 }
 
-async function loadProjectNameMap(client: SupabaseClientLike): Promise<Map<number, string>> {
-  const result = await client.from<Pick<SupabaseProjectRow, 'id' | 'name'>[]>('projects').select('id,name')
+async function loadProjectNameMap(client: SupabaseClientLike, userId: string): Promise<Map<number, string>> {
+  const result = await client.from<Pick<SupabaseProjectRow, 'id' | 'name'>[]>('projects').select('id,name').eq('user_id', userId)
   const rows = ensureList(result as SupabaseResult<Pick<SupabaseProjectRow, 'id' | 'name'>[] | null>)
   return new Map(rows.map((row) => [row.id, row.name]))
 }
 
-async function loadMachineNameMap(client: SupabaseClientLike): Promise<Map<number, string>> {
-  const result = await client.from<Pick<SupabaseMachineRow, 'id' | 'name'>[]>('machines').select('id,name')
+async function loadMachineNameMap(client: SupabaseClientLike, userId: string): Promise<Map<number, string>> {
+  const result = await client.from<Pick<SupabaseMachineRow, 'id' | 'name'>[]>('machines').select('id,name').eq('user_id', userId)
   const rows = ensureList(result as SupabaseResult<Pick<SupabaseMachineRow, 'id' | 'name'>[] | null>)
   return new Map(rows.map((row) => [row.id, row.name]))
 }
 
-async function loadOperatorNameMap(client: SupabaseClientLike): Promise<Map<number, string>> {
-  const result = await client.from<Pick<SupabaseOperatorRow, 'id' | 'name'>[]>('operators').select('id,name')
+async function loadOperatorNameMap(client: SupabaseClientLike, userId: string): Promise<Map<number, string>> {
+  const result = await client.from<Pick<SupabaseOperatorRow, 'id' | 'name'>[]>('operators').select('id,name').eq('user_id', userId)
   const rows = ensureList(result as SupabaseResult<Pick<SupabaseOperatorRow, 'id' | 'name'>[] | null>)
   return new Map(rows.map((row) => [row.id, row.name]))
 }
@@ -168,9 +174,10 @@ function toDateOnly(value: Date | string | number): string {
 
 async function loadDailyLogRows(
   client: SupabaseClientLike,
+  userId: string,
   filters?: DailyLogFilters
 ): Promise<SupabaseDailyLogRow[]> {
-  let query = client.from<SupabaseDailyLogRow[]>('daily_logs').select('*')
+  let query = client.from<SupabaseDailyLogRow[]>('daily_logs').select('*').eq('user_id', userId)
 
   if (filters?.projectId) query = query.eq('project_id', filters.projectId)
   if (filters?.machineId) query = query.eq('machine_id', filters.machineId)
@@ -182,13 +189,13 @@ async function loadDailyLogRows(
   return ensureList(result as SupabaseResult<SupabaseDailyLogRow[] | null>)
 }
 
-async function loadDailyLogById(client: SupabaseClientLike, id: number): Promise<SupabaseDailyLogRow | null> {
-  const result = await client.from<SupabaseDailyLogRow[]>('daily_logs').select('*').eq('id', id)
+async function loadDailyLogById(client: SupabaseClientLike, userId: string, id: number): Promise<SupabaseDailyLogRow | null> {
+  const result = await client.from<SupabaseDailyLogRow[]>('daily_logs').select('*').eq('id', id).eq('user_id', userId)
   return firstItem(result.data)
 }
 
-async function loadCostRows(client: SupabaseClientLike, filters?: CostFilters): Promise<SupabaseProjectCostRow[]> {
-  let query = client.from<SupabaseProjectCostRow[]>('project_costs').select('*')
+async function loadCostRows(client: SupabaseClientLike, userId: string, filters?: CostFilters): Promise<SupabaseProjectCostRow[]> {
+  let query = client.from<SupabaseProjectCostRow[]>('project_costs').select('*').eq('user_id', userId)
 
   if (filters?.projectId) query = query.eq('project_id', filters.projectId)
   if (filters?.category) query = query.eq('category', filters.category)
@@ -199,16 +206,17 @@ async function loadCostRows(client: SupabaseClientLike, filters?: CostFilters): 
   return ensureList(result as SupabaseResult<SupabaseProjectCostRow[] | null>)
 }
 
-async function loadCostById(client: SupabaseClientLike, id: number): Promise<SupabaseProjectCostRow | null> {
-  const result = await client.from<SupabaseProjectCostRow[]>('project_costs').select('*').eq('id', id)
+async function loadCostById(client: SupabaseClientLike, userId: string, id: number): Promise<SupabaseProjectCostRow | null> {
+  const result = await client.from<SupabaseProjectCostRow[]>('project_costs').select('*').eq('id', id).eq('user_id', userId)
   return firstItem(result.data)
 }
 
 async function loadRevenueRows(
   client: SupabaseClientLike,
+  userId: string,
   filters?: RevenueFilters
 ): Promise<SupabaseProjectRevenueRow[]> {
-  let query = client.from<SupabaseProjectRevenueRow[]>('project_revenues').select('*')
+  let query = client.from<SupabaseProjectRevenueRow[]>('project_revenues').select('*').eq('user_id', userId)
 
   if (filters?.projectId) query = query.eq('project_id', filters.projectId)
   if (filters?.status) query = query.eq('status', filters.status)
@@ -221,19 +229,21 @@ async function loadRevenueRows(
 
 async function loadRevenueById(
   client: SupabaseClientLike,
+  userId: string,
   id: number
 ): Promise<SupabaseProjectRevenueRow | null> {
-  const result = await client.from<SupabaseProjectRevenueRow[]>('project_revenues').select('*').eq('id', id)
+  const result = await client.from<SupabaseProjectRevenueRow[]>('project_revenues').select('*').eq('id', id).eq('user_id', userId)
   return firstItem(result.data)
 }
 
-async function loadProjectSummaryFallback(client: SupabaseClientLike, id: number): Promise<ProjectSummary> {
+async function loadProjectSummaryFallback(client: SupabaseClientLike, userId: string, id: number): Promise<ProjectSummary> {
   const [costsResult, revenuesResult, hoursResult] = await Promise.all([
-    client.from<Array<{ amount: number | string | null }>>('project_costs').select('amount').eq('project_id', id),
-    client.from<Array<{ amount: number | string | null }>>('project_revenues').select('amount').eq('project_id', id),
+    client.from<Array<{ amount: number | string | null }>>('project_costs').select('amount').eq('project_id', id).eq('user_id', userId),
+    client.from<Array<{ amount: number | string | null }>>('project_revenues').select('amount').eq('project_id', id).eq('user_id', userId),
     client.from<Array<{ hours_worked: number | string | null }>>('daily_logs')
       .select('hours_worked')
-      .eq('project_id', id),
+      .eq('project_id', id)
+      .eq('user_id', userId),
   ])
 
   throwIfError(costsResult.error)
@@ -256,13 +266,17 @@ async function loadProjectSummaryFallback(client: SupabaseClientLike, id: number
   }
 }
 
-export async function createSupabaseRepository(): Promise<DomainRepository> {
-  const client = (await createSupabaseClientFromEnv()) as unknown as SupabaseClientLike
+export async function createSupabaseRepository(
+  deps?: SupabaseRepositoryDependencies
+): Promise<DomainRepository> {
+  const client = deps?.client ?? (await createSupabaseClientFromEnv()) as unknown as SupabaseClientLike
+  const getCurrentUserId = deps?.getCurrentUserId ?? (async () => { throw new Error('No user context provided') })
 
   return {
     clients: {
       async list(filters?: { search?: string }) {
-        let query = client.from<SupabaseClientRow[]>('clients').select('*')
+        const userId = await getCurrentUserId()
+        let query = client.from<SupabaseClientRow[]>('clients').select('*').eq('user_id', userId)
 
         if (filters?.search?.trim()) {
           const search = filters.search.trim().replaceAll('"', '\\"')
@@ -275,7 +289,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async get(id: number) {
-        const result = await client.from<SupabaseClientRow[]>('clients').select('*').eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from<SupabaseClientRow[]>('clients').select('*').eq('id', id).eq('user_id', userId)
         const row = firstItem(result.data)
         if (!row) {
           return null
@@ -284,47 +299,55 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         return mapSupabaseClientRow(row as never)
       },
       async create(data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) {
-        const result = await client.from<SupabaseClientRow[]>('clients').insert(mapClientToSupabaseInsert(data)).select('*')
+        const userId = await getCurrentUserId()
+        const result = await client.from<SupabaseClientRow[]>('clients').insert(mapClientToSupabaseInsert(data, userId)).select('*')
         return mapSupabaseClientRow(
           ensureItem(result as SupabaseResult<SupabaseClientRow[] | SupabaseClientRow | null>)
         )
       },
       async update(id: number, data: Partial<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseClientRow[]>('clients')
           .update({ ...data, updated_at: new Date().toISOString() })
           .eq('id', id)
+          .eq('user_id', userId)
           .select('*')
         return mapSupabaseClientRow(
           ensureItem(result as SupabaseResult<SupabaseClientRow[] | SupabaseClientRow | null>)
         )
       },
       async delete(id: number) {
-        const result = await client.from('clients').delete().eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from('clients').delete().eq('id', id).eq('user_id', userId)
         throwIfError(result.error)
       },
     },
     projects: {
       async list(filters?: ProjectFilters) {
-        const [rows, clientNames] = await Promise.all([loadProjectRows(client, filters), loadClientNameMap(client)])
+        const userId = await getCurrentUserId()
+        const [rows, clientNames] = await Promise.all([loadProjectRows(client, userId, filters), loadClientNameMap(client, userId)])
         return rows.map((row) => mapSupabaseProjectWithClientRow(row, clientNames.get(row.client_id) ?? null))
       },
       async get(id: number) {
-        const row = await loadProjectById(client, id)
+        const userId = await getCurrentUserId()
+        const row = await loadProjectById(client, userId, id)
         if (!row) {
           return null
         }
 
-        const clientName = await loadClientNameById(client, row.client_id)
+        const clientName = await loadClientNameById(client, userId, row.client_id)
         return mapSupabaseProjectWithClientRow(row, clientName)
       },
       async create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) {
-        const result = await client.from<SupabaseProjectRow[]>('projects').insert(mapProjectToSupabaseInsert(data)).select('*')
+        const userId = await getCurrentUserId()
+        const result = await client.from<SupabaseProjectRow[]>('projects').insert(mapProjectToSupabaseInsert(data, userId)).select('*')
         return mapSupabaseProjectRow(
           ensureItem(result as SupabaseResult<SupabaseProjectRow[] | SupabaseProjectRow | null>)
         )
       },
       async update(id: number, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectRow[]>('projects')
           .update({
@@ -334,6 +357,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
+          .eq('user_id', userId)
           .select('*')
 
         return mapSupabaseProjectRow(
@@ -341,27 +365,30 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async delete(id: number) {
-        const result = await client.from('projects').delete().eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from('projects').delete().eq('id', id).eq('user_id', userId)
         throwIfError(result.error)
       },
       async summary(id: number) {
+        const userId = await getCurrentUserId()
         try {
           const result = await client.rpc<SupabaseProjectSummaryRow[] | SupabaseProjectSummaryRow>(
             'project_summary',
-            { project_id: id }
+            { project_id: id, p_user_id: userId }
           )
 
           return mapProjectSummaryRow(
             ensureItem(result as SupabaseResult<SupabaseProjectSummaryRow[] | SupabaseProjectSummaryRow | null>)
           )
         } catch {
-          return loadProjectSummaryFallback(client, id)
+          return loadProjectSummaryFallback(client, userId, id)
         }
       },
     },
     machines: {
       async list(filters?: { search?: string; status?: Machine['status'] }) {
-        let query = client.from<SupabaseMachineRow[]>('machines').select('*')
+        const userId = await getCurrentUserId()
+        let query = client.from<SupabaseMachineRow[]>('machines').select('*').eq('user_id', userId)
 
         if (filters?.search?.trim()) {
           const search = filters.search.trim().replaceAll('"', '\\"')
@@ -378,7 +405,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async get(id: number) {
-        const result = await client.from<SupabaseMachineRow[]>('machines').select('*').eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from<SupabaseMachineRow[]>('machines').select('*').eq('id', id).eq('user_id', userId)
         const row = firstItem(result.data)
         if (!row) {
           return null
@@ -387,29 +415,34 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         return mapSupabaseMachineRow(row as never)
       },
       async create(data: Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>) {
-        const result = await client.from<SupabaseMachineRow[]>('machines').insert(mapMachineToSupabaseInsert(data)).select('*')
+        const userId = await getCurrentUserId()
+        const result = await client.from<SupabaseMachineRow[]>('machines').insert(mapMachineToSupabaseInsert(data, userId)).select('*')
         return mapSupabaseMachineRow(
           ensureItem(result as SupabaseResult<SupabaseMachineRow[] | SupabaseMachineRow | null>)
         )
       },
       async update(id: number, data: Partial<Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseMachineRow[]>('machines')
           .update({ ...data, updated_at: new Date().toISOString() })
           .eq('id', id)
+          .eq('user_id', userId)
           .select('*')
         return mapSupabaseMachineRow(
           ensureItem(result as SupabaseResult<SupabaseMachineRow[] | SupabaseMachineRow | null>)
         )
       },
       async delete(id: number) {
-        const result = await client.from('machines').delete().eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from('machines').delete().eq('id', id).eq('user_id', userId)
         throwIfError(result.error)
       },
     },
     operators: {
       async list(filters?: { search?: string; isActive?: boolean }) {
-        let query = client.from<SupabaseOperatorRow[]>('operators').select('*')
+        const userId = await getCurrentUserId()
+        let query = client.from<SupabaseOperatorRow[]>('operators').select('*').eq('user_id', userId)
 
         if (filters?.search?.trim()) {
           const search = filters.search.trim().replaceAll('"', '\\"')
@@ -426,7 +459,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async get(id: number) {
-        const result = await client.from<SupabaseOperatorRow[]>('operators').select('*').eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from<SupabaseOperatorRow[]>('operators').select('*').eq('id', id).eq('user_id', userId)
         const row = firstItem(result.data)
         if (!row) {
           return null
@@ -435,33 +469,38 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         return mapSupabaseOperatorRow(row as never)
       },
       async create(data: Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>) {
-        const result = await client.from<SupabaseOperatorRow[]>('operators').insert(mapOperatorToSupabaseInsert(data)).select('*')
+        const userId = await getCurrentUserId()
+        const result = await client.from<SupabaseOperatorRow[]>('operators').insert(mapOperatorToSupabaseInsert(data, userId)).select('*')
         return mapSupabaseOperatorRow(
           ensureItem(result as SupabaseResult<SupabaseOperatorRow[] | SupabaseOperatorRow | null>)
         )
       },
       async update(id: number, data: Partial<Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseOperatorRow[]>('operators')
           .update({ ...data, updated_at: new Date().toISOString() })
           .eq('id', id)
+          .eq('user_id', userId)
           .select('*')
         return mapSupabaseOperatorRow(
           ensureItem(result as SupabaseResult<SupabaseOperatorRow[] | SupabaseOperatorRow | null>)
         )
       },
       async delete(id: number) {
-        const result = await client.from('operators').delete().eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from('operators').delete().eq('id', id).eq('user_id', userId)
         throwIfError(result.error)
       },
     },
     dailylogs: {
       async list(filters?: DailyLogFilters) {
+        const userId = await getCurrentUserId()
         const [rows, projectNames, machineNames, operatorNames] = await Promise.all([
-          loadDailyLogRows(client, filters),
-          loadProjectNameMap(client),
-          loadMachineNameMap(client),
-          loadOperatorNameMap(client),
+          loadDailyLogRows(client, userId, filters),
+          loadProjectNameMap(client, userId),
+          loadMachineNameMap(client, userId),
+          loadOperatorNameMap(client, userId),
         ])
 
         return rows.map((row) =>
@@ -473,15 +512,16 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async get(id: number) {
-        const row = await loadDailyLogById(client, id)
+        const userId = await getCurrentUserId()
+        const row = await loadDailyLogById(client, userId, id)
         if (!row) {
           return null
         }
 
         const [projectNames, machineNames, operatorNames] = await Promise.all([
-          loadProjectNameMap(client),
-          loadMachineNameMap(client),
-          loadOperatorNameMap(client),
+          loadProjectNameMap(client, userId),
+          loadMachineNameMap(client, userId),
+          loadOperatorNameMap(client, userId),
         ])
 
         return mapSupabaseDailyLogWithRelationsRow(row, {
@@ -491,9 +531,10 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         })
       },
       async create(data: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseDailyLogRow[]>('daily_logs')
-          .insert(mapDailyLogToSupabaseInsert(data))
+          .insert(mapDailyLogToSupabaseInsert(data, userId))
           .select('*')
 
         return mapSupabaseDailyLogRow(
@@ -501,6 +542,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async update(id: number, data: Partial<Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseDailyLogRow[]>('daily_logs')
           .update({
@@ -509,6 +551,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
+          .eq('user_id', userId)
           .select('*')
 
         return mapSupabaseDailyLogRow(
@@ -516,17 +559,19 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async delete(id: number) {
-        const result = await client.from('daily_logs').delete().eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from('daily_logs').delete().eq('id', id).eq('user_id', userId)
         throwIfError(result.error)
       },
     },
     costs: {
       async list(filters?: CostFilters) {
+        const userId = await getCurrentUserId()
         const [rows, projectNames, machineNames, operatorNames] = await Promise.all([
-          loadCostRows(client, filters),
-          loadProjectNameMap(client),
-          loadMachineNameMap(client),
-          loadOperatorNameMap(client),
+          loadCostRows(client, userId, filters),
+          loadProjectNameMap(client, userId),
+          loadMachineNameMap(client, userId),
+          loadOperatorNameMap(client, userId),
         ])
 
         return rows.map((row) =>
@@ -538,15 +583,16 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async get(id: number) {
-        const row = await loadCostById(client, id)
+        const userId = await getCurrentUserId()
+        const row = await loadCostById(client, userId, id)
         if (!row) {
           return null
         }
 
         const [projectNames, machineNames, operatorNames] = await Promise.all([
-          loadProjectNameMap(client),
-          loadMachineNameMap(client),
-          loadOperatorNameMap(client),
+          loadProjectNameMap(client, userId),
+          loadMachineNameMap(client, userId),
+          loadOperatorNameMap(client, userId),
         ])
 
         return mapSupabaseProjectCostWithRelationsRow(row, {
@@ -556,9 +602,10 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         })
       },
       async create(data: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectCostRow[]>('project_costs')
-          .insert(mapProjectCostToSupabaseInsert(data))
+          .insert(mapProjectCostToSupabaseInsert(data, userId))
           .select('*')
 
         return mapSupabaseProjectCostRow(
@@ -566,6 +613,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async update(id: number, data: Partial<Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectCostRow[]>('project_costs')
           .update({
@@ -574,6 +622,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
+          .eq('user_id', userId)
           .select('*')
 
         return mapSupabaseProjectCostRow(
@@ -581,31 +630,35 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async delete(id: number) {
-        const result = await client.from('project_costs').delete().eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from('project_costs').delete().eq('id', id).eq('user_id', userId)
         throwIfError(result.error)
       },
     },
     revenues: {
       async list(filters?: RevenueFilters) {
-        const [rows, projectNames] = await Promise.all([loadRevenueRows(client, filters), loadProjectNameMap(client)])
+        const userId = await getCurrentUserId()
+        const [rows, projectNames] = await Promise.all([loadRevenueRows(client, userId, filters), loadProjectNameMap(client, userId)])
 
         return rows.map((row) =>
           mapSupabaseProjectRevenueWithRelationsRow(row, projectNames.get(row.project_id) ?? null)
         )
       },
       async get(id: number) {
-        const row = await loadRevenueById(client, id)
+        const userId = await getCurrentUserId()
+        const row = await loadRevenueById(client, userId, id)
         if (!row) {
           return null
         }
 
-        const projectNames = await loadProjectNameMap(client)
+        const projectNames = await loadProjectNameMap(client, userId)
         return mapSupabaseProjectRevenueWithRelationsRow(row, projectNames.get(row.project_id) ?? null)
       },
       async create(data: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectRevenueRow[]>('project_revenues')
-          .insert(mapProjectRevenueToSupabaseInsert(data))
+          .insert(mapProjectRevenueToSupabaseInsert(data, userId))
           .select('*')
 
         return mapSupabaseProjectRevenueRow(
@@ -613,6 +666,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async update(id: number, data: Partial<Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>>) {
+        const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectRevenueRow[]>('project_revenues')
           .update({
@@ -621,6 +675,7 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
             updated_at: new Date().toISOString(),
           })
           .eq('id', id)
+          .eq('user_id', userId)
           .select('*')
 
         return mapSupabaseProjectRevenueRow(
@@ -628,7 +683,8 @@ export async function createSupabaseRepository(): Promise<DomainRepository> {
         )
       },
       async delete(id: number) {
-        const result = await client.from('project_revenues').delete().eq('id', id)
+        const userId = await getCurrentUserId()
+        const result = await client.from('project_revenues').delete().eq('id', id).eq('user_id', userId)
         throwIfError(result.error)
       },
     },

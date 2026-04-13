@@ -16,6 +16,7 @@ import { formatLocalDate, parseLocalDate } from '../../shared/date'
 
 export interface SupabaseClientRow {
   id: number
+  user_id: string
   name: string
   document: string | null
   phone: string | null
@@ -27,6 +28,7 @@ export interface SupabaseClientRow {
 
 export interface SupabaseMachineRow {
   id: number
+  user_id: string
   name: string
   type: string
   identifier: string | null
@@ -39,6 +41,7 @@ export interface SupabaseMachineRow {
 
 export interface SupabaseOperatorRow {
   id: number
+  user_id: string
   name: string
   phone: string | null
   role: string | null
@@ -50,6 +53,7 @@ export interface SupabaseOperatorRow {
 
 export interface SupabaseProjectRow {
   id: number
+  user_id: string
   client_id: number
   name: string
   location: string | null
@@ -71,6 +75,7 @@ export interface SupabaseProjectSummaryRow {
 
 export interface SupabaseDailyLogRow {
   id: number
+  user_id: string
   date: string
   project_id: number
   machine_id: number | null
@@ -92,6 +97,7 @@ export interface SupabaseDailyLogWithRelationsRow extends SupabaseDailyLogRow {
 
 export interface SupabaseProjectCostRow {
   id: number
+  user_id: string
   date: string
   project_id: number
   machine_id: number | null
@@ -112,6 +118,7 @@ export interface SupabaseProjectCostWithRelationsRow extends SupabaseProjectCost
 
 export interface SupabaseProjectRevenueRow {
   id: number
+  user_id: string
   date: string
   project_id: number
   description: string
@@ -140,9 +147,11 @@ export function mapSupabaseClientRow(row: SupabaseClientRow): Client {
 }
 
 export function mapClientToSupabaseInsert(
-  client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>
+  client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string
 ): Omit<SupabaseClientRow, 'id' | 'created_at' | 'updated_at'> {
   return {
+    user_id: userId,
     name: client.name,
     document: client.document,
     phone: client.phone,
@@ -166,9 +175,11 @@ export function mapSupabaseMachineRow(row: SupabaseMachineRow): Machine {
 }
 
 export function mapMachineToSupabaseInsert(
-  machine: Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>
+  machine: Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string
 ): Omit<SupabaseMachineRow, 'id' | 'created_at' | 'updated_at'> {
   return {
+    user_id: userId,
     name: machine.name,
     type: machine.type,
     identifier: machine.identifier,
@@ -192,9 +203,11 @@ export function mapSupabaseOperatorRow(row: SupabaseOperatorRow): Operator {
 }
 
 export function mapOperatorToSupabaseInsert(
-  operator: Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>
+  operator: Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string
 ): Omit<SupabaseOperatorRow, 'id' | 'created_at' | 'updated_at'> {
   return {
+    user_id: userId,
     name: operator.name,
     phone: operator.phone,
     role: operator.role,
@@ -230,9 +243,11 @@ export function mapSupabaseProjectWithClientRow(
 }
 
 export function mapProjectToSupabaseInsert(
-  project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>
+  project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string
 ): Omit<SupabaseProjectRow, 'id' | 'created_at' | 'updated_at'> {
   return {
+    user_id: userId,
     client_id: project.clientId,
     name: project.name,
     location: project.location,
@@ -281,9 +296,11 @@ export function mapSupabaseDailyLogWithRelationsRow(
 }
 
 export function mapDailyLogToSupabaseInsert(
-  log: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>
+  log: Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string
 ): Omit<SupabaseDailyLogRow, 'id' | 'created_at' | 'updated_at'> {
   return {
+    user_id: userId,
     date: formatLocalDate(log.date),
     project_id: log.projectId,
     machine_id: log.machineId,
@@ -323,9 +340,11 @@ export function mapSupabaseProjectCostWithRelationsRow(
 }
 
 export function mapProjectCostToSupabaseInsert(
-  cost: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>
+  cost: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string
 ): Omit<SupabaseProjectCostRow, 'id' | 'created_at' | 'updated_at'> {
   return {
+    user_id: userId,
     date: formatLocalDate(cost.date),
     project_id: cost.projectId,
     machine_id: cost.machineId,
@@ -362,9 +381,11 @@ export function mapSupabaseProjectRevenueWithRelationsRow(
 }
 
 export function mapProjectRevenueToSupabaseInsert(
-  revenue: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>
+  revenue: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string
 ): Omit<SupabaseProjectRevenueRow, 'id' | 'created_at' | 'updated_at'> {
   return {
+    user_id: userId,
     date: formatLocalDate(revenue.date),
     project_id: revenue.projectId,
     description: revenue.description,

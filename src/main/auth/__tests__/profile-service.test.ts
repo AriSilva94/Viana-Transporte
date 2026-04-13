@@ -7,7 +7,7 @@ describe('createProfileService', () => {
       profiles: {
         getByUserId: vi.fn().mockResolvedValue({
           id: 'user-1',
-          email: 'ariovaldo.bsjunior@gmail.com',
+          email: 'user@test.com',
           role: 'admin',
         }),
       },
@@ -15,7 +15,7 @@ describe('createProfileService', () => {
 
     await expect(service.getRequiredProfile('user-1')).resolves.toEqual({
       id: 'user-1',
-      email: 'ariovaldo.bsjunior@gmail.com',
+      email: 'user@test.com',
       role: 'admin',
     })
   })
