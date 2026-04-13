@@ -133,7 +133,7 @@ async function loadProfileForSession(
     return null
   }
 
-  return profileService.getRequiredProfile(session.userId)
+  return profileService.ensureProfile(session.userId, session.email ?? '')
 }
 
 export function createAuthService({
