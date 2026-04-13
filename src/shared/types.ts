@@ -137,6 +137,14 @@ export interface AppPreferences {
   language: SupportedLocale | null
 }
 
+export type AuthRole = 'admin' | 'owner' | 'employee'
+
+export interface AuthProfile {
+  id: string
+  email: string
+  role: AuthRole
+}
+
 export interface AuthSession {
   accessToken: string
   refreshToken: string
@@ -147,6 +155,7 @@ export interface AuthSession {
 
 export interface AuthState {
   session: AuthSession | null
+  profile: AuthProfile | null
   pendingPasswordReset: boolean
 }
 

@@ -75,10 +75,12 @@ describe('App auth flow', () => {
       auth: {
         getSession: vi.fn().mockResolvedValue({
           session: null,
+          profile: null,
           pendingPasswordReset: false,
         }),
         signIn: vi.fn().mockResolvedValue({
           session: null,
+          profile: null,
           pendingPasswordReset: false,
         }),
         signUp: vi.fn(),
@@ -232,6 +234,11 @@ describe('App auth flow', () => {
         email: 'a@b.com',
         expiresAt: null,
       },
+      profile: {
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      },
       pendingPasswordReset: false,
     })
     const { default: App } = await import('../App')
@@ -252,6 +259,24 @@ describe('App auth flow', () => {
     await waitFor(() => {
       expect(window.api.auth.signOut).toHaveBeenCalledTimes(1)
       expect(screen.getByTestId('auth-mode-title')).toBeInTheDocument()
+    })
+  })
+
+  it('exposes the profile role in the auth state returned by getSession', async () => {
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: null,
+      profile: {
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      },
+      pendingPasswordReset: false,
+    })
+
+    await expect(window.api.auth.getSession()).resolves.toMatchObject({
+      profile: {
+        role: 'admin',
+      },
     })
   })
 
@@ -323,7 +348,8 @@ describe('App auth flow', () => {
     window.api.auth.signIn = vi.fn().mockImplementation(
       () =>
         new Promise((resolve) => {
-          resolveSignInRef.current = () => resolve({ session: null, pendingPasswordReset: false })
+          resolveSignInRef.current = () =>
+            resolve({ session: null, profile: null, pendingPasswordReset: false })
         })
     )
 
