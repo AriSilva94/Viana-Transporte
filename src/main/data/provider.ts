@@ -1,5 +1,6 @@
 import type { DataProvider, DomainRepository } from './types'
 import { createSupabaseRepository } from './supabase/repository'
+import { getAuthService } from '../auth/runtime'
 
 let repository: DomainRepository | null = null
 
@@ -15,7 +16,16 @@ export async function initDataProvider(provider: DataProvider): Promise<DataProv
   repository = null
 
   try {
-    const nextRepository = await createSupabaseRepository()
+    const nextRepository = await createSupabaseRepository({
+      getCurrentUserId: async () => {
+        const state = await getAuthService().getState()
+        const userId = state.session?.userId
+        if (!userId) {
+          throw new Error('No authenticated user for protected data access')
+        }
+        return userId
+      },
+    })
     repository = nextRepository
     return 'supabase'
   } catch (error) {

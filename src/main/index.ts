@@ -2,8 +2,10 @@ import { app, BrowserWindow, Menu, nativeImage } from 'electron'
 import { join } from 'path'
 import { loadMainEnv } from './config/load-env'
 import { initDataProvider, resolveDataProviderFromEnv } from './data/provider'
+import { createSupabaseClientFromEnv } from './data/supabase/client'
 import { registerAllHandlers } from './ipc'
 import { createAuthService } from './auth/service'
+import { createProfileServiceFromSupabaseClient } from './auth/profile-service'
 import { setAuthService } from './auth/runtime'
 import { createAuthDeepLinkRuntime } from './auth/deep-link'
 import { startAppLifecycle } from './app-lifecycle'
@@ -49,7 +51,8 @@ async function bootstrap(): Promise<void> {
   loadMainEnv()
   await initLicenseState()
   await initDataProvider(resolveDataProviderFromEnv())
-  const authService = createAuthService({ userDataPath: app.getPath('userData') })
+  const profileService = createProfileServiceFromSupabaseClient(await createSupabaseClientFromEnv())
+  const authService = createAuthService({ userDataPath: app.getPath('userData'), profileService })
   setAuthService(authService)
   authDeepLinkRuntime.attachAuthService(authService)
   await authService.getState()

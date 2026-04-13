@@ -4,8 +4,14 @@ import { ChevronDown, Search, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@renderer/lib/utils'
 
-export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+export interface SelectProps {
+  children: React.ReactNode
+  className?: string
+  'data-testid'?: string
+  disabled?: boolean
+  id?: string
   onChange?: React.ChangeEventHandler<HTMLSelectElement>
+  value?: string | number
 }
 
 interface SelectOption {
@@ -27,7 +33,7 @@ function extractOptions(children: React.ReactNode): SelectOption[] {
 }
 
 const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
-  ({ className, children, value, onChange, disabled = false, id }, ref) => {
+  ({ className, children, value, onChange, disabled = false, id, 'data-testid': dataTestId }, ref) => {
     const { t } = useTranslation('common')
     const buttonRef = React.useRef<HTMLButtonElement | null>(null)
     const dropdownRef = React.useRef<HTMLDivElement | null>(null)
@@ -88,6 +94,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
       <div className={cn('relative w-full', className)}>
         <button
           id={id}
+          data-testid={dataTestId}
           ref={(node) => {
             buttonRef.current = node
             if (typeof ref === 'function') ref(node)
@@ -95,6 +102,8 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
           }}
           type="button"
           disabled={disabled}
+          aria-expanded={open}
+          aria-haspopup="listbox"
           onClick={() => (open ? setOpen(false) : openDropdown())}
           className={cn(
             'flex h-10 w-full items-center justify-between rounded-xl border border-input bg-white/85 px-3 py-2 text-left text-sm shadow-sm transition-all duration-200',
@@ -123,6 +132,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                   width: dropdownPos.width,
                   position: 'fixed',
                 }}
+                role="listbox"
                 className="z-[9999] overflow-hidden rounded-xl border border-border bg-white shadow-[0_8px_24px_rgba(34,49,95,0.14)]"
               >
                 <div className="border-b border-border p-2">
@@ -149,6 +159,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                           key={option.value}
                           type="button"
                           onClick={() => handleSelect(option.value)}
+                          data-testid={`select-option-${option.value}`}
                           className={cn(
                             'flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors',
                             isSelected

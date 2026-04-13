@@ -74,6 +74,10 @@ const api: ElectronAPI = {
       return () => ipcRenderer.removeListener('auth:sessionChanged', listener)
     },
   },
+  users: {
+    list: () => ipcRenderer.invoke('users:list'),
+    updateRole: (userId, role) => ipcRenderer.invoke('users:updateRole', { userId, role }),
+  },
   license: {
     getStatus: () => ipcRenderer.invoke('license:status'),
   },

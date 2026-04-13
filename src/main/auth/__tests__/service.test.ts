@@ -42,6 +42,7 @@ vi.mock('../../services/license', () => ({
 }))
 
 import { createSupabaseAuthClientFromEnv } from '../client'
+import { createProfileServiceFromSupabaseClient } from '../profile-service'
 import { createAuthService } from '../service'
 
 afterEach(() => {
@@ -130,9 +131,46 @@ describe('createSupabaseAuthClientFromEnv', () => {
   })
 })
 
+describe('createProfileServiceFromSupabaseClient', () => {
+  it('loads the authenticated user profile from the profiles table', async () => {
+    const eq = vi.fn().mockResolvedValue({
+      data: [
+        {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
+      ],
+      error: null,
+    })
+    const select = vi.fn().mockReturnValue({ eq })
+    const from = vi.fn().mockReturnValue({ select })
+    const service = createProfileServiceFromSupabaseClient({
+      from,
+    })
+
+    await expect(service.getRequiredProfile('user-1')).resolves.toEqual({
+      id: 'user-1',
+      email: 'a@b.com',
+      role: 'admin',
+    })
+    expect(from).toHaveBeenCalledWith('profiles')
+    expect(select).toHaveBeenCalledWith('id,email,role')
+    expect(eq).toHaveBeenCalledWith('id', 'user-1')
+  })
+})
+
 describe('createAuthService', () => {
-  it('persists session after signIn and restores it in getState', async () => {
+  it('persists session and profile after signIn and restores them in getState', async () => {
     const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn(),
+      ensureProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      }),
+    }
     const authClient = {
       auth: {
         signInWithPassword: vi.fn().mockResolvedValue({
@@ -158,11 +196,26 @@ describe('createAuthService', () => {
     }
 
     try {
-      const service = await createAuthService({ authClient, userDataPath })
+      const service = await createAuthService({ authClient, profileService, userDataPath })
 
-      await service.signIn({ email: 'a@b.com', password: '123456' })
+      await expect(service.signIn({ email: 'a@b.com', password: '123456' })).resolves.toMatchObject({
+        session: {
+          accessToken: 'access-token',
+          refreshToken: 'refresh-token',
+          userId: 'user-1',
+          email: 'a@b.com',
+          expiresAt: 123,
+        },
+        profile: {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
+        pendingPasswordReset: false,
+      })
+      expect(profileService.ensureProfile).toHaveBeenCalledWith('user-1', 'a@b.com')
 
-      const restored = await createAuthService({ authClient, userDataPath })
+      const restored = await createAuthService({ authClient, profileService, userDataPath })
       await expect(restored.getState()).resolves.toMatchObject({
         session: {
           accessToken: 'access-token',
@@ -171,6 +224,48 @@ describe('createAuthService', () => {
           email: 'a@b.com',
           expiresAt: 123,
         },
+        profile: {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('normalizes legacy persisted auth state without a profile key', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+
+    try {
+      await writeFile(
+        join(userDataPath, 'auth-session.json'),
+        JSON.stringify({
+          session: null,
+          pendingPasswordReset: false,
+        }),
+        'utf-8'
+      )
+
+      const service = await createAuthService({
+        authClient: {
+          auth: {
+            signInWithPassword: vi.fn(),
+            signUp: vi.fn(),
+            resetPasswordForEmail: vi.fn(),
+            updateUser: vi.fn(),
+            setSession: vi.fn(),
+            signOut: vi.fn(),
+          },
+        },
+        userDataPath,
+      })
+
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        profile: null,
         pendingPasswordReset: false,
       })
     } finally {
@@ -242,6 +337,52 @@ describe('createAuthService', () => {
       await expect(service.signIn({ email: 'a@b.com', password: '123456' })).rejects.toThrow('invalid credentials')
       await expect(service.getState()).resolves.toMatchObject({
         session: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects signIn when the profile service fails and does not persist session', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn(),
+      ensureProfile: vi.fn().mockRejectedValue(new Error('Failed to create user profile')),
+    }
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              user: {
+                id: 'user-1',
+                email: 'a@b.com',
+              },
+              expires_at: 123,
+            },
+          },
+          error: null,
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        setSession: vi.fn(),
+        signOut: vi.fn(),
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, profileService, userDataPath })
+
+      await expect(service.signIn({ email: 'a@b.com', password: '123456' })).rejects.toThrow(
+        'Failed to create user profile'
+      )
+      await expect(service.getState()).resolves.toMatchObject({
+        session: null,
+        profile: null,
         pendingPasswordReset: false,
       })
     } finally {
@@ -446,6 +587,14 @@ describe('createAuthService', () => {
   })
   it('establishes recovery session from callback tokens before marking recovery state', async () => {
     const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn(),
+      ensureProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'a@b.com',
+        role: 'admin',
+      }),
+    }
     const setSessionMock = vi.fn().mockResolvedValue({
       data: {
         session: {
@@ -472,7 +621,7 @@ describe('createAuthService', () => {
     }
 
     try {
-      const service = await createAuthService({ authClient, userDataPath })
+      const service = await createAuthService({ authClient, profileService, userDataPath })
 
       await expect(
         service.handleCallbackUrl(
@@ -486,6 +635,11 @@ describe('createAuthService', () => {
           email: 'a@b.com',
           expiresAt: 456,
         },
+        profile: {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin',
+        },
         pendingPasswordReset: true,
       })
 
@@ -493,6 +647,7 @@ describe('createAuthService', () => {
         access_token: 'access-token',
         refresh_token: 'refresh-token',
       })
+      expect(profileService.ensureProfile).toHaveBeenCalledWith('user-1', 'a@b.com')
     } finally {
       await rm(userDataPath, { recursive: true, force: true })
     }
@@ -573,7 +728,11 @@ describe('createAuthDeepLinkRuntime', () => {
     const { createAuthDeepLinkRuntime } = await import('../deep-link')
     const runtime = createAuthDeepLinkRuntime()
 
-    expect(appMock.setAsDefaultProtocolClient).toHaveBeenCalledWith('viana-transporte')
+    expect(appMock.setAsDefaultProtocolClient).toHaveBeenCalledWith(
+      'viana-transporte',
+      expect.any(String),
+      expect.any(Array)
+    )
     expect(appMock.requestSingleInstanceLock).toHaveBeenCalled()
 
     const secondInstance = callbacks.get('second-instance')

@@ -16,6 +16,7 @@ const NAMESPACES = [
   'costs',
   'revenues',
   'reports',
+  'users',
   'auth',
   'license',
 ] as const

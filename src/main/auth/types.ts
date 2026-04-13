@@ -1,5 +1,7 @@
 import type {
   AuthPasswordResetResult,
+  AuthProfile,
+  AuthRole,
   AuthSignUpResult,
   AuthState,
 } from '../../shared/types'
@@ -17,4 +19,5 @@ export interface AuthPasswordUpdate {
   password: string
 }
 
+export type { AuthRole, AuthProfile }
 export type { AuthState, AuthSignUpResult, AuthPasswordResetResult }
