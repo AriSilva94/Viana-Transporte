@@ -23,14 +23,17 @@ alter table public.project_revenues add column if not exists user_id uuid;
 -- 3. Enable RLS on profiles
 alter table public.profiles enable row level security;
 
+drop policy if exists "Users can read their own profile" on public.profiles;
 create policy "Users can read their own profile"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Users can update their own profile" on public.profiles;
 create policy "Users can update their own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
+drop policy if exists "Admin and owner can manage all profiles" on public.profiles;
 create policy "Admin and owner can manage all profiles"
   on public.profiles for all
   using (
@@ -40,7 +43,7 @@ create policy "Admin and owner can manage all profiles"
     )
   );
 
--- 4. Enable RLS on operational tables (user_id scoping)
+-- 4. Enable RLS on operational tables
 do $$
 declare
   t text;
@@ -52,15 +55,23 @@ begin
   loop
     execute format('alter table public.%I enable row level security', t);
 
+    execute format('drop policy if exists "%1$s_select_own" on public.%1$I', t);
+    execute format('drop policy if exists "%1$s_select_authenticated" on public.%1$I', t);
     execute format(
-      'create policy "%1$s_select_own" on public.%1$I for select using (auth.uid() = user_id)', t
+      'create policy "%1$s_select_authenticated" on public.%1$I for select using (auth.role() = ''authenticated'')', t
     );
+
+    execute format('drop policy if exists "%1$s_insert_own" on public.%1$I', t);
     execute format(
       'create policy "%1$s_insert_own" on public.%1$I for insert with check (auth.uid() = user_id)', t
     );
+
+    execute format('drop policy if exists "%1$s_update_own" on public.%1$I', t);
     execute format(
       'create policy "%1$s_update_own" on public.%1$I for update using (auth.uid() = user_id)', t
     );
+
+    execute format('drop policy if exists "%1$s_delete_own" on public.%1$I', t);
     execute format(
       'create policy "%1$s_delete_own" on public.%1$I for delete using (auth.uid() = user_id)', t
     );

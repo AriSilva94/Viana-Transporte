@@ -21,6 +21,30 @@ describe('SQL schema contract', () => {
     expect(sql).toContain('alter table public.profiles enable row level security')
     expect(sql).toContain('enable row level security')
   })
+
+  it('allows authenticated users to read shared operational data while keeping writes owned', async () => {
+    const sql = await readFile(
+      join(__dirname, '../../sql/supabase-user-ownership.sql'),
+      'utf8'
+    )
+
+    expect(sql).toContain('select_authenticated')
+    expect(sql).toContain("auth.role() = ''authenticated''")
+    expect(sql).toContain('for insert with check (auth.uid() = user_id)')
+    expect(sql).toContain('for update using (auth.uid() = user_id)')
+    expect(sql).toContain('for delete using (auth.uid() = user_id)')
+  })
+
+  it('provides an incremental SQL patch for existing environments', async () => {
+    const sql = await readFile(
+      join(__dirname, '../../sql/supabase-shared-read-access.sql'),
+      'utf8'
+    )
+
+    expect(sql).toContain('drop policy if exists')
+    expect(sql).toContain('create policy "%1$s_select_authenticated"')
+    expect(sql).toContain("auth.role() = ''authenticated''")
+  })
 })
 
 describe('createBootstrapAdminOwnership', () => {

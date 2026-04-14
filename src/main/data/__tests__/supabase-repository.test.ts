@@ -105,6 +105,65 @@ describe('createSupabaseRepository', () => {
     expect(machineSelect.eq).toHaveBeenCalledWith('status', 'available')
   })
 
+  it('does not scope shared reads by user_id for clients list and detail', async () => {
+    const clientRow = {
+      id: 3,
+      name: 'Cliente Compartilhado',
+      document: '123',
+      phone: '(11) 99999-0000',
+      email: 'cliente@test.com',
+      notes: 'Importado',
+      created_at: '2026-04-03T10:00:00.000Z',
+      updated_at: '2026-04-03T10:10:00.000Z',
+      user_id: 'seed-admin',
+    }
+
+    const clientListSelect = createQueryMock({ data: [clientRow], error: null })
+    const clientGetSelect = createQueryMock({ data: [clientRow], error: null })
+    const clientInsert = createQueryMock({ data: [clientRow], error: null })
+
+    const clientSelect = vi.fn().mockReturnValueOnce(clientListSelect).mockReturnValueOnce(clientGetSelect)
+    const clientInsertValues = vi.fn()
+
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === 'clients') {
+          return {
+            select: clientSelect,
+            insert: vi.fn((values: unknown) => {
+              clientInsertValues(values)
+              return clientInsert
+            }),
+            update: vi.fn(() => clientInsert),
+            delete: vi.fn(() => clientInsert),
+            or: clientListSelect.or,
+            eq: clientListSelect.eq,
+          }
+        }
+
+        throw new Error(`Unexpected table: ${table}`)
+      }),
+    }
+
+    const repo = await createSupabaseRepository({ client: supabase as never, getCurrentUserId: async () => 'user-2' })
+
+    const list = await repo.clients.list({ search: 'Compartilhado' })
+    const loaded = await repo.clients.get(3)
+    await repo.clients.create({
+      name: 'Novo Cliente',
+      document: '999',
+      phone: null,
+      email: null,
+      notes: null,
+    })
+
+    expect(list).toHaveLength(1)
+    expect(loaded).toMatchObject({ id: 3, name: 'Cliente Compartilhado' })
+    expect(clientListSelect.eq).not.toHaveBeenCalledWith('user_id', 'user-2')
+    expect(clientGetSelect.eq).not.toHaveBeenCalledWith('user_id', 'user-2')
+    expect(clientInsertValues).toHaveBeenCalledWith(expect.objectContaining({ user_id: 'user-2' }))
+  })
+
   it('throws when a machines create returns an empty array', async () => {
     const machineInsert = createQueryMock({ data: [], error: null })
 
@@ -363,7 +422,7 @@ describe('createSupabaseRepository', () => {
       })
     )
     expect(summary).toMatchObject({ totalCosts: 100, totalRevenues: 250, profit: 150, totalHours: 8 })
-    expect(summaryRpc).toHaveBeenCalledWith('project_summary', { project_id: 21, p_user_id: 'user-1' })
+    expect(summaryRpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
     expect(projectListSelect.eq).toHaveBeenCalledWith('status', 'active')
     expect(projectListSelect.eq).toHaveBeenCalledWith('client_id', 5)
     expect(projectGetSelect.eq).toHaveBeenCalledWith('id', 21)
@@ -418,7 +477,7 @@ describe('createSupabaseRepository', () => {
       profit: 150,
       totalHours: 8,
     })
-    expect(supabase.rpc).toHaveBeenCalledWith('project_summary', { project_id: 21, p_user_id: 'user-1' })
+    expect(supabase.rpc).toHaveBeenCalledWith('project_summary', { project_id: 21 })
     expect(supabase.from).toHaveBeenCalledWith('project_costs')
     expect(supabase.from).toHaveBeenCalledWith('project_revenues')
     expect(supabase.from).toHaveBeenCalledWith('daily_logs')
