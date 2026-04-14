@@ -1,17 +1,16 @@
 import { config as loadDotenv } from 'dotenv'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
+import { getEnvFilesForMode } from './env-selection'
 
 let loaded = false
 
-export function loadMainEnv(): void {
+export function loadMainEnv(mode: 'development' | 'production' = 'development'): void {
   if (loaded) {
     return
   }
 
-  const envFiles = ['.env.local', '.env']
-
-  for (const file of envFiles) {
+  for (const file of getEnvFilesForMode(mode)) {
     const path = resolve(process.cwd(), file)
     if (!existsSync(path)) {
       continue
