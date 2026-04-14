@@ -27,13 +27,16 @@ import { RevenuesPage } from './pages/revenues'
 import { RevenueFormPage } from './pages/revenues/RevenueFormPage'
 import { ReportsPage } from './pages/reports'
 import { UsersPage } from './pages/users'
+import { UserDetailPage } from './pages/users/UserDetailPage'
+import { UserFormPage } from './pages/users/UserFormPage'
 import { api } from './lib/api'
 import type { LicenseStatus } from '../shared/license'
 
-function AdminRoute({ children }: { children: JSX.Element }): JSX.Element {
+function UserManagementRoute({ children }: { children: JSX.Element }): JSX.Element {
   const { state } = useAuth()
+  const role = state?.profile?.role
 
-  if (state?.profile?.role !== 'admin') {
+  if (role !== 'admin' && role !== 'owner') {
     return <Navigate to="/dashboard" replace />
   }
 
@@ -118,9 +121,25 @@ export default function App(): JSX.Element {
           <Route
             path="users"
             element={
-              <AdminRoute>
+              <UserManagementRoute>
                 <UsersPage />
-              </AdminRoute>
+              </UserManagementRoute>
+            }
+          />
+          <Route
+            path="users/:id"
+            element={
+              <UserManagementRoute>
+                <UserDetailPage />
+              </UserManagementRoute>
+            }
+          />
+          <Route
+            path="users/:id/edit"
+            element={
+              <UserManagementRoute>
+                <UserFormPage />
+              </UserManagementRoute>
             }
           />
         </Route>
