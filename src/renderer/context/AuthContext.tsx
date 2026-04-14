@@ -1,6 +1,8 @@
 import * as React from 'react'
 import type { AuthState } from '../../shared/types'
 
+const AUTH_SESSION_REFRESH_INTERVAL_MS = 30_000
+
 interface AuthContextValue {
   state: AuthState | null
   loading: boolean
@@ -50,6 +52,20 @@ function AuthProvider({ children }: { children: React.ReactNode }): JSX.Element 
       void refresh()
     })
   }, [refresh])
+
+  React.useEffect(() => {
+    if (!state?.session) {
+      return
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refresh()
+    }, AUTH_SESSION_REFRESH_INTERVAL_MS)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [refresh, state?.session])
 
   const signIn = React.useCallback(async (email: string, password: string): Promise<AuthState> => {
     const nextState = await window.api.auth.signIn(email, password)

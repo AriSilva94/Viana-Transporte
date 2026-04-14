@@ -9,6 +9,7 @@ describe('createProfileService', () => {
           id: 'user-1',
           email: 'user@test.com',
           role: 'admin',
+          status: 'active',
         }),
         create: vi.fn(),
       },
@@ -18,6 +19,28 @@ describe('createProfileService', () => {
       id: 'user-1',
       email: 'user@test.com',
       role: 'admin',
+      status: 'active',
+    })
+  })
+
+  it('maps status from the profile row', async () => {
+    const service = createProfileService({
+      profiles: {
+        getByUserId: vi.fn().mockResolvedValue({
+          id: 'u1',
+          email: 'user@test.com',
+          role: 'employee',
+          status: 'revoked',
+        }),
+        create: vi.fn(),
+      },
+    })
+
+    await expect(service.getRequiredProfile('u1')).resolves.toEqual({
+      id: 'u1',
+      email: 'user@test.com',
+      role: 'employee',
+      status: 'revoked',
     })
   })
 
@@ -29,6 +52,7 @@ describe('createProfileService', () => {
           id: 'user-1',
           email: 'admin@test.com',
           role: 'admin',
+          status: 'active',
         }),
         create,
       },
@@ -53,11 +77,13 @@ describe('createProfileService', () => {
       id: 'user-2',
       email: 'new@test.com',
       role: 'employee',
+      status: 'active',
     })
     expect(create).toHaveBeenCalledWith({
       id: 'user-2',
       email: 'new@test.com',
       role: 'employee',
+      status: 'active',
     })
   })
 })
