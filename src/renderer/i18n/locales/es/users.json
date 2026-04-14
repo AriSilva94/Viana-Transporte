@@ -13,5 +13,12 @@
   "cannotChangeSelf": "No puedes cambiar tu propio perfil",
   "lastAdminError": "Debe existir al menos un administrador",
   "unauthorized": "Acceso restringido a administradores",
-  "emptyState": "No hay usuarios registrados"
+  "emptyState": "No hay usuarios registrados",
+  "viewDialogTitle": "Detalles del Usuario",
+  "editDialogTitle": "Editar Perfil",
+  "deleteDialogTitle": "Eliminar Usuario",
+  "deleteDialogDescription": "Esta seguro que desea eliminar este usuario? Esta accion no se puede deshacer.",
+  "deleteSuccess": "Usuario eliminado con exito",
+  "deleteError": "Error al eliminar usuario",
+  "cannotDeleteSelf": "No puedes eliminar tu propia cuenta"
 }
