@@ -11,8 +11,19 @@ import { useToast } from '@renderer/context/ToastContext'
 import { api } from '@renderer/lib/api'
 import { formatDate } from '@renderer/lib/format'
 import { useTranslation } from 'react-i18next'
-import { getRoleBadgeClass, getRoleLabel, mapUsersErrorMessage } from './userHelpers'
+import {
+  getRoleBadgeClass,
+  getRoleLabel,
+  getStatusBadgeClass,
+  getStatusLabel,
+  mapUsersErrorMessage,
+} from './userHelpers'
 import type { SupportedLocale, UserProfileListItem } from '../../../shared/types'
+
+interface PendingAccessAction {
+  userId: string
+  action: 'revoke' | 'reactivate'
+}
 
 export function UsersPage(): JSX.Element {
   const navigate = useNavigate()
@@ -22,7 +33,7 @@ export function UsersPage(): JSX.Element {
   const { showToast } = useToast()
   const [users, setUsers] = useState<UserProfileListItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [pendingAccessAction, setPendingAccessAction] = useState<PendingAccessAction | null>(null)
 
   async function loadUsers(): Promise<void> {
     setIsLoading(true)
@@ -38,15 +49,22 @@ export function UsersPage(): JSX.Element {
     void loadUsers()
   }, [])
 
-  async function handleDelete(): Promise<void> {
-    if (deleteId === null) return
+  async function handleAccessAction(): Promise<void> {
+    if (!pendingAccessAction) return
+
     try {
-      await api.users.delete(deleteId)
-      setDeleteId(null)
+      if (pendingAccessAction.action === 'revoke') {
+        await api.users.revokeAccess(pendingAccessAction.userId)
+        showToast(t('revokeSuccess'))
+      } else {
+        await api.users.reactivateAccess(pendingAccessAction.userId)
+        showToast(t('reactivateSuccess'))
+      }
+
+      setPendingAccessAction(null)
       await loadUsers()
-      showToast(t('deleteSuccess'))
     } catch (error) {
-      setDeleteId(null)
+      setPendingAccessAction(null)
       showToast(mapUsersErrorMessage(error, t), 'error')
     }
   }
@@ -68,6 +86,17 @@ export function UsersPage(): JSX.Element {
           className={`inline-flex items-center rounded-full border border-black/5 px-2.5 py-1 text-xs font-medium shadow-sm ${getRoleBadgeClass(row.role)}`}
         >
           {getRoleLabel(row.role, t)}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      label: t('status'),
+      render: (row: UserProfileListItem) => (
+        <span
+          className={`inline-flex items-center rounded-full border border-black/5 px-2.5 py-1 text-xs font-medium shadow-sm ${getStatusBadgeClass(row.status)}`}
+        >
+          {getStatusLabel(row.status, t)}
         </span>
       ),
     },
@@ -98,11 +127,16 @@ export function UsersPage(): JSX.Element {
           </Button>
           <Button
             size="sm"
-            variant="destructive"
+            variant={row.status === 'active' ? 'destructive' : 'outline'}
             disabled={row.id === currentUserId}
-            onClick={() => setDeleteId(row.id)}
+            onClick={() =>
+              setPendingAccessAction({
+                userId: row.id,
+                action: row.status === 'active' ? 'revoke' : 'reactivate',
+              })
+            }
           >
-            {tc('delete')}
+            {row.status === 'active' ? t('revokeAccess') : t('reactivateAccess')}
           </Button>
         </div>
       ),
@@ -114,7 +148,7 @@ export function UsersPage(): JSX.Element {
       <PageHeader title={t('pageTitle')} />
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          <TableSkeleton columns={4} />
+          <TableSkeleton columns={5} />
         ) : users.length === 0 ? (
           <EmptyState message={t('emptyState')} />
         ) : (
@@ -122,13 +156,16 @@ export function UsersPage(): JSX.Element {
         )}
       </div>
 
-      {/* Delete Confirmation */}
       <ConfirmDialog
-        open={deleteId !== null}
-        onConfirm={() => void handleDelete()}
-        onCancel={() => setDeleteId(null)}
-        title={t('deleteDialogTitle')}
-        description={t('deleteDialogDescription')}
+        open={pendingAccessAction !== null}
+        onConfirm={() => void handleAccessAction()}
+        onCancel={() => setPendingAccessAction(null)}
+        title={pendingAccessAction?.action === 'reactivate' ? t('reactivateDialogTitle') : t('revokeDialogTitle')}
+        description={
+          pendingAccessAction?.action === 'reactivate'
+            ? t('reactivateDialogDescription')
+            : t('revokeDialogDescription')
+        }
       />
     </div>
   )
