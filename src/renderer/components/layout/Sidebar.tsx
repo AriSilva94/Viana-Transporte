@@ -69,6 +69,11 @@ export function Sidebar(): JSX.Element {
           </NavLink>
         ))}
       </nav>
+      {state?.session?.email && (
+        <p className="px-5 pb-2 text-center text-xs text-white/60 truncate" title={state.session.email}>
+          {state.session.email}
+        </p>
+      )}
       {version && (
         <div className="border-t border-white/10 px-5 py-3 text-center text-xs text-white/40">
           v{version}
