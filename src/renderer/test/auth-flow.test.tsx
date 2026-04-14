@@ -259,6 +259,7 @@ describe('App auth flow', () => {
         id: 'user-1',
         email: 'a@b.com',
         role: 'admin',
+        status: 'active',
       },
       pendingPasswordReset: false,
     })
@@ -290,6 +291,7 @@ describe('App auth flow', () => {
         id: 'user-1',
         email: 'a@b.com',
         role: 'admin',
+        status: 'active',
       },
       pendingPasswordReset: false,
     })
@@ -305,7 +307,7 @@ describe('App auth flow', () => {
     })
   })
 
-  it('redirects non-admin users away from the users route', async () => {
+  it('allows owner users to access the users route', async () => {
     window.api.auth.getSession = vi.fn().mockResolvedValue({
       session: {
         accessToken: 'token',
@@ -318,6 +320,39 @@ describe('App auth flow', () => {
         id: 'user-1',
         email: 'owner@b.com',
         role: 'owner',
+        status: 'active',
+      },
+      pendingPasswordReset: false,
+    })
+
+    window.location.hash = '#/users'
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Gerenciamento de Usuários')).toBeInTheDocument()
+    })
+  })
+
+  it('redirects employee users away from the users route', async () => {
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: {
+        accessToken: 'token',
+        refreshToken: 'refresh',
+        userId: 'user-2',
+        email: 'employee@b.com',
+        expiresAt: null,
+      },
+      profile: {
+        id: 'user-2',
+        email: 'employee@b.com',
+        role: 'employee',
+        status: 'active',
       },
       pendingPasswordReset: false,
     })
@@ -333,7 +368,7 @@ describe('App auth flow', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('link', { name: 'Dashboard', current: 'page' })).toBeInTheDocument()
-      expect(screen.queryByText('Gerenciamento de Usuarios')).not.toBeInTheDocument()
+      expect(screen.queryByText('Gerenciamento de Usuários')).not.toBeInTheDocument()
     })
   })
 
@@ -677,6 +712,104 @@ describe('App auth flow', () => {
         'Este e-mail já possui uma conta'
       )
     })
+  })
+
+  it('polls the auth session while logged in and logs out when a revoked session is returned', async () => {
+    const sessionStates = [
+      {
+        session: {
+          accessToken: 'token',
+          refreshToken: 'refresh',
+          userId: 'user-1',
+          email: 'a@b.com',
+          expiresAt: null,
+        },
+        profile: {
+          id: 'user-1',
+          email: 'a@b.com',
+          role: 'admin' as const,
+          status: 'active' as const,
+        },
+        pendingPasswordReset: false,
+      },
+      {
+        session: null,
+        profile: null,
+        pendingPasswordReset: false,
+      },
+    ]
+    let pollCallback: (() => void) | undefined
+
+    const setIntervalSpy = vi
+      .spyOn(window, 'setInterval')
+      .mockImplementation((handler: TimerHandler, timeout?: number): ReturnType<typeof window.setInterval> => {
+        if (timeout === 30_000) {
+          pollCallback = typeof handler === 'function' ? (() => handler()) : undefined
+        }
+
+        return 1 as unknown as ReturnType<typeof window.setInterval>
+      })
+    const clearIntervalSpy = vi.spyOn(window, 'clearInterval').mockImplementation(() => undefined)
+
+    window.api.auth.getSession = vi.fn().mockImplementation(async () => {
+      return sessionStates.shift() ?? sessionStates.at(-1)
+    })
+
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('logout-button')).toBeInTheDocument()
+    })
+
+    const pollingCalls = setIntervalSpy.mock.calls.filter(([, delay]) => delay === 30_000)
+
+    expect(pollingCalls).toHaveLength(1)
+    expect(pollCallback).toBeTypeOf('function')
+
+    pollCallback?.()
+
+    await waitFor(() => {
+      expect(window.api.auth.getSession).toHaveBeenCalledTimes(2)
+      expect(screen.getByTestId('auth-mode-title')).toBeInTheDocument()
+    })
+
+    expect(clearIntervalSpy.mock.calls.length).toBeGreaterThan(0)
+    setIntervalSpy.mockRestore()
+    clearIntervalSpy.mockRestore()
+  })
+
+  it('does not start auth polling without an active session', async () => {
+    const setIntervalSpy = vi.spyOn(window, 'setInterval')
+
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: null,
+      profile: null,
+      pendingPasswordReset: false,
+    })
+
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-mode-title')).toBeInTheDocument()
+    })
+
+    expect(window.api.auth.getSession).toHaveBeenCalledTimes(1)
+    const pollingCalls = setIntervalSpy.mock.calls.filter(([, delay]) => delay === 30_000)
+
+    expect(pollingCalls).toHaveLength(0)
+    setIntervalSpy.mockRestore()
   })
 })
 

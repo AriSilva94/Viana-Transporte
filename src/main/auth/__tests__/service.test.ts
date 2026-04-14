@@ -139,6 +139,7 @@ describe('createProfileServiceFromSupabaseClient', () => {
           id: 'user-1',
           email: 'a@b.com',
           role: 'admin',
+          status: 'active',
         },
       ],
       error: null,
@@ -153,9 +154,10 @@ describe('createProfileServiceFromSupabaseClient', () => {
       id: 'user-1',
       email: 'a@b.com',
       role: 'admin',
+      status: 'active',
     })
     expect(from).toHaveBeenCalledWith('profiles')
-    expect(select).toHaveBeenCalledWith('id,email,role')
+    expect(select).toHaveBeenCalledWith('id,email,role,status')
     expect(eq).toHaveBeenCalledWith('id', 'user-1')
   })
 })
@@ -169,6 +171,7 @@ describe('createAuthService', () => {
         id: 'user-1',
         email: 'a@b.com',
         role: 'admin',
+        status: 'active',
       }),
     }
     const authClient = {
@@ -210,6 +213,7 @@ describe('createAuthService', () => {
           id: 'user-1',
           email: 'a@b.com',
           role: 'admin',
+          status: 'active',
         },
         pendingPasswordReset: false,
       })
@@ -228,7 +232,230 @@ describe('createAuthService', () => {
           id: 'user-1',
           email: 'a@b.com',
           role: 'admin',
+          status: 'active',
         },
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects sign-in when the loaded profile is revoked', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn(),
+      ensureProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'revoked@test.com',
+        role: 'employee',
+        status: 'revoked',
+      }),
+    }
+    const signOut = vi.fn().mockResolvedValue({ error: null })
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              user: {
+                id: 'user-1',
+                email: 'revoked@test.com',
+              },
+              expires_at: 123,
+            },
+          },
+          error: null,
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        setSession: vi.fn(),
+        signOut,
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, profileService, userDataPath })
+
+      await expect(service.signIn({ email: 'revoked@test.com', password: '123456' })).rejects.toThrow('Access revoked')
+      expect(signOut).toHaveBeenCalledOnce()
+      await expect(service.getState()).resolves.toEqual({
+        session: null,
+        profile: null,
+        pendingPasswordReset: false,
+      })
+    } finally {
+      await rm(userDataPath, { recursive: true, force: true })
+    }
+  })
+
+  it('returns a signed-out state when a restored session belongs to a revoked profile', async () => {
+    const signOut = vi.fn().mockResolvedValue({ error: null })
+    const profileService = {
+      getRequiredProfile: vi.fn(),
+      ensureProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'revoked@test.com',
+        role: 'employee',
+        status: 'revoked',
+      }),
+    }
+    const sessionStore = {
+      readState: vi.fn().mockResolvedValue({
+        session: {
+          accessToken: 'token',
+          refreshToken: 'refresh',
+          userId: 'user-1',
+          email: 'revoked@test.com',
+          expiresAt: null,
+        },
+        profile: null,
+        pendingPasswordReset: false,
+      }),
+      writeState: vi.fn().mockResolvedValue(undefined),
+      clearState: vi.fn().mockResolvedValue(undefined),
+    }
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        setSession: vi.fn(),
+        signOut,
+      },
+    }
+
+    const service = await createAuthService({
+      authClient,
+      profileService,
+      sessionStore,
+      userDataPath: 'ignored',
+    })
+
+    await expect(service.getState()).resolves.toEqual({
+      session: null,
+      profile: null,
+      pendingPasswordReset: false,
+    })
+    expect(profileService.ensureProfile).toHaveBeenCalledWith('user-1', 'revoked@test.com')
+    expect(signOut).toHaveBeenCalledOnce()
+    expect(sessionStore.writeState).toHaveBeenCalledWith({
+      session: null,
+      profile: null,
+      pendingPasswordReset: false,
+    })
+  })
+
+  it('clears local access even when remote sign-out fails for a revoked restored session', async () => {
+    const signOut = vi.fn().mockResolvedValue({ error: { message: 'network error' } })
+    const profileService = {
+      getRequiredProfile: vi.fn(),
+      ensureProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'revoked@test.com',
+        role: 'employee',
+        status: 'revoked',
+      }),
+    }
+    const sessionStore = {
+      readState: vi.fn().mockResolvedValue({
+        session: {
+          accessToken: 'token',
+          refreshToken: 'refresh',
+          userId: 'user-1',
+          email: 'revoked@test.com',
+          expiresAt: null,
+        },
+        profile: {
+          id: 'user-1',
+          email: 'revoked@test.com',
+          role: 'employee',
+          status: 'revoked',
+        },
+        pendingPasswordReset: false,
+      }),
+      writeState: vi.fn().mockResolvedValue(undefined),
+      clearState: vi.fn().mockResolvedValue(undefined),
+    }
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        setSession: vi.fn(),
+        signOut,
+      },
+    }
+
+    const service = await createAuthService({
+      authClient,
+      profileService,
+      sessionStore,
+      userDataPath: 'ignored',
+    })
+
+    await expect(service.getState()).resolves.toEqual({
+      session: null,
+      profile: null,
+      pendingPasswordReset: false,
+    })
+    expect(signOut).toHaveBeenCalledOnce()
+    expect(sessionStore.writeState).toHaveBeenCalledWith({
+      session: null,
+      profile: null,
+      pendingPasswordReset: false,
+    })
+  })
+
+  it('keeps revoked sign-in blocked even when remote sign-out fails', async () => {
+    const userDataPath = await mkdtemp(join(tmpdir(), 'viana-transporte-auth-'))
+    const profileService = {
+      getRequiredProfile: vi.fn(),
+      ensureProfile: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'revoked@test.com',
+        role: 'employee',
+        status: 'revoked',
+      }),
+    }
+    const signOut = vi.fn().mockResolvedValue({ error: { message: 'network error' } })
+    const authClient = {
+      auth: {
+        signInWithPassword: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'access-token',
+              refresh_token: 'refresh-token',
+              user: {
+                id: 'user-1',
+                email: 'revoked@test.com',
+              },
+              expires_at: 123,
+            },
+          },
+          error: null,
+        }),
+        signUp: vi.fn(),
+        resetPasswordForEmail: vi.fn(),
+        updateUser: vi.fn(),
+        setSession: vi.fn(),
+        signOut,
+      },
+    }
+
+    try {
+      const service = await createAuthService({ authClient, profileService, userDataPath })
+
+      await expect(service.signIn({ email: 'revoked@test.com', password: '123456' })).rejects.toThrow('Access revoked')
+      expect(signOut).toHaveBeenCalledOnce()
+      await expect(service.getState()).resolves.toEqual({
+        session: null,
+        profile: null,
         pendingPasswordReset: false,
       })
     } finally {
@@ -593,6 +820,7 @@ describe('createAuthService', () => {
         id: 'user-1',
         email: 'a@b.com',
         role: 'admin',
+        status: 'active',
       }),
     }
     const setSessionMock = vi.fn().mockResolvedValue({
@@ -639,6 +867,7 @@ describe('createAuthService', () => {
           id: 'user-1',
           email: 'a@b.com',
           role: 'admin',
+          status: 'active',
         },
         pendingPasswordReset: true,
       })

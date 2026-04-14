@@ -17,6 +17,7 @@ function createAuthState(role: AuthRole): AuthState {
       id: 'current-user',
       email: 'current@test.com',
       role,
+      status: 'active',
     },
     pendingPasswordReset: false,
   }
@@ -138,19 +139,26 @@ describe('LanguageSwitcher', () => {
     expect(screen.getByRole('link', { name: /informes/i })).toBeInTheDocument()
   })
 
-  it('mostra Usuarios na sidebar apenas para admin', async () => {
+  it('mostra Usuários na sidebar apenas para admin', async () => {
     await initializeI18n('pt-BR')
 
     renderSidebar('admin')
 
-    expect(screen.getByRole('link', { name: /usuarios/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /usuários/i })).toBeInTheDocument()
   })
 
-  it('oculta Usuarios na sidebar para owner e employee', async () => {
+  it('mostra Usuários na sidebar para owner', async () => {
     await initializeI18n('pt-BR')
 
     renderSidebar('owner')
-    expect(screen.queryByRole('link', { name: /usuarios/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /usuários/i })).toBeInTheDocument()
+  })
+
+  it('oculta Usuários na sidebar para employee', async () => {
+    await initializeI18n('pt-BR')
+
+    renderSidebar('employee')
+    expect(screen.queryByRole('link', { name: /usuários/i })).not.toBeInTheDocument()
   })
 
   it('carrega o namespace auth na inicializacao do i18n', async () => {
