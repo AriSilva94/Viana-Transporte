@@ -278,6 +278,7 @@ export interface ElectronAPI {
   users: {
     list: () => Promise<UserProfileListItem[]>
     updateRole: (userId: string, role: AuthRole) => Promise<void>
+    delete: (userId: string) => Promise<void>
   }
   license: {
     getStatus: () => Promise<LicenseStatus>

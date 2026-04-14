@@ -31,12 +31,12 @@ create policy "Users can update their own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
-create policy "Admin can manage all profiles"
+create policy "Admin and owner can manage all profiles"
   on public.profiles for all
   using (
     exists (
       select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
+      where id = auth.uid() and role in ('admin', 'owner')
     )
   );
 

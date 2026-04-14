@@ -77,6 +77,7 @@ const api: ElectronAPI = {
   users: {
     list: () => ipcRenderer.invoke('users:list'),
     updateRole: (userId, role) => ipcRenderer.invoke('users:updateRole', { userId, role }),
+    delete: (userId) => ipcRenderer.invoke('users:delete', userId),
   },
   license: {
     getStatus: () => ipcRenderer.invoke('license:status'),

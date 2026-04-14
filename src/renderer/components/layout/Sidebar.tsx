@@ -33,9 +33,9 @@ export function Sidebar(): JSX.Element {
   const { t } = useTranslation('navigation')
   const { state } = useAuth()
   const [version, setVersion] = useState('')
-  const isAdmin = state?.profile?.role === 'admin'
+  const isAdminOrOwner = state?.profile?.role === 'admin' || state?.profile?.role === 'owner'
 
-  const navItems = isAdmin
+  const navItems = isAdminOrOwner
     ? [...baseNavItems, { to: '/users', labelKey: 'users', icon: Shield }]
     : baseNavItems
 
