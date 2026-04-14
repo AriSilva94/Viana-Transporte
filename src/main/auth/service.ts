@@ -125,6 +125,14 @@ function createAuthStateFromCurrentState(state: AuthState): AuthState {
   }
 }
 
+function createSignedOutState(): AuthState {
+  return {
+    session: null,
+    profile: null,
+    pendingPasswordReset: false,
+  }
+}
+
 async function loadProfileForSession(
   profileService: ProfileService | undefined,
   session: AuthSession | null
@@ -134,6 +142,15 @@ async function loadProfileForSession(
   }
 
   return profileService.ensureProfile(session.userId, session.email ?? '')
+}
+
+async function revokeSessionAccess(client: SupabaseAuthClientLike): Promise<void> {
+  try {
+    const result = await client.auth.signOut()
+    void result
+  } catch {
+    // Best-effort remote sign-out. Local state cleanup still happens below.
+  }
 }
 
 export function createAuthService({
@@ -161,18 +178,49 @@ export function createAuthService({
     return state
   }
 
+  async function clearLocalAccess(): Promise<AuthState> {
+    return writeState(createSignedOutState())
+  }
+
   return {
     async getState() {
-      return readState()
+      const currentState = await readState()
+
+      if (!currentState.session) {
+        return currentState
+      }
+
+      const client = await resolveAuthClient()
+      const profile = await loadProfileForSession(profileService, currentState.session)
+
+      if (profile?.status === 'revoked') {
+        await revokeSessionAccess(client)
+        return clearLocalAccess()
+      }
+
+      const nextState = {
+        ...currentState,
+        profile,
+      }
+
+      return writeState(nextState)
     },
     async signIn({ email, password }) {
       const client = await resolveAuthClient()
       const result = await client.auth.signInWithPassword({ email, password })
       throwIfSupabaseError(result.error, 'Failed to sign in')
       const session = mapSupabaseSession(result.data.session)
+      const profile = await loadProfileForSession(profileService, session)
+
+      if (profile?.status === 'revoked') {
+        await revokeSessionAccess(client)
+        await clearLocalAccess()
+        throw new Error('Access revoked')
+      }
+
       const nextState = {
         session,
-        profile: await loadProfileForSession(profileService, session),
+        profile,
         pendingPasswordReset: false,
       }
 
