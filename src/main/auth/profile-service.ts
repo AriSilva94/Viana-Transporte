@@ -19,6 +19,7 @@ interface SupabaseProfileRow {
   id: string
   email: string
   role: AuthProfile['role']
+  status: AuthProfile['status']
 }
 
 interface SupabaseProfileQueryBuilder {
@@ -48,7 +49,7 @@ export function createProfileServiceFromSupabaseClient(
     profiles: {
       async getByUserId(userId: string): Promise<AuthProfile | null> {
         const profiles = client.from('profiles') as SupabaseProfileQueryBuilder
-        const result = await profiles.select('id,email,role').eq('id', userId)
+        const result = await profiles.select('id,email,role,status').eq('id', userId)
 
         if (result.error) {
           throw new Error(getErrorMessage(result.error, 'Failed to load authenticated user profile'))
@@ -59,7 +60,7 @@ export function createProfileServiceFromSupabaseClient(
       async create(profile: AuthProfile): Promise<void> {
         const { error } = await (client.from('profiles') as unknown as {
           insert: (row: SupabaseProfileRow) => Promise<{ error: unknown | null }>
-        }).insert({ id: profile.id, email: profile.email, role: profile.role })
+        }).insert({ id: profile.id, email: profile.email, role: profile.role, status: profile.status })
         if (error) {
           throw new Error(getErrorMessage(error, 'Failed to create user profile'))
         }
@@ -86,7 +87,7 @@ export function createProfileService(deps: ProfileServiceDependencies): ProfileS
         return existing
       }
 
-      const newProfile: AuthProfile = { id: userId, email, role: 'employee' }
+      const newProfile: AuthProfile = { id: userId, email, role: 'employee', status: 'active' }
       await deps.profiles.create(newProfile)
       return newProfile
     },

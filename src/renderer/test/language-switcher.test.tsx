@@ -17,6 +17,7 @@ function createAuthState(role: AuthRole): AuthState {
       id: 'current-user',
       email: 'current@test.com',
       role,
+      status: 'active',
     },
     pendingPasswordReset: false,
   }

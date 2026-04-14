@@ -1,4 +1,4 @@
-import type { AuthRole, UserProfileListItem } from '../../../shared/types'
+import type { AuthRole, UserAccessStatus, UserProfileListItem } from '../../../shared/types'
 
 function getRoleLabel(role: AuthRole, t: (key: string) => string): string {
   if (role === 'admin') return t('roleAdmin')
@@ -12,15 +12,26 @@ function getRoleBadgeClass(role: AuthRole): string {
   return 'bg-brand-sky/18 text-brand-deep'
 }
 
+function getStatusLabel(status: UserAccessStatus, t: (key: string) => string): string {
+  if (status === 'revoked') return t('statusRevoked')
+  return t('statusActive')
+}
+
+function getStatusBadgeClass(status: UserAccessStatus): string {
+  if (status === 'revoked') return 'bg-brand-orange/18 text-brand-orange'
+  return 'bg-brand-deep/12 text-brand-deep'
+}
+
 function mapUsersErrorMessage(error: unknown, t: (key: string) => string): string {
   const message = error instanceof Error ? error.message.toLowerCase() : ''
 
   if (message.includes('own role')) return t('cannotChangeSelf')
-  if (message.includes('own account')) return t('cannotDeleteSelf')
+  if (message.includes('own access')) return t('cannotChangeOwnAccess')
   if (message.includes('at least one admin')) return t('lastAdminError')
   if (message.includes('unauthorized')) return t('unauthorized')
+  if (message.includes('not found')) return t('userNotFound')
 
-  return t('updateError')
+  return t('actionError')
 }
 
 async function findUserById(userId: string): Promise<UserProfileListItem | null> {
@@ -28,4 +39,11 @@ async function findUserById(userId: string): Promise<UserProfileListItem | null>
   return users.find((user: UserProfileListItem) => user.id === userId) ?? null
 }
 
-export { findUserById, getRoleBadgeClass, getRoleLabel, mapUsersErrorMessage }
+export {
+  findUserById,
+  getRoleBadgeClass,
+  getRoleLabel,
+  getStatusBadgeClass,
+  getStatusLabel,
+  mapUsersErrorMessage,
+}
