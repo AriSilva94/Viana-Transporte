@@ -48,7 +48,7 @@ function createWindow(): BrowserWindow {
 }
 
 async function bootstrap(): Promise<void> {
-  loadMainEnv()
+  loadMainEnv(app.isPackaged ? 'production' : 'development')
   await initLicenseState()
   await initDataProvider(resolveDataProviderFromEnv())
   const profileService = createProfileServiceFromSupabaseClient(await createSupabaseClientFromEnv())
