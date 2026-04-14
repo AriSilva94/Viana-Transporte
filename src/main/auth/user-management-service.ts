@@ -60,16 +60,26 @@ interface SupabaseUpdateRoleQuery {
   }
 }
 
+interface SupabaseDeleteProfileQuery {
+  delete: () => {
+    eq: (column: string, value: string) => Promise<{
+      error: unknown | null
+    }>
+  }
+}
+
 export interface UserManagementRepository {
   listProfiles: () => Promise<SupabaseProfileRow[]>
   getProfileById: (userId: string) => Promise<SupabaseProfileRow | null>
   countAdmins: () => Promise<number>
   updateRole: (userId: string, role: AuthRole, updatedAt: string) => Promise<void>
+  deleteProfile: (userId: string) => Promise<void>
 }
 
 export interface UserManagementService {
   listProfiles: () => Promise<ProfileListItem[]>
   updateRole: (targetUserId: string, newRole: AuthRole) => Promise<void>
+  deleteUser: (targetUserId: string) => Promise<void>
 }
 
 export interface UserManagementServiceDependencies {
@@ -88,12 +98,12 @@ function getErrorMessage(error: unknown, fallbackMessage: string): string {
   return fallbackMessage
 }
 
-async function requireAdminCaller(authService: UserManagementServiceDependencies['authService']) {
+async function requireAdminOrOwnerCaller(authService: UserManagementServiceDependencies['authService']) {
   const state = await authService.getState()
   const profile = state.profile
 
-  if (!profile || profile.role !== 'admin') {
-    throw new Error('Unauthorized: admin access required')
+  if (!profile || (profile.role !== 'admin' && profile.role !== 'owner')) {
+    throw new Error('Unauthorized: admin or owner access required')
   }
 
   return profile
@@ -104,7 +114,7 @@ export function createUserManagementService(
 ): UserManagementService {
   return {
     async listProfiles() {
-      await requireAdminCaller(deps.authService)
+      await requireAdminOrOwnerCaller(deps.authService)
       const profiles = await deps.repository.listProfiles()
 
       return profiles.map((profile) => ({
@@ -116,7 +126,7 @@ export function createUserManagementService(
     },
 
     async updateRole(targetUserId, newRole) {
-      const caller = await requireAdminCaller(deps.authService)
+      const caller = await requireAdminOrOwnerCaller(deps.authService)
       const targetProfile = await deps.repository.getProfileById(targetUserId)
 
       if (!targetProfile) {
@@ -135,6 +145,28 @@ export function createUserManagementService(
       }
 
       await deps.repository.updateRole(targetUserId, newRole, new Date().toISOString())
+    },
+
+    async deleteUser(targetUserId) {
+      const caller = await requireAdminOrOwnerCaller(deps.authService)
+      const targetProfile = await deps.repository.getProfileById(targetUserId)
+
+      if (!targetProfile) {
+        throw new Error('User not found')
+      }
+
+      if (caller.id === targetUserId) {
+        throw new Error('You cannot delete your own account')
+      }
+
+      if (targetProfile.role === 'admin') {
+        const adminCount = await deps.repository.countAdmins()
+        if (adminCount <= 1) {
+          throw new Error('At least one admin must remain in the system')
+        }
+      }
+
+      await deps.repository.deleteProfile(targetUserId)
     },
   }
 }
@@ -184,6 +216,15 @@ export function createUserManagementRepositoryFromSupabaseClient(
 
       if (result.error) {
         throw new Error(getErrorMessage(result.error, 'Failed to update user role'))
+      }
+    },
+
+    async deleteProfile(userId) {
+      const profiles = client.from('profiles') as SupabaseDeleteProfileQuery
+      const result = await profiles.delete().eq('id', userId)
+
+      if (result.error) {
+        throw new Error(getErrorMessage(result.error, 'Failed to delete user'))
       }
     },
   }
