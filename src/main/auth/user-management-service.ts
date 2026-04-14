@@ -1,10 +1,11 @@
-import type { AuthRole, AuthState } from '../../shared/types'
+import type { AuthRole, AuthState, UserAccessStatus } from '../../shared/types'
 import { createSupabaseClientFromEnv, type SupabaseClientBootstrap } from '../data/supabase/client'
 
 export interface ProfileListItem {
   id: string
   email: string
   role: AuthRole
+  status: UserAccessStatus
   createdAt: string
 }
 
@@ -12,11 +13,17 @@ interface SupabaseProfileRow {
   id: string
   email: string
   role: AuthRole
+  status: UserAccessStatus
   created_at: string
 }
 
 interface ProfileRoleUpdate {
   role: AuthRole
+  updated_at: string
+}
+
+interface ProfileStatusUpdate {
+  status: UserAccessStatus
   updated_at: string
 }
 
@@ -45,10 +52,12 @@ interface SupabaseCountAdminsQuery {
     columns: string,
     options: { count: 'exact'; head: true }
   ) => {
-    eq: (column: string, value: AuthRole) => Promise<{
-      count: number | null
-      error: unknown | null
-    }>
+    eq: (column: string, value: AuthRole | UserAccessStatus) => {
+      eq: (column: string, value: AuthRole | UserAccessStatus) => Promise<{
+        count: number | null
+        error: unknown | null
+      }>
+    }
   }
 }
 
@@ -60,8 +69,8 @@ interface SupabaseUpdateRoleQuery {
   }
 }
 
-interface SupabaseDeleteProfileQuery {
-  delete: () => {
+interface SupabaseUpdateStatusQuery {
+  update: (values: ProfileStatusUpdate) => {
     eq: (column: string, value: string) => Promise<{
       error: unknown | null
     }>
@@ -71,15 +80,16 @@ interface SupabaseDeleteProfileQuery {
 export interface UserManagementRepository {
   listProfiles: () => Promise<SupabaseProfileRow[]>
   getProfileById: (userId: string) => Promise<SupabaseProfileRow | null>
-  countAdmins: () => Promise<number>
+  countActiveAdmins: () => Promise<number>
   updateRole: (userId: string, role: AuthRole, updatedAt: string) => Promise<void>
-  deleteProfile: (userId: string) => Promise<void>
+  updateStatus: (userId: string, status: UserAccessStatus, updatedAt: string) => Promise<void>
 }
 
 export interface UserManagementService {
   listProfiles: () => Promise<ProfileListItem[]>
   updateRole: (targetUserId: string, newRole: AuthRole) => Promise<void>
-  deleteUser: (targetUserId: string) => Promise<void>
+  revokeAccess: (targetUserId: string) => Promise<void>
+  reactivateAccess: (targetUserId: string) => Promise<void>
 }
 
 export interface UserManagementServiceDependencies {
@@ -112,6 +122,17 @@ async function requireAdminOrOwnerCaller(authService: UserManagementServiceDepen
 export function createUserManagementService(
   deps: UserManagementServiceDependencies
 ): UserManagementService {
+  async function getManagedProfile(targetUserId: string) {
+    const caller = await requireAdminOrOwnerCaller(deps.authService)
+    const targetProfile = await deps.repository.getProfileById(targetUserId)
+
+    if (!targetProfile) {
+      throw new Error('User not found')
+    }
+
+    return { caller, targetProfile }
+  }
+
   return {
     async listProfiles() {
       await requireAdminOrOwnerCaller(deps.authService)
@@ -121,24 +142,20 @@ export function createUserManagementService(
         id: profile.id,
         email: profile.email,
         role: profile.role,
+        status: profile.status,
         createdAt: profile.created_at,
       }))
     },
 
     async updateRole(targetUserId, newRole) {
-      const caller = await requireAdminOrOwnerCaller(deps.authService)
-      const targetProfile = await deps.repository.getProfileById(targetUserId)
-
-      if (!targetProfile) {
-        throw new Error('User not found')
-      }
+      const { caller, targetProfile } = await getManagedProfile(targetUserId)
 
       if (caller.id === targetUserId) {
         throw new Error('You cannot change your own role')
       }
 
-      if (targetProfile.role === 'admin' && newRole !== 'admin') {
-        const adminCount = await deps.repository.countAdmins()
+      if (targetProfile.role === 'admin' && targetProfile.status === 'active' && newRole !== 'admin') {
+        const adminCount = await deps.repository.countActiveAdmins()
         if (adminCount <= 1) {
           throw new Error('At least one admin must remain in the system')
         }
@@ -147,26 +164,31 @@ export function createUserManagementService(
       await deps.repository.updateRole(targetUserId, newRole, new Date().toISOString())
     },
 
-    async deleteUser(targetUserId) {
-      const caller = await requireAdminOrOwnerCaller(deps.authService)
-      const targetProfile = await deps.repository.getProfileById(targetUserId)
-
-      if (!targetProfile) {
-        throw new Error('User not found')
-      }
+    async revokeAccess(targetUserId) {
+      const { caller, targetProfile } = await getManagedProfile(targetUserId)
 
       if (caller.id === targetUserId) {
-        throw new Error('You cannot delete your own account')
+        throw new Error('You cannot revoke your own access')
       }
 
-      if (targetProfile.role === 'admin') {
-        const adminCount = await deps.repository.countAdmins()
+      if (targetProfile.role === 'admin' && targetProfile.status === 'active') {
+        const adminCount = await deps.repository.countActiveAdmins()
         if (adminCount <= 1) {
           throw new Error('At least one admin must remain in the system')
         }
       }
 
-      await deps.repository.deleteProfile(targetUserId)
+      await deps.repository.updateStatus(targetUserId, 'revoked', new Date().toISOString())
+    },
+
+    async reactivateAccess(targetUserId) {
+      const { caller } = await getManagedProfile(targetUserId)
+
+      if (caller.id === targetUserId) {
+        throw new Error('You cannot reactivate your own access')
+      }
+
+      await deps.repository.updateStatus(targetUserId, 'active', new Date().toISOString())
     },
   }
 }
@@ -177,7 +199,7 @@ export function createUserManagementRepositoryFromSupabaseClient(
   return {
     async listProfiles() {
       const profiles = client.from('profiles') as SupabaseListProfilesQuery
-      const result = await profiles.select('id,email,role,created_at').order('created_at', {
+      const result = await profiles.select('id,email,role,status,created_at').order('created_at', {
         ascending: true,
       })
 
@@ -190,7 +212,10 @@ export function createUserManagementRepositoryFromSupabaseClient(
 
     async getProfileById(userId) {
       const profiles = client.from('profiles') as SupabaseGetProfileQuery
-      const result = await profiles.select('id,email,role,created_at').eq('id', userId).maybeSingle()
+      const result = await profiles
+        .select('id,email,role,status,created_at')
+        .eq('id', userId)
+        .maybeSingle()
 
       if (result.error) {
         throw new Error(getErrorMessage(result.error, 'Failed to load target profile'))
@@ -199,9 +224,12 @@ export function createUserManagementRepositoryFromSupabaseClient(
       return result.data
     },
 
-    async countAdmins() {
+    async countActiveAdmins() {
       const profiles = client.from('profiles') as SupabaseCountAdminsQuery
-      const result = await profiles.select('id', { count: 'exact', head: true }).eq('role', 'admin')
+      const result = await profiles
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'admin')
+        .eq('status', 'active')
 
       if (result.error) {
         throw new Error(getErrorMessage(result.error, 'Failed to count admins'))
@@ -219,12 +247,12 @@ export function createUserManagementRepositoryFromSupabaseClient(
       }
     },
 
-    async deleteProfile(userId) {
-      const profiles = client.from('profiles') as SupabaseDeleteProfileQuery
-      const result = await profiles.delete().eq('id', userId)
+    async updateStatus(userId, status, updatedAt) {
+      const profiles = client.from('profiles') as SupabaseUpdateStatusQuery
+      const result = await profiles.update({ status, updated_at: updatedAt }).eq('id', userId)
 
       if (result.error) {
-        throw new Error(getErrorMessage(result.error, 'Failed to delete user'))
+        throw new Error(getErrorMessage(result.error, 'Failed to update user access'))
       }
     },
   }

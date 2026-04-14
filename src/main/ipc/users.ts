@@ -31,8 +31,13 @@ export function registerUsersHandlers(): void {
     await service.updateRole(payload.userId, payload.role)
   })
 
-  handleWrite('users:delete', async (_, userId: string): Promise<void> => {
+  handleWrite('users:revokeAccess', async (_, userId: string): Promise<void> => {
     const service = await getUserManagementService()
-    await service.deleteUser(userId)
+    await service.revokeAccess(userId)
+  })
+
+  handleWrite('users:reactivateAccess', async (_, userId: string): Promise<void> => {
+    const service = await getUserManagementService()
+    await service.reactivateAccess(userId)
   })
 }

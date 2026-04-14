@@ -138,11 +138,13 @@ export interface AppPreferences {
 }
 
 export type AuthRole = 'admin' | 'owner' | 'employee'
+export type UserAccessStatus = 'active' | 'revoked'
 
 export interface AuthProfile {
   id: string
   email: string
   role: AuthRole
+  status: UserAccessStatus
 }
 
 export interface AuthSession {
@@ -171,6 +173,7 @@ export interface UserProfileListItem {
   id: string
   email: string
   role: AuthRole
+  status: UserAccessStatus
   createdAt: string
 }
 
@@ -278,7 +281,8 @@ export interface ElectronAPI {
   users: {
     list: () => Promise<UserProfileListItem[]>
     updateRole: (userId: string, role: AuthRole) => Promise<void>
-    delete: (userId: string) => Promise<void>
+    revokeAccess: (userId: string) => Promise<void>
+    reactivateAccess: (userId: string) => Promise<void>
   }
   license: {
     getStatus: () => Promise<LicenseStatus>
