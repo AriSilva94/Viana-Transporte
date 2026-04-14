@@ -13,5 +13,12 @@
   "cannotChangeSelf": "Voce nao pode alterar seu proprio perfil",
   "lastAdminError": "Deve existir pelo menos um administrador",
   "unauthorized": "Acesso restrito a administradores",
-  "emptyState": "Nenhum usuario cadastrado"
+  "emptyState": "Nenhum usuario cadastrado",
+  "viewDialogTitle": "Detalhes do Usuario",
+  "editDialogTitle": "Editar Perfil",
+  "deleteDialogTitle": "Excluir Usuario",
+  "deleteDialogDescription": "Tem certeza que deseja excluir este usuario? Esta acao nao pode ser desfeita.",
+  "deleteSuccess": "Usuario excluido com sucesso",
+  "deleteError": "Erro ao excluir usuario",
+  "cannotDeleteSelf": "Voce nao pode excluir sua propria conta"
 }
