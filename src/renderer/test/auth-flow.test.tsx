@@ -305,7 +305,7 @@ describe('App auth flow', () => {
     })
   })
 
-  it('redirects non-admin users away from the users route', async () => {
+  it('allows owner users to access the users route', async () => {
     window.api.auth.getSession = vi.fn().mockResolvedValue({
       session: {
         accessToken: 'token',
@@ -332,8 +332,39 @@ describe('App auth flow', () => {
     )
 
     await waitFor(() => {
+      expect(screen.getByText('Gerenciamento de Usuários')).toBeInTheDocument()
+    })
+  })
+
+  it('redirects employee users away from the users route', async () => {
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: {
+        accessToken: 'token',
+        refreshToken: 'refresh',
+        userId: 'user-2',
+        email: 'employee@b.com',
+        expiresAt: null,
+      },
+      profile: {
+        id: 'user-2',
+        email: 'employee@b.com',
+        role: 'employee',
+      },
+      pendingPasswordReset: false,
+    })
+
+    window.location.hash = '#/users'
+    const { default: App } = await import('../App')
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
       expect(screen.getByRole('link', { name: 'Dashboard', current: 'page' })).toBeInTheDocument()
-      expect(screen.queryByText('Gerenciamento de Usuarios')).not.toBeInTheDocument()
+      expect(screen.queryByText('Gerenciamento de Usuários')).not.toBeInTheDocument()
     })
   })
 
