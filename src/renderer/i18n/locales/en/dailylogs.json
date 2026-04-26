@@ -10,6 +10,10 @@
     "operator": "Operator",
     "hoursWorked": "Hours",
     "fuelQuantity": "Fuel",
+    "km": "KM",
+    "percentage": "%",
+    "toll": "Toll",
+    "tonnage": "Tonnage",
     "actions": "Actions"
   },
   "filters": {
@@ -38,6 +42,10 @@
       "operator": "Operator",
       "hoursWorked": "Hours Worked *",
       "fuelQuantity": "Fuel (L)",
+      "km": "KM",
+      "percentage": "Percentage (%)",
+      "toll": "Toll ($)",
+      "tonnage": "Tonnage",
       "workDescription": "Work Description",
       "downtimeNotes": "Downtime Notes",
       "notes": "General Notes"
@@ -47,6 +55,10 @@
       "none": "None",
       "hoursWorked": "0.0",
       "fuelQuantity": "0.0",
+      "km": "0.0",
+      "percentage": "0.0",
+      "toll": "0.00",
+      "tonnage": "0.0",
       "workDescription": "Describe the work performed...",
       "downtimeNotes": "Record incidents or downtime...",
       "notes": "Additional notes..."

@@ -13,6 +13,7 @@ import { Button } from '@renderer/components/ui/button'
 import { DatePicker } from '@renderer/components/ui/date-picker'
 import { endOfLocalDay, isLocalDateWithinInclusiveRange, parseLocalDate } from '../../../shared/date'
 import type {
+  Client,
   ProjectWithClient,
   Machine,
   DailyLogWithRelations,
@@ -42,6 +43,7 @@ interface ProjectSummaryRow {
 
 interface ProjectSummaryFilters {
   status: Project['status'] | ''
+  clientId: number | ''
   dateFrom: string
   dateTo: string
 }
@@ -65,8 +67,13 @@ function ProjectSummaryTab(): JSX.Element {
   const { t, i18n } = useTranslation(['reports', 'common'])
   const locale = i18n.language as SupportedLocale
   const [rows, setRows] = useState<ProjectSummaryRow[]>([])
-  const [filters, setFilters] = useState<ProjectSummaryFilters>({ status: '', dateFrom: '', dateTo: '' })
+  const [filters, setFilters] = useState<ProjectSummaryFilters>({ status: '', clientId: '', dateFrom: '', dateTo: '' })
+  const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.clients.list().then(setClients)
+  }, [])
 
   useEffect(() => {
     async function load(): Promise<void> {
@@ -88,6 +95,10 @@ function ProjectSummaryTab(): JSX.Element {
 
         if (filters.status) {
           filtered = filtered.filter((p) => p.status === filters.status)
+        }
+
+        if (filters.clientId) {
+          filtered = filtered.filter((p) => p.clientId === filters.clientId)
         }
 
         if (filters.dateFrom) {
@@ -134,10 +145,10 @@ function ProjectSummaryTab(): JSX.Element {
     load()
   }, [filters])
 
-  const hasActiveFilters = filters.status !== '' || filters.dateFrom !== '' || filters.dateTo !== ''
+  const hasActiveFilters = filters.status !== '' || filters.clientId !== '' || filters.dateFrom !== '' || filters.dateTo !== ''
 
   function clearFilters(): void {
-    setFilters({ status: '', dateFrom: '', dateTo: '' })
+    setFilters({ status: '', clientId: '', dateFrom: '', dateTo: '' })
   }
 
   const totalCosts = rows.reduce((sum, r) => sum + r.totalCosts, 0)
@@ -201,6 +212,27 @@ function ProjectSummaryTab(): JSX.Element {
             <option value="active">{t('common:status.active')}</option>
             <option value="completed">{t('common:status.completed')}</option>
             <option value="canceled">{t('common:status.canceled')}</option>
+          </Select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-foreground">{t('reports:filters.client')}</label>
+          <Select
+            value={filters.clientId !== '' ? String(filters.clientId) : ''}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                clientId: e.target.value ? Number(e.target.value) : '',
+              }))
+            }
+            className="min-w-[13rem] text-[15px]"
+          >
+            <option value="">{t('reports:filters.allClients')}</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
           </Select>
         </div>
 
