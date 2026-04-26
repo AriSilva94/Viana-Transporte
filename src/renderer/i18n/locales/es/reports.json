@@ -13,6 +13,8 @@
     "dateTo": "Fecha final",
     "allStatuses": "Todos los estados",
     "allProjects": "Todos los proyectos",
+    "client": "Cliente",
+    "allClients": "Todos los clientes",
     "clear": "Limpiar filtros"
   },
   "hoursValue": "{{value}} h",
