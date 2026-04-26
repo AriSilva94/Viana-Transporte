@@ -10,6 +10,10 @@
     "operator": "Operador",
     "hoursWorked": "Horas",
     "fuelQuantity": "Combustible",
+    "km": "KM",
+    "percentage": "%",
+    "toll": "Peaje",
+    "tonnage": "Toneladas",
     "actions": "Acciones"
   },
   "filters": {
@@ -38,6 +42,10 @@
       "operator": "Operador",
       "hoursWorked": "Horas Trabajadas *",
       "fuelQuantity": "Combustible (L)",
+      "km": "KM",
+      "percentage": "Porcentaje (%)",
+      "toll": "Peaje ($)",
+      "tonnage": "Toneladas",
       "workDescription": "Descripción del Servicio",
       "downtimeNotes": "Observaciones de Parada",
       "notes": "Observaciones Generales"
@@ -47,6 +55,10 @@
       "none": "Ninguno",
       "hoursWorked": "0,0",
       "fuelQuantity": "0,0",
+      "km": "0,0",
+      "percentage": "0,0",
+      "toll": "0,00",
+      "tonnage": "0,0",
       "workDescription": "Describe el trabajo realizado...",
       "downtimeNotes": "Registra incidencias o paradas...",
       "notes": "Observaciones adicionales..."

@@ -34,6 +34,10 @@ export function DailyLogFormPage(): JSX.Element {
   const [fuelQuantity, setFuelQuantity] = useState<number | ''>('')
   const [downtimeNotes, setDowntimeNotes] = useState('')
   const [notes, setNotes] = useState('')
+  const [km, setKm] = useState<number | ''>('')
+  const [percentage, setPercentage] = useState<number | ''>('')
+  const [toll, setToll] = useState<number | ''>('')
+  const [tonnage, setTonnage] = useState<number | ''>('')
 
   useEffect(() => {
     api.projects.list().then(setProjects)
@@ -52,6 +56,10 @@ export function DailyLogFormPage(): JSX.Element {
       setFuelQuantity(log.fuelQuantity ?? '')
       setDowntimeNotes(log.downtimeNotes ?? '')
       setNotes(log.notes ?? '')
+      setKm(log.km ?? '')
+      setPercentage(log.percentage ?? '')
+      setToll(log.toll ?? '')
+      setTonnage(log.tonnage ?? '')
     })
   }, [id, isEdit])
 
@@ -82,6 +90,10 @@ export function DailyLogFormPage(): JSX.Element {
         fuelQuantity: fuelQuantity !== '' ? Number(fuelQuantity) : null,
         downtimeNotes: downtimeNotes.trim() || null,
         notes: notes.trim() || null,
+        km: km !== '' ? Number(km) : null,
+        percentage: percentage !== '' ? Number(percentage) : null,
+        toll: toll !== '' ? Number(toll) : null,
+        tonnage: tonnage !== '' ? Number(tonnage) : null,
       }
       if (isEdit) {
         await api.dailylogs.update(Number(id), data)
@@ -186,6 +198,60 @@ export function DailyLogFormPage(): JSX.Element {
             value={fuelQuantity}
             onChange={(e) => setFuelQuantity(e.target.value === '' ? '' : Number(e.target.value))}
             placeholder={t('dailylogs:form.placeholders.fuelQuantity')}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="km">{t('dailylogs:form.fields.km')}</Label>
+          <Input
+            id="km"
+            type="number"
+            min={0}
+            step={0.1}
+            value={km}
+            onChange={(e) => setKm(e.target.value === '' ? '' : Number(e.target.value))}
+            placeholder={t('dailylogs:form.placeholders.km')}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="percentage">{t('dailylogs:form.fields.percentage')}</Label>
+          <Input
+            id="percentage"
+            type="number"
+            min={0}
+            step={0.1}
+            value={percentage}
+            onChange={(e) => setPercentage(e.target.value === '' ? '' : Number(e.target.value))}
+            placeholder={t('dailylogs:form.placeholders.percentage')}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="toll">{t('dailylogs:form.fields.toll')}</Label>
+          <Input
+            id="toll"
+            type="number"
+            min={0}
+            step={0.01}
+            value={toll}
+            onChange={(e) => setToll(e.target.value === '' ? '' : Number(e.target.value))}
+            placeholder={t('dailylogs:form.placeholders.toll')}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tonnage">{t('dailylogs:form.fields.tonnage')}</Label>
+          <Input
+            id="tonnage"
+            type="number"
+            min={0}
+            step={0.1}
+            value={tonnage}
+            onChange={(e) => setTonnage(e.target.value === '' ? '' : Number(e.target.value))}
+            placeholder={t('dailylogs:form.placeholders.tonnage')}
           />
         </div>
       </div>
