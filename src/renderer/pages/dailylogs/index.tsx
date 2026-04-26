@@ -112,6 +112,30 @@ export function DailyLogsPage(): JSX.Element {
           : t('common:emptyValue'),
     },
     {
+      key: 'km',
+      label: t('dailylogs:columns.km'),
+      render: (row: DailyLogWithRelations) =>
+        row.km != null ? formatDecimal(Number(row.km), locale) : t('common:emptyValue'),
+    },
+    {
+      key: 'percentage',
+      label: t('dailylogs:columns.percentage'),
+      render: (row: DailyLogWithRelations) =>
+        row.percentage != null ? formatDecimal(Number(row.percentage), locale) : t('common:emptyValue'),
+    },
+    {
+      key: 'toll',
+      label: t('dailylogs:columns.toll'),
+      render: (row: DailyLogWithRelations) =>
+        row.toll != null ? formatDecimal(Number(row.toll), locale) : t('common:emptyValue'),
+    },
+    {
+      key: 'tonnage',
+      label: t('dailylogs:columns.tonnage'),
+      render: (row: DailyLogWithRelations) =>
+        row.tonnage != null ? formatDecimal(Number(row.tonnage), locale) : t('common:emptyValue'),
+    },
+    {
       key: 'actions',
       label: t('dailylogs:columns.actions'),
       render: (row: DailyLogWithRelations) => (
@@ -224,7 +248,7 @@ export function DailyLogsPage(): JSX.Element {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          <TableSkeleton columns={6} />
+          <TableSkeleton columns={10} />
         ) : logs.length === 0 && !hasActiveFilters ? (
           <EmptyState
             message={t('dailylogs:empty')}

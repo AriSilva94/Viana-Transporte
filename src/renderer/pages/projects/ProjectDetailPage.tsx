@@ -163,6 +163,30 @@ export function ProjectDetailPage(): JSX.Element {
                   render: (row: DailyLogWithRelations) => String(row.hoursWorked),
                 },
                 {
+                  key: 'km',
+                  label: t('projects:columns.km'),
+                  render: (row: DailyLogWithRelations) =>
+                    row.km != null ? String(row.km) : t('common:emptyValue'),
+                },
+                {
+                  key: 'percentage',
+                  label: t('projects:columns.percentage'),
+                  render: (row: DailyLogWithRelations) =>
+                    row.percentage != null ? String(row.percentage) : t('common:emptyValue'),
+                },
+                {
+                  key: 'toll',
+                  label: t('projects:columns.toll'),
+                  render: (row: DailyLogWithRelations) =>
+                    row.toll != null ? String(row.toll) : t('common:emptyValue'),
+                },
+                {
+                  key: 'tonnage',
+                  label: t('projects:columns.tonnage'),
+                  render: (row: DailyLogWithRelations) =>
+                    row.tonnage != null ? String(row.tonnage) : t('common:emptyValue'),
+                },
+                {
                   key: 'workDescription',
                   label: t('projects:columns.workDescription'),
                   render: (row: DailyLogWithRelations) =>
