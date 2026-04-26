@@ -65,6 +65,10 @@ export interface DailyLog {
   fuelQuantity: number | null
   downtimeNotes: string | null
   notes: string | null
+  km: number | null
+  percentage: number | null
+  toll: number | null
+  tonnage: number | null
   createdAt: Date
   updatedAt: Date
 }

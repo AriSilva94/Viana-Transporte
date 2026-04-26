@@ -75,6 +75,12 @@
       "output": "dist/full",
       "buildResources": "build"
     },
+    "extraResources": [
+      {
+        "from": ".env.production",
+        "to": ".env.production"
+      }
+    ],
     "publish": {
       "provider": "github",
       "owner": "AriSilva94",
