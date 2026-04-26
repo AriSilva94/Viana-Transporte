@@ -85,6 +85,10 @@ export interface SupabaseDailyLogRow {
   fuel_quantity: number | string | null
   downtime_notes: string | null
   notes: string | null
+  km: number | string | null
+  percentage: number | string | null
+  toll: number | string | null
+  tonnage: number | string | null
   created_at: string
   updated_at: string
 }
@@ -280,6 +284,10 @@ export function mapSupabaseDailyLogRow(row: SupabaseDailyLogRow): DailyLog {
     fuelQuantity: row.fuel_quantity === null ? null : Number(row.fuel_quantity),
     downtimeNotes: row.downtime_notes,
     notes: row.notes,
+    km: row.km === null ? null : Number(row.km),
+    percentage: row.percentage === null ? null : Number(row.percentage),
+    toll: row.toll === null ? null : Number(row.toll),
+    tonnage: row.tonnage === null ? null : Number(row.tonnage),
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   }
@@ -310,6 +318,10 @@ export function mapDailyLogToSupabaseInsert(
     fuel_quantity: log.fuelQuantity,
     downtime_notes: log.downtimeNotes,
     notes: log.notes,
+    km: log.km,
+    percentage: log.percentage,
+    toll: log.toll,
+    tonnage: log.tonnage,
   }
 }
 

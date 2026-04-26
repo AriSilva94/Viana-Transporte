@@ -13,6 +13,8 @@
     "dateTo": "Data final",
     "allStatuses": "Todos os status",
     "allProjects": "Todos os projetos",
+    "client": "Cliente",
+    "allClients": "Todos os clientes",
     "clear": "Limpar filtros"
   },
   "hoursValue": "{{value}} h",
