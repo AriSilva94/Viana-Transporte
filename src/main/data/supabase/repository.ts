@@ -2,13 +2,20 @@ import type { DomainRepository } from '../types'
 import { createSupabaseClientFromEnv } from './client'
 import {
   mapClientToSupabaseInsert,
+  mapClientToSupabaseUpdate,
   mapDailyLogToSupabaseInsert,
+  mapDailyLogToSupabaseUpdate,
   mapMachineToSupabaseInsert,
+  mapMachineToSupabaseUpdate,
   mapProjectCostToSupabaseInsert,
+  mapProjectCostToSupabaseUpdate,
   mapProjectRevenueToSupabaseInsert,
+  mapProjectRevenueToSupabaseUpdate,
   mapOperatorToSupabaseInsert,
+  mapOperatorToSupabaseUpdate,
   mapProjectSummaryRow,
   mapProjectToSupabaseInsert,
+  mapProjectToSupabaseUpdate,
   mapSupabaseDailyLogRow,
   mapSupabaseDailyLogWithRelationsRow,
   mapSupabaseClientRow,
@@ -302,7 +309,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseClientRow[]>('clients')
-          .update({ ...data, updated_at: new Date().toISOString() })
+          .update(mapClientToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -341,12 +348,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectRow[]>('projects')
-          .update({
-            ...data,
-            start_date: data.startDate ? formatLocalDate(data.startDate) : data.startDate,
-            end_date: data.endDate ? formatLocalDate(data.endDate) : data.endDate,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapProjectToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -410,7 +412,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseMachineRow[]>('machines')
-          .update({ ...data, updated_at: new Date().toISOString() })
+          .update(mapMachineToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -462,7 +464,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseOperatorRow[]>('operators')
-          .update({ ...data, updated_at: new Date().toISOString() })
+          .update(mapOperatorToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -526,11 +528,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseDailyLogRow[]>('daily_logs')
-          .update({
-            ...data,
-            date: data.date ? formatLocalDate(data.date) : data.date,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapDailyLogToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -595,11 +593,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectCostRow[]>('project_costs')
-          .update({
-            ...data,
-            date: data.date ? formatLocalDate(data.date) : data.date,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapProjectCostToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -646,11 +640,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectRevenueRow[]>('project_revenues')
-          .update({
-            ...data,
-            date: data.date ? formatLocalDate(data.date) : data.date,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapProjectRevenueToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
