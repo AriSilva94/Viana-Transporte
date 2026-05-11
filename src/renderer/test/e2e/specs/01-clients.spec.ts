@@ -2,7 +2,10 @@
 import path from 'path'
 import { test, expect, goTo, ensureScreenshotDir, confirmDialog } from '../fixtures/electron'
 
-const UNIQUE_NAME = `Cliente Playwright 01 ${Date.now()}`
+const UNIQUE_SUFFIX = `${Date.now()}-${Math.floor(Math.random() * 10000)}`
+const UNIQUE_NAME = `Cliente Playwright 01 ${UNIQUE_SUFFIX}`
+const UNIQUE_DOC = `${Date.now()}`.slice(-14)
+const UNIQUE_EMAIL = `playwright01-${UNIQUE_SUFFIX}@test.com`
 
 test.describe.serial('Clients — Automated', () => {
   test('create client', async ({ page }) => {
@@ -10,15 +13,15 @@ test.describe.serial('Clients — Automated', () => {
     await page.waitForSelector('#name')
 
     await page.fill('#name', UNIQUE_NAME)
-    await page.fill('#document', '12.345.678/0001-90')
+    await page.fill('#document', UNIQUE_DOC)
     await page.fill('#phone', '(11) 99999-0001')
-    await page.fill('#email', 'playwright01@test.com')
+    await page.fill('#email', UNIQUE_EMAIL)
     await page.fill('#notes', 'Criado pelo Playwright')
 
     await page.click('button[type="submit"]')
 
     // Should redirect to /clients list
-    await page.waitForSelector('table', { timeout: 5000 })
+    await page.waitForSelector('table')
 
     const row = page.locator('tr', { hasText: UNIQUE_NAME })
     await expect(row).toBeVisible()
@@ -41,6 +44,7 @@ test.describe.serial('Clients — Automated', () => {
     await row.locator('button').nth(1).click() // 0=View, 1=Edit, 2=Delete
 
     await page.waitForSelector('#name')
+    await expect(page.locator('#name')).not.toHaveValue('')
     await page.fill('#name', UNIQUE_NAME + ' Editado')
     await page.click('button[type="submit"]')
 

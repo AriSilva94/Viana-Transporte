@@ -2,13 +2,20 @@ import type { DomainRepository } from '../types'
 import { createSupabaseClientFromEnv } from './client'
 import {
   mapClientToSupabaseInsert,
+  mapClientToSupabaseUpdate,
   mapDailyLogToSupabaseInsert,
+  mapDailyLogToSupabaseUpdate,
   mapMachineToSupabaseInsert,
+  mapMachineToSupabaseUpdate,
   mapProjectCostToSupabaseInsert,
+  mapProjectCostToSupabaseUpdate,
   mapProjectRevenueToSupabaseInsert,
+  mapProjectRevenueToSupabaseUpdate,
   mapOperatorToSupabaseInsert,
+  mapOperatorToSupabaseUpdate,
   mapProjectSummaryRow,
   mapProjectToSupabaseInsert,
+  mapProjectToSupabaseUpdate,
   mapSupabaseDailyLogRow,
   mapSupabaseDailyLogWithRelationsRow,
   mapSupabaseClientRow,
@@ -44,6 +51,7 @@ import type {
   RevenueFilters,
 } from '../../../shared/types'
 import { formatLocalDate } from '../../../shared/date'
+import { computeDailyLogValue } from '../../../shared/dailyLogValue'
 
 type SupabaseResult<T> = {
   data: T | null
@@ -165,6 +173,34 @@ async function loadOperatorNameMap(client: SupabaseClientLike): Promise<Map<numb
   const result = await client.from<Pick<SupabaseOperatorRow, 'id' | 'name'>[]>('operators').select('id,name')
   const rows = ensureList(result as SupabaseResult<Pick<SupabaseOperatorRow, 'id' | 'name'>[] | null>)
   return new Map(rows.map((row) => [row.id, row.name]))
+}
+
+type DailyLogFormulaRow = Pick<
+  SupabaseDailyLogRow,
+  'id' | 'tonnage' | 'percentage' | 'km' | 'toll'
+>
+
+async function loadDailyLogFormulaMap(client: SupabaseClientLike): Promise<Map<number, number>> {
+  const result = await client
+    .from<DailyLogFormulaRow[]>('daily_logs')
+    .select('id,tonnage,percentage,km,toll')
+  const rows = ensureList(result as SupabaseResult<DailyLogFormulaRow[] | null>)
+  return new Map(
+    rows.map((row) => [
+      row.id,
+      computeDailyLogValue({
+        tonnage: row.tonnage === null ? null : Number(row.tonnage),
+        percentage: row.percentage === null ? null : Number(row.percentage),
+        km: row.km === null ? null : Number(row.km),
+        toll: row.toll === null ? null : Number(row.toll),
+      }),
+    ])
+  )
+}
+
+function computedValueFor(map: Map<number, number>, dailyLogId: number | null): number | null {
+  if (dailyLogId === null || dailyLogId === undefined) return null
+  return map.get(dailyLogId) ?? null
 }
 
 function toDateOnly(value: Date | string | number): string {
@@ -302,7 +338,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseClientRow[]>('clients')
-          .update({ ...data, updated_at: new Date().toISOString() })
+          .update(mapClientToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -341,12 +377,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectRow[]>('projects')
-          .update({
-            ...data,
-            start_date: data.startDate ? formatLocalDate(data.startDate) : data.startDate,
-            end_date: data.endDate ? formatLocalDate(data.endDate) : data.endDate,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapProjectToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -410,7 +441,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseMachineRow[]>('machines')
-          .update({ ...data, updated_at: new Date().toISOString() })
+          .update(mapMachineToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -462,7 +493,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseOperatorRow[]>('operators')
-          .update({ ...data, updated_at: new Date().toISOString() })
+          .update(mapOperatorToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -526,11 +557,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseDailyLogRow[]>('daily_logs')
-          .update({
-            ...data,
-            date: data.date ? formatLocalDate(data.date) : data.date,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapDailyLogToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -547,11 +574,12 @@ export async function createSupabaseRepository(
     },
     costs: {
       async list(filters?: CostFilters) {
-        const [rows, projectNames, machineNames, operatorNames] = await Promise.all([
+        const [rows, projectNames, machineNames, operatorNames, dailyLogValues] = await Promise.all([
           loadCostRows(client, filters),
           loadProjectNameMap(client),
           loadMachineNameMap(client),
           loadOperatorNameMap(client),
+          loadDailyLogFormulaMap(client),
         ])
 
         return rows.map((row) =>
@@ -559,6 +587,7 @@ export async function createSupabaseRepository(
             projectName: projectNames.get(row.project_id) ?? null,
             machineName: row.machine_id ? machineNames.get(row.machine_id) ?? null : null,
             operatorName: row.operator_id ? operatorNames.get(row.operator_id) ?? null : null,
+            dailyLogComputedValue: computedValueFor(dailyLogValues, row.daily_log_id),
           })
         )
       },
@@ -568,16 +597,18 @@ export async function createSupabaseRepository(
           return null
         }
 
-        const [projectNames, machineNames, operatorNames] = await Promise.all([
+        const [projectNames, machineNames, operatorNames, dailyLogValues] = await Promise.all([
           loadProjectNameMap(client),
           loadMachineNameMap(client),
           loadOperatorNameMap(client),
+          loadDailyLogFormulaMap(client),
         ])
 
         return mapSupabaseProjectCostWithRelationsRow(row, {
           projectName: projectNames.get(row.project_id) ?? null,
           machineName: row.machine_id ? machineNames.get(row.machine_id) ?? null : null,
           operatorName: row.operator_id ? operatorNames.get(row.operator_id) ?? null : null,
+          dailyLogComputedValue: computedValueFor(dailyLogValues, row.daily_log_id),
         })
       },
       async create(data: Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>) {
@@ -595,11 +626,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectCostRow[]>('project_costs')
-          .update({
-            ...data,
-            date: data.date ? formatLocalDate(data.date) : data.date,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapProjectCostToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')
@@ -616,10 +643,17 @@ export async function createSupabaseRepository(
     },
     revenues: {
       async list(filters?: RevenueFilters) {
-        const [rows, projectNames] = await Promise.all([loadRevenueRows(client, filters), loadProjectNameMap(client)])
+        const [rows, projectNames, dailyLogValues] = await Promise.all([
+          loadRevenueRows(client, filters),
+          loadProjectNameMap(client),
+          loadDailyLogFormulaMap(client),
+        ])
 
         return rows.map((row) =>
-          mapSupabaseProjectRevenueWithRelationsRow(row, projectNames.get(row.project_id) ?? null)
+          mapSupabaseProjectRevenueWithRelationsRow(row, {
+            projectName: projectNames.get(row.project_id) ?? null,
+            dailyLogComputedValue: computedValueFor(dailyLogValues, row.daily_log_id),
+          })
         )
       },
       async get(id: number) {
@@ -628,8 +662,14 @@ export async function createSupabaseRepository(
           return null
         }
 
-        const projectNames = await loadProjectNameMap(client)
-        return mapSupabaseProjectRevenueWithRelationsRow(row, projectNames.get(row.project_id) ?? null)
+        const [projectNames, dailyLogValues] = await Promise.all([
+          loadProjectNameMap(client),
+          loadDailyLogFormulaMap(client),
+        ])
+        return mapSupabaseProjectRevenueWithRelationsRow(row, {
+          projectName: projectNames.get(row.project_id) ?? null,
+          dailyLogComputedValue: computedValueFor(dailyLogValues, row.daily_log_id),
+        })
       },
       async create(data: Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>) {
         const userId = await getCurrentUserId()
@@ -646,11 +686,7 @@ export async function createSupabaseRepository(
         const userId = await getCurrentUserId()
         const result = await client
           .from<SupabaseProjectRevenueRow[]>('project_revenues')
-          .update({
-            ...data,
-            date: data.date ? formatLocalDate(data.date) : data.date,
-            updated_at: new Date().toISOString(),
-          })
+          .update(mapProjectRevenueToSupabaseUpdate(data))
           .eq('id', id)
           .eq('user_id', userId)
           .select('*')

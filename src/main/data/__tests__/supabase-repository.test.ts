@@ -700,6 +700,10 @@ describe('createSupabaseRepository', () => {
       fuelQuantity: 12,
       downtimeNotes: 'Sem paradas',
       notes: 'Observação',
+      km: null,
+      percentage: null,
+      toll: null,
+      tonnage: null,
     })
     const loadedDailyLog = await repo.dailylogs.get(31)
     const updatedDailyLog = await repo.dailylogs.update(31, {
@@ -719,6 +723,7 @@ describe('createSupabaseRepository', () => {
       projectId: 21,
       machineId: 7,
       operatorId: 11,
+      dailyLogId: null,
       category: 'fuel',
       description: 'Combustível',
       amount: 100,
@@ -740,6 +745,7 @@ describe('createSupabaseRepository', () => {
     const createdRevenue = await repo.revenues.create({
       date: new Date('2026-04-05T03:00:00.000Z'),
       projectId: 21,
+      dailyLogId: null,
       description: 'Faturamento',
       amount: 250,
       status: 'billed',

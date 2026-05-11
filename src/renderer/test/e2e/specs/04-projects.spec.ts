@@ -1,5 +1,5 @@
 import path from 'path'
-import { test, expect, goTo, ensureScreenshotDir, seedBase, confirmDialog } from '../fixtures/electron'
+import { test, expect, goTo, ensureScreenshotDir, seedBase, confirmDialog, selectCustom } from '../fixtures/electron'
 
 const UNIQUE_NAME = `Projeto Playwright 04 ${Date.now()}`
 
@@ -16,14 +16,16 @@ test.describe.serial('Projects — Automated', () => {
     await page.waitForSelector('#name')
 
     await page.fill('#name', UNIQUE_NAME)
-    await page.selectOption('#clientId', { value: String(clientId) })
+    await selectCustom(page, 'clientId', clientId)
     await page.fill('#location', 'Rodovia SP-123, km 45')
 
     // DatePicker customizado: abre e escolhe "Hoje/Today"
     await page.click('#startDate')
-    await page.getByRole('button', { name: /hoje|today/i }).first().click()
+    const todayBtn = page.getByRole('button', { name: /hoje|today/i }).first()
+    await todayBtn.scrollIntoViewIfNeeded()
+    await todayBtn.evaluate((el) => (el as HTMLElement).click())
 
-    await page.selectOption('#status', 'active')
+    await selectCustom(page, 'status', 'active')
     await page.fill('#contractAmount', '150000')
 
     await page.click('button[type="submit"]')
@@ -46,6 +48,7 @@ test.describe.serial('Projects — Automated', () => {
     await row.locator('button').nth(1).click()
 
     await page.waitForSelector('#name')
+    await expect(page.locator('#name')).not.toHaveValue('')
     await page.fill('#name', UNIQUE_NAME + ' Editado')
     await page.click('button[type="submit"]')
 

@@ -9,6 +9,7 @@
     "description": "Descripción",
     "amount": "Valor",
     "status": "Estado",
+    "computedValue": "Valor Calculado",
     "actions": "Acciones"
   },
   "filters": {
@@ -39,13 +40,22 @@
       "description": "Descripción *",
       "amount": "Valor (R$) *",
       "status": "Estado *",
+      "dailyLog": "Diario Vinculado",
+      "computedValue": "Valor Calculado ($)",
       "notes": "Observaciones"
     },
     "placeholders": {
       "select": "Seleccionar...",
+      "dailyLogNone": "Ninguno",
       "description": "Describe el ingreso o medición...",
       "amount": "0,00",
       "notes": "Observaciones adicionales..."
+    },
+    "actions": {
+      "useComputedValue": "Usar valor"
+    },
+    "helpers": {
+      "computedValue": "Calculado desde el diario vinculado (Toneladas × % × KM + Peaje)"
     },
     "errors": {
       "requiredDate": "La fecha es obligatoria",

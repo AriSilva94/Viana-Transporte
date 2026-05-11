@@ -106,6 +106,7 @@ export interface SupabaseProjectCostRow {
   project_id: number
   machine_id: number | null
   operator_id: number | null
+  daily_log_id: number | null
   category: ProjectCost['category']
   description: string
   amount: number | string
@@ -118,6 +119,7 @@ export interface SupabaseProjectCostWithRelationsRow extends SupabaseProjectCost
   projectName: string | null
   machineName: string | null
   operatorName: string | null
+  dailyLogComputedValue: number | null
 }
 
 export interface SupabaseProjectRevenueRow {
@@ -125,6 +127,7 @@ export interface SupabaseProjectRevenueRow {
   user_id: string
   date: string
   project_id: number
+  daily_log_id: number | null
   description: string
   amount: number | string
   status: ProjectRevenue['status']
@@ -135,6 +138,7 @@ export interface SupabaseProjectRevenueRow {
 
 export interface SupabaseProjectRevenueWithRelationsRow extends SupabaseProjectRevenueRow {
   projectName: string | null
+  dailyLogComputedValue: number | null
 }
 
 export function mapSupabaseClientRow(row: SupabaseClientRow): Client {
@@ -332,6 +336,7 @@ export function mapSupabaseProjectCostRow(row: SupabaseProjectCostRow): ProjectC
     projectId: row.project_id,
     machineId: row.machine_id,
     operatorId: row.operator_id,
+    dailyLogId: row.daily_log_id ?? null,
     category: row.category,
     description: row.description,
     amount: Number(row.amount),
@@ -343,7 +348,12 @@ export function mapSupabaseProjectCostRow(row: SupabaseProjectCostRow): ProjectC
 
 export function mapSupabaseProjectCostWithRelationsRow(
   row: SupabaseProjectCostRow,
-  relations: { projectName: string | null; machineName: string | null; operatorName: string | null }
+  relations: {
+    projectName: string | null
+    machineName: string | null
+    operatorName: string | null
+    dailyLogComputedValue: number | null
+  }
 ): ProjectCostWithRelations {
   return {
     ...mapSupabaseProjectCostRow(row),
@@ -361,6 +371,7 @@ export function mapProjectCostToSupabaseInsert(
     project_id: cost.projectId,
     machine_id: cost.machineId,
     operator_id: cost.operatorId,
+    daily_log_id: cost.dailyLogId,
     category: cost.category,
     description: cost.description,
     amount: cost.amount,
@@ -373,6 +384,7 @@ export function mapSupabaseProjectRevenueRow(row: SupabaseProjectRevenueRow): Pr
     id: row.id,
     date: parseLocalDate(row.date),
     projectId: row.project_id,
+    dailyLogId: row.daily_log_id ?? null,
     description: row.description,
     amount: Number(row.amount),
     status: row.status,
@@ -384,11 +396,11 @@ export function mapSupabaseProjectRevenueRow(row: SupabaseProjectRevenueRow): Pr
 
 export function mapSupabaseProjectRevenueWithRelationsRow(
   row: SupabaseProjectRevenueRow,
-  projectName: string | null
+  relations: { projectName: string | null; dailyLogComputedValue: number | null }
 ): ProjectRevenueWithRelations {
   return {
     ...mapSupabaseProjectRevenueRow(row),
-    projectName,
+    ...relations,
   }
 }
 
@@ -400,9 +412,134 @@ export function mapProjectRevenueToSupabaseInsert(
     user_id: userId,
     date: formatLocalDate(revenue.date),
     project_id: revenue.projectId,
+    daily_log_id: revenue.dailyLogId,
     description: revenue.description,
     amount: revenue.amount,
     status: revenue.status,
     notes: revenue.notes,
   }
+}
+
+type SupabasePatch<T> = Partial<T> & { updated_at: string }
+
+function assignIfPresent<T extends object, K extends keyof T>(
+  target: T,
+  key: K,
+  value: T[K] | undefined
+): void {
+  if (value !== undefined) {
+    target[key] = value as T[K]
+  }
+}
+
+export function mapClientToSupabaseUpdate(
+  data: Partial<Omit<Client, 'id' | 'createdAt' | 'updatedAt'>>
+): SupabasePatch<SupabaseClientRow> {
+  const patch: SupabasePatch<SupabaseClientRow> = { updated_at: new Date().toISOString() }
+  assignIfPresent(patch, 'name', data.name)
+  assignIfPresent(patch, 'document', data.document)
+  assignIfPresent(patch, 'phone', data.phone)
+  assignIfPresent(patch, 'email', data.email)
+  assignIfPresent(patch, 'notes', data.notes)
+  return patch
+}
+
+export function mapMachineToSupabaseUpdate(
+  data: Partial<Omit<Machine, 'id' | 'createdAt' | 'updatedAt'>>
+): SupabasePatch<SupabaseMachineRow> {
+  const patch: SupabasePatch<SupabaseMachineRow> = { updated_at: new Date().toISOString() }
+  assignIfPresent(patch, 'name', data.name)
+  assignIfPresent(patch, 'type', data.type)
+  assignIfPresent(patch, 'identifier', data.identifier)
+  assignIfPresent(patch, 'brand_model', data.brandModel)
+  assignIfPresent(patch, 'status', data.status)
+  assignIfPresent(patch, 'notes', data.notes)
+  return patch
+}
+
+export function mapOperatorToSupabaseUpdate(
+  data: Partial<Omit<Operator, 'id' | 'createdAt' | 'updatedAt'>>
+): SupabasePatch<SupabaseOperatorRow> {
+  const patch: SupabasePatch<SupabaseOperatorRow> = { updated_at: new Date().toISOString() }
+  assignIfPresent(patch, 'name', data.name)
+  assignIfPresent(patch, 'phone', data.phone)
+  assignIfPresent(patch, 'role', data.role)
+  assignIfPresent(patch, 'is_active', data.isActive)
+  assignIfPresent(patch, 'notes', data.notes)
+  return patch
+}
+
+export function mapProjectToSupabaseUpdate(
+  data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>
+): SupabasePatch<SupabaseProjectRow> {
+  const patch: SupabasePatch<SupabaseProjectRow> = { updated_at: new Date().toISOString() }
+  assignIfPresent(patch, 'client_id', data.clientId)
+  assignIfPresent(patch, 'name', data.name)
+  assignIfPresent(patch, 'location', data.location)
+  if (data.startDate !== undefined) {
+    patch.start_date = data.startDate ? formatLocalDate(data.startDate) : null
+  }
+  if (data.endDate !== undefined) {
+    patch.end_date = data.endDate ? formatLocalDate(data.endDate) : null
+  }
+  assignIfPresent(patch, 'status', data.status)
+  assignIfPresent(patch, 'contract_amount', data.contractAmount)
+  assignIfPresent(patch, 'description', data.description)
+  return patch
+}
+
+export function mapDailyLogToSupabaseUpdate(
+  data: Partial<Omit<DailyLog, 'id' | 'createdAt' | 'updatedAt'>>
+): SupabasePatch<SupabaseDailyLogRow> {
+  const patch: SupabasePatch<SupabaseDailyLogRow> = { updated_at: new Date().toISOString() }
+  if (data.date !== undefined) {
+    patch.date = formatLocalDate(data.date)
+  }
+  assignIfPresent(patch, 'project_id', data.projectId)
+  assignIfPresent(patch, 'machine_id', data.machineId)
+  assignIfPresent(patch, 'operator_id', data.operatorId)
+  assignIfPresent(patch, 'hours_worked', data.hoursWorked)
+  assignIfPresent(patch, 'work_description', data.workDescription)
+  assignIfPresent(patch, 'fuel_quantity', data.fuelQuantity)
+  assignIfPresent(patch, 'downtime_notes', data.downtimeNotes)
+  assignIfPresent(patch, 'notes', data.notes)
+  assignIfPresent(patch, 'km', data.km)
+  assignIfPresent(patch, 'percentage', data.percentage)
+  assignIfPresent(patch, 'toll', data.toll)
+  assignIfPresent(patch, 'tonnage', data.tonnage)
+  return patch
+}
+
+export function mapProjectCostToSupabaseUpdate(
+  data: Partial<Omit<ProjectCost, 'id' | 'createdAt' | 'updatedAt'>>
+): SupabasePatch<SupabaseProjectCostRow> {
+  const patch: SupabasePatch<SupabaseProjectCostRow> = { updated_at: new Date().toISOString() }
+  if (data.date !== undefined) {
+    patch.date = formatLocalDate(data.date)
+  }
+  assignIfPresent(patch, 'project_id', data.projectId)
+  assignIfPresent(patch, 'machine_id', data.machineId)
+  assignIfPresent(patch, 'operator_id', data.operatorId)
+  assignIfPresent(patch, 'daily_log_id', data.dailyLogId)
+  assignIfPresent(patch, 'category', data.category)
+  assignIfPresent(patch, 'description', data.description)
+  assignIfPresent(patch, 'amount', data.amount)
+  assignIfPresent(patch, 'notes', data.notes)
+  return patch
+}
+
+export function mapProjectRevenueToSupabaseUpdate(
+  data: Partial<Omit<ProjectRevenue, 'id' | 'createdAt' | 'updatedAt'>>
+): SupabasePatch<SupabaseProjectRevenueRow> {
+  const patch: SupabasePatch<SupabaseProjectRevenueRow> = { updated_at: new Date().toISOString() }
+  if (data.date !== undefined) {
+    patch.date = formatLocalDate(data.date)
+  }
+  assignIfPresent(patch, 'project_id', data.projectId)
+  assignIfPresent(patch, 'daily_log_id', data.dailyLogId)
+  assignIfPresent(patch, 'description', data.description)
+  assignIfPresent(patch, 'amount', data.amount)
+  assignIfPresent(patch, 'status', data.status)
+  assignIfPresent(patch, 'notes', data.notes)
+  return patch
 }

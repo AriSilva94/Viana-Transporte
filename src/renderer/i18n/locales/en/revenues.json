@@ -9,6 +9,7 @@
     "description": "Description",
     "amount": "Amount",
     "status": "Status",
+    "computedValue": "Computed Value",
     "actions": "Actions"
   },
   "filters": {
@@ -39,13 +40,22 @@
       "description": "Description *",
       "amount": "Amount (R$) *",
       "status": "Status *",
+      "dailyLog": "Linked Daily Log",
+      "computedValue": "Computed Value ($)",
       "notes": "Notes"
     },
     "placeholders": {
       "select": "Select...",
+      "dailyLogNone": "None",
       "description": "Describe the revenue or measurement...",
       "amount": "0.00",
       "notes": "Additional notes..."
+    },
+    "actions": {
+      "useComputedValue": "Use value"
+    },
+    "helpers": {
+      "computedValue": "Computed from linked daily log (Tonnage × % × KM + Toll)"
     },
     "errors": {
       "requiredDate": "Date is required",

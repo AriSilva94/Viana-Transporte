@@ -85,6 +85,7 @@ export interface ProjectCost {
   projectId: number
   machineId: number | null
   operatorId: number | null
+  dailyLogId: number | null
   category: 'fuel' | 'labor' | 'maintenance' | 'transport' | 'outsourced' | 'miscellaneous'
   description: string
   amount: number
@@ -97,12 +98,14 @@ export interface ProjectCostWithRelations extends ProjectCost {
   projectName: string | null
   machineName: string | null
   operatorName: string | null
+  dailyLogComputedValue: number | null
 }
 
 export interface ProjectRevenue {
   id: number
   date: Date
   projectId: number
+  dailyLogId: number | null
   description: string
   amount: number
   status: 'planned' | 'billed' | 'received'
@@ -113,6 +116,7 @@ export interface ProjectRevenue {
 
 export interface ProjectRevenueWithRelations extends ProjectRevenue {
   projectName: string | null
+  dailyLogComputedValue: number | null
 }
 
 // ─── Computed Result Types ────────────────────────────────────────────────────
