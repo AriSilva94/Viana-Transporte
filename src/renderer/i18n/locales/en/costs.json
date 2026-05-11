@@ -10,6 +10,7 @@
     "description": "Description",
     "amount": "Amount",
     "machine": "Machine",
+    "computedValue": "Computed Value",
     "actions": "Actions"
   },
   "filters": {
@@ -45,14 +46,23 @@
       "amount": "Amount (R$) *",
       "machine": "Machine",
       "operator": "Operator",
+      "dailyLog": "Linked Daily Log",
+      "computedValue": "Computed Value ($)",
       "notes": "Notes"
     },
     "placeholders": {
       "select": "Select...",
       "none": "None",
+      "dailyLogNone": "None",
       "description": "Describe the cost...",
       "amount": "0.00",
       "notes": "Additional notes..."
+    },
+    "actions": {
+      "useComputedValue": "Use value"
+    },
+    "helpers": {
+      "computedValue": "Computed from linked daily log (Tonnage × % × KM + Toll)"
     },
     "errors": {
       "requiredDate": "Date is required",

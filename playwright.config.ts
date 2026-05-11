@@ -10,5 +10,6 @@ export default defineConfig({
   use: {
     screenshot: 'only-on-failure',
     video: 'off',
+    viewport: { width: 1600, height: 1000 },
   },
 })

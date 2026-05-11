@@ -106,6 +106,7 @@ export interface SupabaseProjectCostRow {
   project_id: number
   machine_id: number | null
   operator_id: number | null
+  daily_log_id: number | null
   category: ProjectCost['category']
   description: string
   amount: number | string
@@ -118,6 +119,7 @@ export interface SupabaseProjectCostWithRelationsRow extends SupabaseProjectCost
   projectName: string | null
   machineName: string | null
   operatorName: string | null
+  dailyLogComputedValue: number | null
 }
 
 export interface SupabaseProjectRevenueRow {
@@ -125,6 +127,7 @@ export interface SupabaseProjectRevenueRow {
   user_id: string
   date: string
   project_id: number
+  daily_log_id: number | null
   description: string
   amount: number | string
   status: ProjectRevenue['status']
@@ -135,6 +138,7 @@ export interface SupabaseProjectRevenueRow {
 
 export interface SupabaseProjectRevenueWithRelationsRow extends SupabaseProjectRevenueRow {
   projectName: string | null
+  dailyLogComputedValue: number | null
 }
 
 export function mapSupabaseClientRow(row: SupabaseClientRow): Client {
@@ -332,6 +336,7 @@ export function mapSupabaseProjectCostRow(row: SupabaseProjectCostRow): ProjectC
     projectId: row.project_id,
     machineId: row.machine_id,
     operatorId: row.operator_id,
+    dailyLogId: row.daily_log_id ?? null,
     category: row.category,
     description: row.description,
     amount: Number(row.amount),
@@ -343,7 +348,12 @@ export function mapSupabaseProjectCostRow(row: SupabaseProjectCostRow): ProjectC
 
 export function mapSupabaseProjectCostWithRelationsRow(
   row: SupabaseProjectCostRow,
-  relations: { projectName: string | null; machineName: string | null; operatorName: string | null }
+  relations: {
+    projectName: string | null
+    machineName: string | null
+    operatorName: string | null
+    dailyLogComputedValue: number | null
+  }
 ): ProjectCostWithRelations {
   return {
     ...mapSupabaseProjectCostRow(row),
@@ -361,6 +371,7 @@ export function mapProjectCostToSupabaseInsert(
     project_id: cost.projectId,
     machine_id: cost.machineId,
     operator_id: cost.operatorId,
+    daily_log_id: cost.dailyLogId,
     category: cost.category,
     description: cost.description,
     amount: cost.amount,
@@ -373,6 +384,7 @@ export function mapSupabaseProjectRevenueRow(row: SupabaseProjectRevenueRow): Pr
     id: row.id,
     date: parseLocalDate(row.date),
     projectId: row.project_id,
+    dailyLogId: row.daily_log_id ?? null,
     description: row.description,
     amount: Number(row.amount),
     status: row.status,
@@ -384,11 +396,11 @@ export function mapSupabaseProjectRevenueRow(row: SupabaseProjectRevenueRow): Pr
 
 export function mapSupabaseProjectRevenueWithRelationsRow(
   row: SupabaseProjectRevenueRow,
-  projectName: string | null
+  relations: { projectName: string | null; dailyLogComputedValue: number | null }
 ): ProjectRevenueWithRelations {
   return {
     ...mapSupabaseProjectRevenueRow(row),
-    projectName,
+    ...relations,
   }
 }
 
@@ -400,6 +412,7 @@ export function mapProjectRevenueToSupabaseInsert(
     user_id: userId,
     date: formatLocalDate(revenue.date),
     project_id: revenue.projectId,
+    daily_log_id: revenue.dailyLogId,
     description: revenue.description,
     amount: revenue.amount,
     status: revenue.status,
@@ -507,6 +520,7 @@ export function mapProjectCostToSupabaseUpdate(
   assignIfPresent(patch, 'project_id', data.projectId)
   assignIfPresent(patch, 'machine_id', data.machineId)
   assignIfPresent(patch, 'operator_id', data.operatorId)
+  assignIfPresent(patch, 'daily_log_id', data.dailyLogId)
   assignIfPresent(patch, 'category', data.category)
   assignIfPresent(patch, 'description', data.description)
   assignIfPresent(patch, 'amount', data.amount)
@@ -522,6 +536,7 @@ export function mapProjectRevenueToSupabaseUpdate(
     patch.date = formatLocalDate(data.date)
   }
   assignIfPresent(patch, 'project_id', data.projectId)
+  assignIfPresent(patch, 'daily_log_id', data.dailyLogId)
   assignIfPresent(patch, 'description', data.description)
   assignIfPresent(patch, 'amount', data.amount)
   assignIfPresent(patch, 'status', data.status)

@@ -115,6 +115,14 @@ export function CostsPage(): JSX.Element {
       render: (row: ProjectCostWithRelations) => row.machineName ?? t('common:emptyValue'),
     },
     {
+      key: 'dailyLogComputedValue',
+      label: t('costs:columns.computedValue'),
+      render: (row: ProjectCostWithRelations) =>
+        row.dailyLogComputedValue !== null
+          ? formatCurrency(row.dailyLogComputedValue, locale)
+          : t('common:emptyValue'),
+    },
+    {
       key: 'actions',
       label: t('costs:columns.actions'),
       render: (row: ProjectCostWithRelations) => (
@@ -207,7 +215,7 @@ export function CostsPage(): JSX.Element {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          <TableSkeleton columns={6} />
+          <TableSkeleton columns={7} />
         ) : costs.length === 0 && !hasActiveFilters ? (
           <EmptyState
             message={t('costs:empty')}

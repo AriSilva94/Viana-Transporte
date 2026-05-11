@@ -1,5 +1,5 @@
 import path from 'path'
-import { test, expect, goTo, ensureScreenshotDir, seedBase, seedMachine, seedOperator, confirmDialog } from '../fixtures/electron'
+import { test, expect, goTo, ensureScreenshotDir, seedBase, seedMachine, seedOperator, confirmDialog, selectCustom } from '../fixtures/electron'
 
 const UNIQUE_DESC = `Escavação Playwright 05 ${Date.now()}`
 
@@ -23,12 +23,20 @@ test.describe.serial('Daily Logs — Automated', () => {
     await goTo(page, '#/daily-logs/new')
     await page.waitForSelector('#hoursWorked')
 
-    await page.selectOption('#projectId', { value: String(projectId) })
-    await page.selectOption('#machineId', { value: String(machineId) })
-    await page.selectOption('#operatorId', { value: String(operatorId) })
+    await selectCustom(page, 'projectId', projectId)
+    await selectCustom(page, 'machineId', machineId)
+    await selectCustom(page, 'operatorId', operatorId)
     await page.fill('#hoursWorked', '8')
     await page.fill('#workDescription', UNIQUE_DESC)
     await page.fill('#fuelQuantity', '120')
+    await page.fill('#tonnage', '22.6')
+    await page.fill('#percentage', '0.80')
+    await page.fill('#km', '60')
+    await page.fill('#toll', '97')
+
+    // computed value field is non-editable but should reflect formula immediately
+    const computedValueField = page.locator('#computedValue')
+    await expect(computedValueField).toHaveValue(/1\.181,80|1181\.80|1,181\.80/)
 
     await page.click('button[type="submit"]')
     await page.waitForSelector('table')
@@ -51,6 +59,7 @@ test.describe.serial('Daily Logs — Automated', () => {
     await row.locator('button').nth(0).click()
 
     await page.waitForSelector('#hoursWorked')
+    await expect(page.locator('#hoursWorked')).not.toHaveValue('')
     await page.fill('#hoursWorked', '10')
     await page.click('button[type="submit"]')
 

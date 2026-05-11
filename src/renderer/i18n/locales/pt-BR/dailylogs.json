@@ -46,6 +46,7 @@
       "percentage": "Porcentagem (%)",
       "toll": "Pedágio (R$)",
       "tonnage": "Toneladas",
+      "computedValue": "Valor Calculado (R$)",
       "workDescription": "Descrição do Serviço",
       "downtimeNotes": "Observações de Parada",
       "notes": "Observações Gerais"
@@ -62,6 +63,9 @@
       "workDescription": "Descreva o serviço realizado...",
       "downtimeNotes": "Registre ocorrências ou paradas...",
       "notes": "Observações adicionais..."
+    },
+    "helpers": {
+      "computedValue": "Toneladas × Porcentagem × KM + Pedágio"
     },
     "errors": {
       "requiredDate": "Data é obrigatória",
