@@ -28,6 +28,26 @@ export async function goTo(page: Page, hash: string, awaitSelector?: string): Pr
   }
 }
 
+// ─── Helper: select a value from the custom Select dropdown ──────────────────
+// The app uses a custom button-based Select rendered in a portal, so Playwright's
+// native page.selectOption() does not work. This helper clicks the trigger,
+// waits for the listbox, and clicks the option keyed by `data-testid`.
+
+export async function selectCustom(
+  page: Page,
+  triggerId: string,
+  value: string | number
+): Promise<void> {
+  const trigger = page.locator(`#${triggerId}`)
+  await trigger.waitFor({ state: 'visible' })
+  await trigger.click()
+  const option = page.locator(`[data-testid="select-option-${value}"]`)
+  await option.waitFor({ state: 'visible', timeout: 5000 })
+  // Dropdown rendered via portal at fixed coordinates can land outside the
+  // playwright viewport. Trigger native click to bypass viewport guard.
+  await option.evaluate((el) => (el as HTMLElement).click())
+}
+
 // ─── Helper: ensure screenshot dir exists ────────────────────────────────────
 
 export function ensureScreenshotDir(module: string): string {

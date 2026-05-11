@@ -1,7 +1,9 @@
 import path from 'path'
 import { test, expect, goTo, ensureScreenshotDir, confirmDialog } from '../fixtures/electron'
 
-const UNIQUE_NAME = `Máquina Playwright 02 ${Date.now()}`
+const UNIQUE_SUFFIX = `${Date.now()}-${Math.floor(Math.random() * 10000)}`
+const UNIQUE_NAME = `Máquina Playwright 02 ${UNIQUE_SUFFIX}`
+const UNIQUE_IDENTIFIER = `PW-02-${UNIQUE_SUFFIX}`.slice(0, 30)
 
 test.describe.serial('Machines — Automated', () => {
   test('create machine', async ({ page }) => {
@@ -10,7 +12,7 @@ test.describe.serial('Machines — Automated', () => {
 
     await page.fill('#name', UNIQUE_NAME)
     await page.fill('#type', 'Escavadeira')
-    await page.fill('#identifier', 'PW-02')
+    await page.fill('#identifier', UNIQUE_IDENTIFIER)
     await page.fill('#brandModel', 'Caterpillar 320')
 
     await page.click('button[type="submit"]')
@@ -33,6 +35,7 @@ test.describe.serial('Machines — Automated', () => {
     await row.locator('button').nth(1).click()
 
     await page.waitForSelector('#name')
+    await expect(page.locator('#name')).not.toHaveValue('')
     await page.fill('#name', UNIQUE_NAME + ' Editada')
     await page.click('button[type="submit"]')
 

@@ -8,9 +8,16 @@ import { Textarea } from '@renderer/components/ui/textarea'
 import { Select } from '@renderer/components/ui/select'
 import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
+import { Button } from '@renderer/components/ui/button'
 import { useToast } from '@renderer/context/ToastContext'
 import { formatLocalDate, parseLocalDate } from '../../../shared/date'
-import type { ProjectRevenue, ProjectRevenueWithRelations, ProjectWithClient } from '../../../shared/types'
+import { computeDailyLogValue } from '../../../shared/dailyLogValue'
+import type {
+  DailyLogWithRelations,
+  ProjectRevenue,
+  ProjectRevenueWithRelations,
+  ProjectWithClient,
+} from '../../../shared/types'
 
 type RevenueStatus = ProjectRevenue['status']
 
@@ -31,6 +38,8 @@ export function RevenueFormPage(): JSX.Element {
   const [amount, setAmount] = useState<number | ''>('')
   const [status, setStatus] = useState<RevenueStatus>('planned')
   const [notes, setNotes] = useState('')
+  const [dailyLogId, setDailyLogId] = useState<number | ''>('')
+  const [projectDailyLogs, setProjectDailyLogs] = useState<DailyLogWithRelations[]>([])
 
   const statusOptions: { value: RevenueStatus; label: string }[] = [
     { value: 'planned', label: t('revenues:statuses.planned') },
@@ -50,8 +59,35 @@ export function RevenueFormPage(): JSX.Element {
       setAmount(revenue.amount)
       setStatus(revenue.status)
       setNotes(revenue.notes ?? '')
+      setDailyLogId(revenue.dailyLogId ?? '')
     })
   }, [id, isEdit])
+
+  useEffect(() => {
+    if (projectId === '') {
+      setProjectDailyLogs([])
+      return
+    }
+    api.dailylogs.list({ projectId: Number(projectId) }).then(setProjectDailyLogs)
+  }, [projectId])
+
+  const selectedDailyLog =
+    dailyLogId === ''
+      ? null
+      : projectDailyLogs.find((log) => log.id === Number(dailyLogId)) ?? null
+
+  const computedValue = selectedDailyLog
+    ? computeDailyLogValue({
+        tonnage: selectedDailyLog.tonnage,
+        percentage: selectedDailyLog.percentage,
+        km: selectedDailyLog.km,
+        toll: selectedDailyLog.toll,
+      })
+    : 0
+  const computedValueFormatted = computedValue.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
@@ -85,6 +121,7 @@ export function RevenueFormPage(): JSX.Element {
         amount: Number(amount),
         status,
         notes: notes.trim() || null,
+        dailyLogId: dailyLogId !== '' ? Number(dailyLogId) : null,
       }
       if (isEdit) {
         await api.revenues.update(Number(id), data)
@@ -168,6 +205,51 @@ export function RevenueFormPage(): JSX.Element {
               </option>
             ))}
           </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="dailyLogId">{t('revenues:form.fields.dailyLog')}</Label>
+          <Select
+            id="dailyLogId"
+            value={dailyLogId === '' ? '' : String(dailyLogId)}
+            onChange={(e) => setDailyLogId(e.target.value === '' ? '' : Number(e.target.value))}
+            disabled={projectId === ''}
+          >
+            <option value="">{t('revenues:form.placeholders.dailyLogNone')}</option>
+            {projectDailyLogs.map((log) => (
+              <option key={log.id} value={log.id}>
+                {formatLocalDate(log.date)} — {log.workDescription ?? t('common:emptyValue')}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="computedValue">{t('revenues:form.fields.computedValue')}</Label>
+          <div className="flex gap-2">
+            <Input
+              id="computedValue"
+              type="text"
+              value={computedValueFormatted}
+              readOnly
+              tabIndex={-1}
+              className="bg-muted/40 font-medium text-brand-ink"
+            />
+            {selectedDailyLog && computedValue > 0 && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setAmount(computedValue)}
+              >
+                {t('revenues:form.actions.useComputedValue')}
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {t('revenues:form.helpers.computedValue')}
+          </p>
         </div>
       </div>
 

@@ -10,6 +10,7 @@
     "description": "Descrição",
     "amount": "Valor",
     "machine": "Máquina",
+    "computedValue": "Valor Calculado",
     "actions": "Ações"
   },
   "filters": {
@@ -45,14 +46,23 @@
       "amount": "Valor (R$) *",
       "machine": "Máquina",
       "operator": "Operador",
+      "dailyLog": "Diário Vinculado",
+      "computedValue": "Valor Calculado (R$)",
       "notes": "Observações"
     },
     "placeholders": {
       "select": "Selecionar...",
       "none": "Nenhuma",
+      "dailyLogNone": "Nenhum",
       "description": "Descreva o custo...",
       "amount": "0,00",
       "notes": "Observações adicionais..."
+    },
+    "actions": {
+      "useComputedValue": "Usar valor"
+    },
+    "helpers": {
+      "computedValue": "Calculado a partir do diário vinculado (Toneladas × % × KM + Pedágio)"
     },
     "errors": {
       "requiredDate": "Data é obrigatória",

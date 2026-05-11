@@ -109,6 +109,14 @@ export function RevenuesPage(): JSX.Element {
       ),
     },
     {
+      key: 'dailyLogComputedValue',
+      label: t('revenues:columns.computedValue'),
+      render: (row: ProjectRevenueWithRelations) =>
+        row.dailyLogComputedValue !== null
+          ? formatCurrency(row.dailyLogComputedValue, locale)
+          : t('common:emptyValue'),
+    },
+    {
       key: 'actions',
       label: t('revenues:columns.actions'),
       render: (row: ProjectRevenueWithRelations) => (
@@ -201,7 +209,7 @@ export function RevenuesPage(): JSX.Element {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          <TableSkeleton columns={5} />
+          <TableSkeleton columns={6} />
         ) : revenues.length === 0 && !hasActiveFilters ? (
           <EmptyState
             message={t('revenues:empty')}

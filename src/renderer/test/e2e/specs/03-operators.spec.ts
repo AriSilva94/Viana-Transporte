@@ -32,6 +32,7 @@ test.describe.serial('Operators — Automated', () => {
     await row.locator('button').nth(1).click()
 
     await page.waitForSelector('#name')
+    await expect(page.locator('#name')).not.toHaveValue('')
     await page.fill('#name', UNIQUE_NAME + ' Editado')
     await page.click('button[type="submit"]')
 

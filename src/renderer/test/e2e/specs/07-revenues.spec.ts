@@ -1,5 +1,5 @@
 import path from 'path'
-import { test, expect, goTo, ensureScreenshotDir, seedBase, confirmDialog } from '../fixtures/electron'
+import { test, expect, goTo, ensureScreenshotDir, seedBase, confirmDialog, selectCustom } from '../fixtures/electron'
 
 const UNIQUE_DESC = `Medição Playwright 07 ${Date.now()}`
 
@@ -15,10 +15,10 @@ test.describe.serial('Revenues — Automated', () => {
     await goTo(page, '#/revenues/new')
     await page.waitForSelector('#description')
 
-    await page.selectOption('#projectId', { value: String(projectId) })
+    await selectCustom(page, 'projectId', projectId)
     await page.fill('#description', UNIQUE_DESC)
     await page.fill('#amount', '25000.00')
-    await page.selectOption('#status', 'billed')
+    await selectCustom(page, 'status', 'billed')
 
     await page.click('button[type="submit"]')
     await page.waitForSelector('table')
@@ -40,9 +40,10 @@ test.describe.serial('Revenues — Automated', () => {
     await row.locator('button').nth(0).click()
 
     await page.waitForSelector('#description')
+    await expect(page.locator('#description')).not.toHaveValue('')
     await page.fill('#description', UNIQUE_DESC + ' Editado')
     await page.fill('#amount', '30000.00')
-    await page.selectOption('#status', 'received')
+    await selectCustom(page, 'status', 'received')
     await page.click('button[type="submit"]')
 
     await page.waitForSelector('table')
