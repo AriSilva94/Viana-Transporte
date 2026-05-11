@@ -10,6 +10,7 @@ import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import { useToast } from '@renderer/context/ToastContext'
 import { formatLocalDate, parseLocalDate } from '../../../shared/date'
+import { computeDailyLogValue } from '../../../shared/dailyLogValue'
 import type { DailyLogWithRelations, Machine, Operator, ProjectWithClient } from '../../../shared/types'
 
 export function DailyLogFormPage(): JSX.Element {
@@ -38,6 +39,17 @@ export function DailyLogFormPage(): JSX.Element {
   const [percentage, setPercentage] = useState<number | ''>('')
   const [toll, setToll] = useState<number | ''>('')
   const [tonnage, setTonnage] = useState<number | ''>('')
+
+  const computedValue = computeDailyLogValue({
+    tonnage: tonnage === '' ? null : Number(tonnage),
+    percentage: percentage === '' ? null : Number(percentage),
+    km: km === '' ? null : Number(km),
+    toll: toll === '' ? null : Number(toll),
+  })
+  const computedValueFormatted = computedValue.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
 
   useEffect(() => {
     api.projects.list().then(setProjects)
@@ -254,6 +266,21 @@ export function DailyLogFormPage(): JSX.Element {
             placeholder={t('dailylogs:form.placeholders.tonnage')}
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="computedValue">{t('dailylogs:form.fields.computedValue')}</Label>
+        <Input
+          id="computedValue"
+          type="text"
+          value={computedValueFormatted}
+          readOnly
+          tabIndex={-1}
+          className="bg-muted/40 font-medium text-brand-ink"
+        />
+        <p className="text-xs text-muted-foreground">
+          {t('dailylogs:form.helpers.computedValue')}
+        </p>
       </div>
 
       <div className="space-y-2">

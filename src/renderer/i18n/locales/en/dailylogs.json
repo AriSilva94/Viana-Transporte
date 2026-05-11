@@ -46,6 +46,7 @@
       "percentage": "Percentage (%)",
       "toll": "Toll ($)",
       "tonnage": "Tonnage",
+      "computedValue": "Computed Value ($)",
       "workDescription": "Work Description",
       "downtimeNotes": "Downtime Notes",
       "notes": "General Notes"
@@ -62,6 +63,9 @@
       "workDescription": "Describe the work performed...",
       "downtimeNotes": "Record incidents or downtime...",
       "notes": "Additional notes..."
+    },
+    "helpers": {
+      "computedValue": "Tonnage × Percentage × KM + Toll"
     },
     "errors": {
       "requiredDate": "Date is required",

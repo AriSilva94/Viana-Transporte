@@ -1,5 +1,5 @@
 import path from 'path'
-import { test, expect, goTo, ensureScreenshotDir, seedBase, confirmDialog } from '../fixtures/electron'
+import { test, expect, goTo, ensureScreenshotDir, seedBase, confirmDialog, selectCustom } from '../fixtures/electron'
 
 const UNIQUE_DESC = `Combustível Playwright 06 ${Date.now()}`
 
@@ -15,8 +15,8 @@ test.describe.serial('Costs — Automated', () => {
     await goTo(page, '#/costs/new')
     await page.waitForSelector('#description')
 
-    await page.selectOption('#projectId', { value: String(projectId) })
-    await page.selectOption('#category', 'fuel')
+    await selectCustom(page, 'projectId', projectId)
+    await selectCustom(page, 'category', 'fuel')
     await page.fill('#description', UNIQUE_DESC)
     await page.fill('#amount', '500.50')
 
@@ -40,6 +40,7 @@ test.describe.serial('Costs — Automated', () => {
     await row.locator('button').nth(0).click()
 
     await page.waitForSelector('#description')
+    await expect(page.locator('#description')).not.toHaveValue('')
     await page.fill('#description', UNIQUE_DESC + ' Editado')
     await page.fill('#amount', '600.00')
     await page.click('button[type="submit"]')
