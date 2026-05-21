@@ -92,7 +92,7 @@ Para testar o fluxo de update sem publicar no GitHub, você pode:
    ```
 
 2. **Verificar logs** (o app escreve logs em):
-   - Windows: `%APPDATA%/MightyRept/logs/`
+   - Windows: `%APPDATA%/Viana Transporte/logs/`
    - Contêm informações sobre tentativas de update
 
 ## ⚙️ Configurações Avançadas
@@ -120,7 +120,7 @@ await window.api.updater.checkForUpdates()
 
 **Problema**: App não detecta updates
 - Verificar se está rodando a versão 1.0.0 e há uma tag v1.0.1+ no GitHub
-- Verificar logs em `%APPDATA%/MightyRept/logs/`
+- Verificar logs em `%APPDATA%/Viana Transporte/logs/`
 
 **Problema**: GitHub Actions falha ao publicar
 - Verificar se o repositório é público OU se tem permissões corretas
