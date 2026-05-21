@@ -4,15 +4,109 @@ import { _electron as electron, ElectronApplication, Page } from 'playwright'
 import path from 'path'
 import fs from 'fs'
 
+// ─── Production safety guards ────────────────────────────────────────────────
+// E2E tests must NEVER touch the production Supabase backend.
+// Defense in depth — three layers of validation:
+//   1. process.env.E2E_ACKNOWLEDGE_BACKEND_ISOLATED === 'YES'
+//   2. Built bundle exists (out/main/index.js) and is the E2E test build
+//      (contains VIANA_E2E='1' baked in by electron-vite --mode test)
+//   3. Built bundle does NOT contain any production Supabase host
+
+const PRODUCTION_SUPABASE_HOSTS = ['srv1660010.hstgr.cloud']
+const ACK_ENV_VAR = 'E2E_ACKNOWLEDGE_BACKEND_ISOLATED'
+
+function formatGuardError(reason: string): string {
+  return [
+    '',
+    '╔══════════════════════════════════════════════════════════════════╗',
+    '║                  E2E TESTS BLOCKED FOR SAFETY                    ║',
+    '╚══════════════════════════════════════════════════════════════════╝',
+    '',
+    reason,
+    '',
+    'HOW E2E WORKS IN THIS PROJECT:',
+    '  "npm run test:e2e" builds the app in memory-only mode',
+    '  ("npm run build:e2e", which is electron-vite build --mode test).',
+    '  In this mode the main process uses an in-memory repository and a',
+    '  memory auth service — Supabase is NEVER called. Data lives only',
+    '  in the running process and disappears when the app exits.',
+    '',
+    'PAST INCIDENT:',
+    '  Previous E2E runs (before this guard existed) injected rows into',
+    '  the production database:',
+    '    - clients   LIKE "__Seed Cliente__ %" or "Cliente Playwright%"',
+    '    - projects  LIKE "__Seed Projeto__ %" or "Projeto Playwright%"',
+    '    - machines  LIKE "__Seed Máquina__ %" or "Máquina Playwright%"',
+    '    - operators LIKE "__Seed Operador__ %" or "Operador Playwright%"',
+    '    - daily_logs / project_costs / project_revenues w/ "Playwright"',
+    '    - emails    LIKE "playwright%@test.com"',
+    '',
+    'TO RUN E2E LOCALLY:',
+    '  npm run test:e2e',
+    '',
+    '  (the script sets both VIANA_E2E=1 and',
+    `   ${ACK_ENV_VAR}=YES for you and runs build:e2e first)`,
+    '',
+    'TO CLEAN UP HISTORIC TEST DATA STILL IN PRODUCTION:',
+    '  See src/main/db/sql/e2e-cleanup/README.md',
+    '',
+  ].join('\n')
+}
+
+function assertE2EAcknowledged(): void {
+  if (process.env[ACK_ENV_VAR] !== 'YES') {
+    throw new Error(
+      formatGuardError(`Missing env var ${ACK_ENV_VAR}=YES.`)
+    )
+  }
+}
+
+function assertBuildIsE2ETestBuild(projectRoot: string): void {
+  const mainBundle = path.join(projectRoot, 'out', 'main', 'index.js')
+  if (!fs.existsSync(mainBundle)) {
+    throw new Error(
+      formatGuardError(
+        `Built bundle not found at ${mainBundle}. Run "npm run build:e2e" first.`
+      )
+    )
+  }
+  const content = fs.readFileSync(mainBundle, 'utf-8')
+
+  for (const host of PRODUCTION_SUPABASE_HOSTS) {
+    if (content.includes(host)) {
+      throw new Error(
+        formatGuardError(
+          `Built bundle contains production host "${host}".\n` +
+          `Rebuild with "npm run build:e2e" (mode=test) before running E2E.`
+        )
+      )
+    }
+  }
+
+  // The test build hits the memory-mode branch in main/index.ts, which emits
+  // a marker string. In production builds the branch is dead and the marker
+  // is tree-shaken away. Absence of the marker means this is NOT a test build.
+  if (!content.includes('[VIANA_E2E_MEMORY_MODE_MARKER]')) {
+    throw new Error(
+      formatGuardError(
+        `Built bundle is NOT a memory-mode test build.\n` +
+        `Run "npm run build:e2e" to produce the correct bundle.`
+      )
+    )
+  }
+}
+
+assertE2EAcknowledged()
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Fixtures = {
-  electronApp: ElectronApplication
   page: Page
 }
 
 type WorkerFixtures = {
   e2eDbPath: string
+  electronApp: ElectronApplication
 }
 
 // ─── Helper: navigate using HashRouter ───────────────────────────────────────
@@ -154,21 +248,24 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     { scope: 'worker' },
   ],
 
-  electronApp: async ({ e2eDbPath }, use) => {
-    const projectRoot = process.cwd()
-    const launchEnv = Object.fromEntries(
-      Object.entries(process.env).filter((entry): entry is [string, string] => {
-        return typeof entry[1] === 'string'
-      })
-    )
-    delete launchEnv.ELECTRON_RUN_AS_NODE
-    launchEnv.MIGHTYREPT_DB_PATH = e2eDbPath
-    launchEnv.MIGHTYREPT_SKIP_INITIAL_SEED = '1'
+  electronApp: [
+    async ({ e2eDbPath: _e2eDbPath }, use) => {
+      const projectRoot = process.cwd()
+      assertBuildIsE2ETestBuild(projectRoot)
 
-    const app = await electron.launch({ args: ['.'], cwd: projectRoot, env: launchEnv })
-    await use(app)
-    await app.close()
-  },
+      const launchEnv = Object.fromEntries(
+        Object.entries(process.env).filter((entry): entry is [string, string] => {
+          return typeof entry[1] === 'string'
+        })
+      )
+      delete launchEnv.ELECTRON_RUN_AS_NODE
+
+      const app = await electron.launch({ args: ['.'], cwd: projectRoot, env: launchEnv })
+      await use(app)
+      await app.close()
+    },
+    { scope: 'worker' },
+  ],
 
   page: async ({ electronApp }, use) => {
     const page = await electronApp.firstWindow({ timeout: 15000 })

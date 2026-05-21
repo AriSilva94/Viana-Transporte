@@ -16,31 +16,21 @@
     "dist:win:all": "npm run dist:win:full && npm run dist:win:trial",
     "preview": "electron-vite preview",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "build:e2e": "electron-vite build --mode test",
+    "test:e2e": "npm run build:e2e && cross-env VIANA_E2E=1 E2E_ACKNOWLEDGE_BACKEND_ISOLATED=YES playwright test",
     "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
     "db:bootstrap-admin-ownership": "tsx src/main/db/scripts/run-bootstrap.ts"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.2.2",
-    "@radix-ui/react-slot": "^1.0.2",
     "@supabase/supabase-js": "^2.49.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
     "dotenv": "^16.6.1",
     "electron-log": "^5.2.0",
-    "electron-updater": "^6.3.0",
-    "i18next": "^24.2.3",
-    "lucide-react": "^0.363.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-hook-form": "^7.72.1",
-    "react-i18next": "^15.7.4",
-    "react-router-dom": "^6.22.3",
-    "tailwind-merge": "^2.2.1",
-    "zod": "^3.25.76"
+    "electron-updater": "^6.3.0"
   },
   "devDependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@playwright/test": "^1.48.2",
+    "@radix-ui/react-slot": "^1.0.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -49,27 +39,48 @@
     "@types/react-dom": "^18.2.23",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
     "cross-env": "^7.0.3",
     "electron": "^41.1.0",
     "electron-builder": "^26.0.12",
     "electron-vite": "^2.1.0",
+    "i18next": "^24.2.3",
     "jsdom": "^25.0.1",
+    "lucide-react": "^0.363.0",
     "playwright": "^1.48.2",
     "postcss": "^8.4.38",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.72.1",
+    "react-i18next": "^15.7.4",
+    "react-router-dom": "^6.22.3",
+    "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.19.2",
     "typescript": "^5.4.3",
     "vitest": "^2.1.9",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^3.25.76"
   },
   "build": {
     "appId": "com.viana.transporte",
     "productName": "Viana Transporte",
     "artifactName": "Viana-Transporte-${version}-${os}-${arch}.${ext}",
+    "compression": "maximum",
     "files": [
       "out/**/*",
-      "package.json"
+      "package.json",
+      "!**/{test,tests,__tests__,docs,doc,examples,example,coverage,.nyc_output}/**",
+      "!**/*.{md,markdown,map,ts,tsx,d.ts}",
+      "!**/LICENSE*",
+      "!**/CHANGELOG*",
+      "!**/.github/**",
+      "!**/.editorconfig",
+      "!**/.eslintrc*",
+      "!**/.prettierrc*",
+      "!**/tsconfig*.json"
     ],
     "directories": {
       "output": "dist/full",
@@ -96,7 +107,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
+      "uninstallerIcon": "build/icon.ico",
+      "differentialPackage": true
     }
   }
 }

@@ -8,6 +8,10 @@ export function resolveDataProviderFromEnv(): DataProvider {
   return 'supabase'
 }
 
+export function setRepository(instance: DomainRepository): void {
+  repository = instance
+}
+
 export async function initDataProvider(provider: DataProvider): Promise<DataProvider> {
   if (provider !== 'supabase') {
     throw new Error('This build supports only Supabase as data provider.')
