@@ -3,16 +3,22 @@ import { resolve } from 'path'
 
 import { config as loadDotenv } from 'dotenv'
 
+export type BuildMode = 'development' | 'production' | 'test'
+
 export interface LoadBuildEnvOptions {
   cwd: string
-  mode: 'development' | 'production'
+  mode: BuildMode
   processEnv: NodeJS.ProcessEnv
   envKeys: string[]
 }
 
-export function getEnvFilesForMode(mode: 'development' | 'production'): string[] {
+export function getEnvFilesForMode(mode: BuildMode): string[] {
   if (mode === 'production') {
     return ['.env.production']
+  }
+
+  if (mode === 'test') {
+    return ['.env.test']
   }
 
   return ['.env']

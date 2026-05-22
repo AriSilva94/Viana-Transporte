@@ -153,5 +153,36 @@ vite.config.ts.timestamp-*
 # Local Claude settings
 .claude/
 
-# Local docs
+# Local docs (all .md outside README live here)
 docs/
+
+# Project-level markdown kept at root for tooling but not tracked
+CLAUDE.md
+*.md
+!README.md
+!node_modules/**/*.md
+!.agents/**/*.md
+!.superpowers/**/*.md
+!src/**/*.md
+
+# Playwright / e2e artifacts (may contain screenshots with real data)
+test-results/
+playwright-report/
+
+# SQLite / local DB files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Build asar inspection temp
+tmp-asar/
+
+# Local secret/config dropouts
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+secrets/
+.secrets/
