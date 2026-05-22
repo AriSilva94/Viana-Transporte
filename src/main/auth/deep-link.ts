@@ -27,7 +27,13 @@ function enqueueOrDeliverUrl(getAuthService: () => AuthService | null, pendingUr
   pendingUrls.push(url)
 }
 
-export function createAuthDeepLinkRuntime(): AuthDeepLinkRuntime {
+export interface AuthDeepLinkRuntimeOptions {
+  skipSingleInstanceLock?: boolean
+}
+
+export function createAuthDeepLinkRuntime(
+  options: AuthDeepLinkRuntimeOptions = {}
+): AuthDeepLinkRuntime {
   const pendingUrls: string[] = []
   let authService: AuthService | null = null
 
@@ -37,7 +43,7 @@ export function createAuthDeepLinkRuntime(): AuthDeepLinkRuntime {
     app.setAsDefaultProtocolClient('viana-transporte')
   }
 
-  const shouldQuit = !app.requestSingleInstanceLock()
+  const shouldQuit = options.skipSingleInstanceLock ? false : !app.requestSingleInstanceLock()
 
   const initialDeepLink = extractDeepLinkUrlFromArgv(process.argv)
   if (initialDeepLink) {
