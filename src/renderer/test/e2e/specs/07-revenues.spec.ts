@@ -71,7 +71,7 @@ test.describe('Revenues — Screenshots', () => {
   test('screenshot: list page', async ({ page }) => {
     const dir = ensureScreenshotDir('revenues')
     await goTo(page, '#/revenues')
-    await page.waitForSelector('table, [class*="empty"]', { timeout: 5000 })
+    await page.waitForSelector('table, [data-testid="empty-state"]', { timeout: 5000 })
     await page.screenshot({ path: path.join(dir, 'list.png'), fullPage: true })
   })
 

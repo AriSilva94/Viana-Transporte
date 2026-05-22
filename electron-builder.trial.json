@@ -2,9 +2,19 @@
   "appId": "com.viana.transporte.trial.v2",
   "productName": "Viana Transporte Trial",
   "artifactName": "Viana-Transporte-Trial-${version}-${os}-${arch}.${ext}",
+  "compression": "maximum",
   "files": [
     "out/**/*",
-    "package.json"
+    "package.json",
+    "!**/{test,tests,__tests__,docs,doc,examples,example,coverage,.nyc_output}/**",
+    "!**/*.{md,markdown,map,ts,tsx,d.ts}",
+    "!**/LICENSE*",
+    "!**/CHANGELOG*",
+    "!**/.github/**",
+    "!**/.editorconfig",
+    "!**/.eslintrc*",
+    "!**/.prettierrc*",
+    "!**/tsconfig*.json"
   ],
   "directories": {
     "output": "dist/trial",
@@ -32,6 +42,7 @@
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
     "installerIcon": "build/icon.ico",
-    "uninstallerIcon": "build/icon.ico"
+    "uninstallerIcon": "build/icon.ico",
+    "differentialPackage": true
   }
 }
