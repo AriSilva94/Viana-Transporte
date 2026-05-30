@@ -71,6 +71,12 @@
       "requiredDate": "Date is required",
       "requiredProject": "Project is required",
       "requiredHours": "Worked hours must be greater than zero",
+      "negativeNotAllowed": "Numeric values cannot be negative",
+      "tonnagePrecision": "Tonnage accepts at most 4 decimal places",
+      "fuelQuantityPrecision": "Fuel accepts at most 2 decimal places",
+      "kmPrecision": "KM accepts at most 2 decimal places",
+      "percentagePrecision": "Percentage accepts at most 2 decimal places",
+      "tollPrecision": "Toll accepts at most 2 decimal places",
       "save": "Error saving daily log. Please try again."
     },
     "toasts": {

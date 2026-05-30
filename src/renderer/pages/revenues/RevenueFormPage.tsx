@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useForm, Controller } from 'react-hook-form'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -21,6 +22,16 @@ import type {
 
 type RevenueStatus = ProjectRevenue['status']
 
+type FormValues = {
+  date: string
+  projectId: string
+  description: string
+  amount: string
+  status: RevenueStatus
+  notes: string
+  dailyLogId: string
+}
+
 export function RevenueFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { t } = useTranslation(['revenues', 'common'])
@@ -30,16 +41,22 @@ export function RevenueFormPage(): JSX.Element {
 
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  const [date, setDate] = useState(formatLocalDate(new Date()))
-  const [projectId, setProjectId] = useState<number | ''>('')
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState<number | ''>('')
-  const [status, setStatus] = useState<RevenueStatus>('planned')
-  const [notes, setNotes] = useState('')
-  const [dailyLogId, setDailyLogId] = useState<number | ''>('')
   const [projectDailyLogs, setProjectDailyLogs] = useState<DailyLogWithRelations[]>([])
+
+  const { control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormValues>({
+    defaultValues: {
+      date: formatLocalDate(new Date()),
+      projectId: '',
+      description: '',
+      amount: '',
+      status: 'planned',
+      notes: '',
+      dailyLogId: '',
+    },
+  })
+
+  const watchedProjectId = watch('projectId')
+  const watchedDailyLogId = watch('dailyLogId')
 
   const statusOptions: { value: RevenueStatus; label: string }[] = [
     { value: 'planned', label: t('revenues:statuses.planned') },
@@ -49,32 +66,33 @@ export function RevenueFormPage(): JSX.Element {
 
   useEffect(() => {
     api.projects.list().then(setProjects)
-
     if (!isEdit) return
     api.revenues.get(Number(id)).then((revenue: ProjectRevenueWithRelations | null) => {
       if (!revenue) return
-      setDate(formatLocalDate(revenue.date))
-      setProjectId(revenue.projectId)
-      setDescription(revenue.description)
-      setAmount(revenue.amount)
-      setStatus(revenue.status)
-      setNotes(revenue.notes ?? '')
-      setDailyLogId(revenue.dailyLogId ?? '')
+      reset({
+        date: formatLocalDate(revenue.date),
+        projectId: String(revenue.projectId),
+        description: revenue.description,
+        amount: String(revenue.amount),
+        status: revenue.status,
+        notes: revenue.notes ?? '',
+        dailyLogId: revenue.dailyLogId != null ? String(revenue.dailyLogId) : '',
+      })
     })
-  }, [id, isEdit])
+  }, [id, isEdit, reset])
 
   useEffect(() => {
-    if (projectId === '') {
+    if (!watchedProjectId) {
       setProjectDailyLogs([])
       return
     }
-    api.dailylogs.list({ projectId: Number(projectId) }).then(setProjectDailyLogs)
-  }, [projectId])
+    api.dailylogs.list({ projectId: Number(watchedProjectId) }).then(setProjectDailyLogs)
+  }, [watchedProjectId])
 
   const selectedDailyLog =
-    dailyLogId === ''
+    watchedDailyLogId === ''
       ? null
-      : projectDailyLogs.find((log) => log.id === Number(dailyLogId)) ?? null
+      : projectDailyLogs.find((log) => log.id === Number(watchedDailyLogId)) ?? null
 
   const computedValue = selectedDailyLog
     ? computeDailyLogValue({
@@ -89,39 +107,17 @@ export function RevenueFormPage(): JSX.Element {
     currency: 'BRL',
   })
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
-    e.preventDefault()
-    if (!date) {
-      setError(t('revenues:form.errors.requiredDate'))
-      return
-    }
-    if (!projectId) {
-      setError(t('revenues:form.errors.requiredProject'))
-      return
-    }
-    if (!description.trim()) {
-      setError(t('revenues:form.errors.requiredDescription'))
-      return
-    }
-    if (amount === '' || Number(amount) <= 0) {
-      setError(t('revenues:form.errors.requiredAmount'))
-      return
-    }
-    if (!status) {
-      setError(t('revenues:form.errors.requiredStatus'))
-      return
-    }
+  async function onSubmit(values: FormValues): Promise<void> {
     setIsLoading(true)
-    setError('')
     try {
       const data = {
-        date: parseLocalDate(date),
-        projectId: Number(projectId),
-        description: description.trim(),
-        amount: Number(amount),
-        status,
-        notes: notes.trim() || null,
-        dailyLogId: dailyLogId !== '' ? Number(dailyLogId) : null,
+        date: parseLocalDate(values.date),
+        projectId: Number(values.projectId),
+        description: values.description.trim(),
+        amount: Number(values.amount),
+        status: values.status,
+        notes: values.notes.trim() || null,
+        dailyLogId: values.dailyLogId !== '' ? Number(values.dailyLogId) : null,
       }
       if (isEdit) {
         await api.revenues.update(Number(id), data)
@@ -132,7 +128,6 @@ export function RevenueFormPage(): JSX.Element {
       navigate('/revenues')
     } catch {
       showToast(t('revenues:form.toasts.error'), 'error')
-      setError(t('revenues:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -142,88 +137,108 @@ export function RevenueFormPage(): JSX.Element {
     <FormCard
       title={isEdit ? t('revenues:form.editTitle') : t('revenues:form.newTitle')}
       description={t('revenues:form.description')}
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       onCancel={() => navigate('/revenues')}
       isLoading={isLoading}
     >
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="date">{t('revenues:form.fields.date')}</Label>
-          <DatePicker id="date" value={date} onChange={setDate} />
+          <Controller
+            name="date"
+            control={control}
+            rules={{ required: t('revenues:form.errors.requiredDate') }}
+            render={({ field }) => (
+              <DatePicker id="date" value={field.value} onChange={field.onChange} />
+            )}
+          />
+          {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="projectId">{t('revenues:form.fields.project')}</Label>
-          <Select
-            id="projectId"
-            value={projectId === '' ? '' : String(projectId)}
-            onChange={(e) => setProjectId(e.target.value === '' ? '' : Number(e.target.value))}
-          >
-            <option value="">{t('revenues:form.placeholders.select')}</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} — {p.clientName ?? t('common:emptyValue')}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="projectId"
+            control={control}
+            rules={{ required: t('revenues:form.errors.requiredProject') }}
+            render={({ field }) => (
+              <Select id="projectId" value={field.value} onChange={(e) => field.onChange(e.target.value)}>
+                <option value="">{t('revenues:form.placeholders.select')}</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — {p.clientName ?? t('common:emptyValue')}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
+          {errors.projectId && <p className="text-sm text-destructive">{errors.projectId.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="description">{t('revenues:form.fields.description')}</Label>
-          <Input
-            id="description"
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t('revenues:form.placeholders.description')}
+          <Controller
+            name="description"
+            control={control}
+            rules={{ required: t('revenues:form.errors.requiredDescription'), validate: (v) => v.trim() !== '' || t('revenues:form.errors.requiredDescription') }}
+            render={({ field }) => (
+              <Input id="description" type="text" {...field} placeholder={t('revenues:form.placeholders.description')} />
+            )}
           />
+          {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="amount">{t('revenues:form.fields.amount')}</Label>
-          <Input
-            id="amount"
-            type="number"
-            min={0}
-            step={0.01}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('revenues:form.placeholders.amount')}
+          <Controller
+            name="amount"
+            control={control}
+            rules={{
+              required: t('revenues:form.errors.requiredAmount'),
+              validate: (v) => (v !== '' && Number(v) > 0) || t('revenues:form.errors.requiredAmount'),
+            }}
+            render={({ field }) => (
+              <Input id="amount" type="number" min={0} step={0.01} {...field} placeholder={t('revenues:form.placeholders.amount')} />
+            )}
           />
+          {errors.amount && <p className="text-sm text-destructive">{errors.amount.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="status">{t('revenues:form.fields.status')}</Label>
-          <Select id="status" value={status} onChange={(e) => setStatus(e.target.value as RevenueStatus)}>
-            {statusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Select id="status" value={field.value} onChange={(e) => field.onChange(e.target.value as RevenueStatus)}>
+                {statusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            )}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="dailyLogId">{t('revenues:form.fields.dailyLog')}</Label>
-          <Select
-            id="dailyLogId"
-            value={dailyLogId === '' ? '' : String(dailyLogId)}
-            onChange={(e) => setDailyLogId(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={projectId === ''}
-          >
-            <option value="">{t('revenues:form.placeholders.dailyLogNone')}</option>
-            {projectDailyLogs.map((log) => (
-              <option key={log.id} value={log.id}>
-                {formatLocalDate(log.date)} — {log.workDescription ?? t('common:emptyValue')}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="dailyLogId"
+            control={control}
+            render={({ field }) => (
+              <Select id="dailyLogId" value={field.value} onChange={(e) => field.onChange(e.target.value)} disabled={!watchedProjectId}>
+                <option value="">{t('revenues:form.placeholders.dailyLogNone')}</option>
+                {projectDailyLogs.map((log) => (
+                  <option key={log.id} value={log.id}>
+                    {formatLocalDate(log.date)} — {log.workDescription ?? t('common:emptyValue')}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="computedValue">{t('revenues:form.fields.computedValue')}</Label>
@@ -241,7 +256,7 @@ export function RevenueFormPage(): JSX.Element {
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setAmount(computedValue)}
+                onClick={() => setValue('amount', String(computedValue))}
               >
                 {t('revenues:form.actions.useComputedValue')}
               </Button>
@@ -255,11 +270,12 @@ export function RevenueFormPage(): JSX.Element {
 
       <div className="space-y-2">
         <Label htmlFor="notes">{t('revenues:form.fields.notes')}</Label>
-        <Textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={t('revenues:form.placeholders.notes')}
+        <Controller
+          name="notes"
+          control={control}
+          render={({ field }) => (
+            <Textarea id="notes" {...field} placeholder={t('revenues:form.placeholders.notes')} />
+          )}
         />
       </div>
     </FormCard>
