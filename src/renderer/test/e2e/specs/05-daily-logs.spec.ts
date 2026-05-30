@@ -34,7 +34,6 @@ test.describe.serial('Daily Logs — Automated', () => {
     await page.fill('#km', '60')
     await page.fill('#toll', '97')
 
-    // computed value field is non-editable but should reflect formula immediately
     const computedValueField = page.locator('#computedValue')
     await expect(computedValueField).toHaveValue(/1\.181,80|1181\.80|1,181\.80/)
 
@@ -54,7 +53,6 @@ test.describe.serial('Daily Logs — Automated', () => {
     await goTo(page, '#/daily-logs')
     await page.waitForSelector('table')
 
-    // daily-logs lista tem apenas Edit + Delete (sem View). Edit = nth(0), Delete = last()
     const row = page.locator('tr', { hasText: machineName })
     await row.locator('button').nth(0).click()
 

@@ -71,6 +71,12 @@
       "requiredDate": "Data é obrigatória",
       "requiredProject": "Projeto é obrigatório",
       "requiredHours": "Horas trabalhadas devem ser maiores que zero",
+      "negativeNotAllowed": "Valores numéricos não podem ser negativos",
+      "tonnagePrecision": "Toneladas aceita no máximo 4 casas decimais",
+      "fuelQuantityPrecision": "Combustível aceita no máximo 2 casas decimais",
+      "kmPrecision": "KM aceita no máximo 2 casas decimais",
+      "percentagePrecision": "Porcentagem aceita no máximo 2 casas decimais",
+      "tollPrecision": "Pedágio aceita no máximo 2 casas decimais",
       "save": "Erro ao salvar diário. Tente novamente."
     },
     "toasts": {

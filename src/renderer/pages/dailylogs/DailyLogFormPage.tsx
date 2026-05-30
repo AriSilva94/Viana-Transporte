@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useForm, Controller } from 'react-hook-form'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -13,6 +14,27 @@ import { formatLocalDate, parseLocalDate } from '../../../shared/date'
 import { computeDailyLogValue } from '../../../shared/dailyLogValue'
 import type { DailyLogWithRelations, Machine, Operator, ProjectWithClient } from '../../../shared/types'
 
+type FormValues = {
+  date: string
+  projectId: string
+  machineId: string
+  operatorId: string
+  hoursWorked: string
+  workDescription: string
+  fuelQuantity: string
+  downtimeNotes: string
+  notes: string
+  km: string
+  percentage: string
+  toll: string
+  tonnage: string
+}
+
+const countDecimals = (v: string): number => {
+  const dot = v.indexOf('.')
+  return dot === -1 ? 0 : v.length - dot - 1
+}
+
 export function DailyLogFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { t } = useTranslation(['dailylogs', 'common'])
@@ -24,21 +46,26 @@ export function DailyLogFormPage(): JSX.Element {
   const [machines, setMachines] = useState<Machine[]>([])
   const [operators, setOperators] = useState<Operator[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
 
-  const [date, setDate] = useState(formatLocalDate(new Date()))
-  const [projectId, setProjectId] = useState<number | ''>('')
-  const [machineId, setMachineId] = useState<number | ''>('')
-  const [operatorId, setOperatorId] = useState<number | ''>('')
-  const [hoursWorked, setHoursWorked] = useState<number | ''>('')
-  const [workDescription, setWorkDescription] = useState('')
-  const [fuelQuantity, setFuelQuantity] = useState<number | ''>('')
-  const [downtimeNotes, setDowntimeNotes] = useState('')
-  const [notes, setNotes] = useState('')
-  const [km, setKm] = useState<number | ''>('')
-  const [percentage, setPercentage] = useState<number | ''>('')
-  const [toll, setToll] = useState<number | ''>('')
-  const [tonnage, setTonnage] = useState<number | ''>('')
+  const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({
+    defaultValues: {
+      date: formatLocalDate(new Date()),
+      projectId: '',
+      machineId: '',
+      operatorId: '',
+      hoursWorked: '',
+      workDescription: '',
+      fuelQuantity: '',
+      downtimeNotes: '',
+      notes: '',
+      km: '',
+      percentage: '',
+      toll: '',
+      tonnage: '',
+    },
+  })
+
+  const [tonnage, km, percentage, toll] = watch(['tonnage', 'km', 'percentage', 'toll'])
 
   const computedValue = computeDailyLogValue({
     tonnage: tonnage === '' ? null : Number(tonnage),
@@ -59,53 +86,41 @@ export function DailyLogFormPage(): JSX.Element {
     if (!isEdit) return
     api.dailylogs.get(Number(id)).then((log: DailyLogWithRelations | null) => {
       if (!log) return
-      setDate(formatLocalDate(log.date))
-      setProjectId(log.projectId)
-      setMachineId(log.machineId ?? '')
-      setOperatorId(log.operatorId ?? '')
-      setHoursWorked(log.hoursWorked)
-      setWorkDescription(log.workDescription ?? '')
-      setFuelQuantity(log.fuelQuantity ?? '')
-      setDowntimeNotes(log.downtimeNotes ?? '')
-      setNotes(log.notes ?? '')
-      setKm(log.km ?? '')
-      setPercentage(log.percentage ?? '')
-      setToll(log.toll ?? '')
-      setTonnage(log.tonnage ?? '')
+      reset({
+        date: formatLocalDate(log.date),
+        projectId: String(log.projectId),
+        machineId: log.machineId != null ? String(log.machineId) : '',
+        operatorId: log.operatorId != null ? String(log.operatorId) : '',
+        hoursWorked: log.hoursWorked != null ? String(log.hoursWorked) : '',
+        workDescription: log.workDescription ?? '',
+        fuelQuantity: log.fuelQuantity != null ? String(log.fuelQuantity) : '',
+        downtimeNotes: log.downtimeNotes ?? '',
+        notes: log.notes ?? '',
+        km: log.km != null ? String(log.km) : '',
+        percentage: log.percentage != null ? String(log.percentage) : '',
+        toll: log.toll != null ? String(log.toll) : '',
+        tonnage: log.tonnage != null ? String(log.tonnage) : '',
+      })
     })
-  }, [id, isEdit])
+  }, [id, isEdit, reset])
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
-    e.preventDefault()
-    if (!date) {
-      setError(t('dailylogs:form.errors.requiredDate'))
-      return
-    }
-    if (!projectId) {
-      setError(t('dailylogs:form.errors.requiredProject'))
-      return
-    }
-    if (hoursWorked === '' || Number(hoursWorked) <= 0) {
-      setError(t('dailylogs:form.errors.requiredHours'))
-      return
-    }
+  async function onSubmit(values: FormValues): Promise<void> {
     setIsLoading(true)
-    setError('')
     try {
       const data = {
-        date: parseLocalDate(date),
-        projectId: Number(projectId),
-        machineId: machineId !== '' ? Number(machineId) : null,
-        operatorId: operatorId !== '' ? Number(operatorId) : null,
-        hoursWorked: Number(hoursWorked),
-        workDescription: workDescription.trim() || null,
-        fuelQuantity: fuelQuantity !== '' ? Number(fuelQuantity) : null,
-        downtimeNotes: downtimeNotes.trim() || null,
-        notes: notes.trim() || null,
-        km: km !== '' ? Number(km) : null,
-        percentage: percentage !== '' ? Number(percentage) : null,
-        toll: toll !== '' ? Number(toll) : null,
-        tonnage: tonnage !== '' ? Number(tonnage) : null,
+        date: parseLocalDate(values.date),
+        projectId: Number(values.projectId),
+        machineId: values.machineId !== '' ? Number(values.machineId) : null,
+        operatorId: values.operatorId !== '' ? Number(values.operatorId) : null,
+        hoursWorked: Number(values.hoursWorked),
+        workDescription: values.workDescription.trim() || null,
+        fuelQuantity: values.fuelQuantity !== '' ? Number(values.fuelQuantity) : null,
+        downtimeNotes: values.downtimeNotes.trim() || null,
+        notes: values.notes.trim() || null,
+        km: values.km !== '' ? Number(values.km) : null,
+        percentage: values.percentage !== '' ? Number(values.percentage) : null,
+        toll: values.toll !== '' ? Number(values.toll) : null,
+        tonnage: values.tonnage !== '' ? Number(values.tonnage) : null,
       }
       if (isEdit) {
         await api.dailylogs.update(Number(id), data)
@@ -116,7 +131,6 @@ export function DailyLogFormPage(): JSX.Element {
       navigate('/daily-logs')
     } catch {
       showToast(t('dailylogs:form.toasts.error'), 'error')
-      setError(t('dailylogs:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -126,145 +140,193 @@ export function DailyLogFormPage(): JSX.Element {
     <FormCard
       title={isEdit ? t('dailylogs:form.editTitle') : t('dailylogs:form.newTitle')}
       description={t('dailylogs:form.description')}
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       onCancel={() => navigate('/daily-logs')}
       isLoading={isLoading}
     >
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="date">{t('dailylogs:form.fields.date')}</Label>
-          <DatePicker id="date" value={date} onChange={setDate} />
+          <Controller
+            name="date"
+            control={control}
+            rules={{ required: t('dailylogs:form.errors.requiredDate') }}
+            render={({ field }) => (
+              <DatePicker id="date" value={field.value} onChange={field.onChange} />
+            )}
+          />
+          {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="projectId">{t('dailylogs:form.fields.project')}</Label>
-          <Select
-            id="projectId"
-            value={projectId === '' ? '' : String(projectId)}
-            onChange={(e) => setProjectId(e.target.value === '' ? '' : Number(e.target.value))}
-          >
-            <option value="">{t('dailylogs:form.placeholders.select')}</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} — {p.clientName ?? t('common:emptyValue')}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="projectId"
+            control={control}
+            rules={{ required: t('dailylogs:form.errors.requiredProject') }}
+            render={({ field }) => (
+              <Select id="projectId" value={field.value} onChange={(e) => field.onChange(e.target.value)}>
+                <option value="">{t('dailylogs:form.placeholders.select')}</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — {p.clientName ?? t('common:emptyValue')}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
+          {errors.projectId && <p className="text-sm text-destructive">{errors.projectId.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="machineId">{t('dailylogs:form.fields.machine')}</Label>
-          <Select
-            id="machineId"
-            value={machineId === '' ? '' : String(machineId)}
-            onChange={(e) => setMachineId(e.target.value === '' ? '' : Number(e.target.value))}
-          >
-            <option value="">{t('dailylogs:form.placeholders.none')}</option>
-            {machines.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name} ({m.type})
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="machineId"
+            control={control}
+            render={({ field }) => (
+              <Select id="machineId" value={field.value} onChange={(e) => field.onChange(e.target.value)}>
+                <option value="">{t('dailylogs:form.placeholders.none')}</option>
+                {machines.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name} ({m.type})</option>
+                ))}
+              </Select>
+            )}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="operatorId">{t('dailylogs:form.fields.operator')}</Label>
-          <Select
-            id="operatorId"
-            value={operatorId === '' ? '' : String(operatorId)}
-            onChange={(e) => setOperatorId(e.target.value === '' ? '' : Number(e.target.value))}
-          >
-            <option value="">{t('dailylogs:form.placeholders.none')}</option>
-            {operators.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.name}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="operatorId"
+            control={control}
+            render={({ field }) => (
+              <Select id="operatorId" value={field.value} onChange={(e) => field.onChange(e.target.value)}>
+                <option value="">{t('dailylogs:form.placeholders.none')}</option>
+                {operators.map((o) => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </Select>
+            )}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="hoursWorked">{t('dailylogs:form.fields.hoursWorked')}</Label>
-          <Input
-            id="hoursWorked"
-            type="number"
-            min={0}
-            step={0.5}
-            value={hoursWorked}
-            onChange={(e) => setHoursWorked(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('dailylogs:form.placeholders.hoursWorked')}
+          <Controller
+            name="hoursWorked"
+            control={control}
+            rules={{
+              required: t('dailylogs:form.errors.requiredHours'),
+              validate: (v) => (v !== '' && Number(v) > 0) || t('dailylogs:form.errors.requiredHours'),
+            }}
+            render={({ field }) => (
+              <Input id="hoursWorked" type="number" min={0} step={0.5} {...field} placeholder={t('dailylogs:form.placeholders.hoursWorked')} />
+            )}
           />
+          {errors.hoursWorked && <p className="text-sm text-destructive">{errors.hoursWorked.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="fuelQuantity">{t('dailylogs:form.fields.fuelQuantity')}</Label>
-          <Input
-            id="fuelQuantity"
-            type="number"
-            min={0}
-            step={0.1}
-            value={fuelQuantity}
-            onChange={(e) => setFuelQuantity(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('dailylogs:form.placeholders.fuelQuantity')}
+          <Controller
+            name="fuelQuantity"
+            control={control}
+            rules={{
+              validate: (v) => {
+                if (v === '') return true
+                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (countDecimals(v) > 2) return t('dailylogs:form.errors.fuelQuantityPrecision')
+                return true
+              },
+            }}
+            render={({ field }) => (
+              <Input id="fuelQuantity" type="number" min={0} step={0.01} {...field} placeholder={t('dailylogs:form.placeholders.fuelQuantity')} />
+            )}
           />
+          {errors.fuelQuantity && <p className="text-sm text-destructive">{errors.fuelQuantity.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="km">{t('dailylogs:form.fields.km')}</Label>
-          <Input
-            id="km"
-            type="number"
-            min={0}
-            step={0.1}
-            value={km}
-            onChange={(e) => setKm(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('dailylogs:form.placeholders.km')}
+          <Controller
+            name="km"
+            control={control}
+            rules={{
+              validate: (v) => {
+                if (v === '') return true
+                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (countDecimals(v) > 2) return t('dailylogs:form.errors.kmPrecision')
+                return true
+              },
+            }}
+            render={({ field }) => (
+              <Input id="km" type="number" min={0} step={0.01} {...field} placeholder={t('dailylogs:form.placeholders.km')} />
+            )}
           />
+          {errors.km && <p className="text-sm text-destructive">{errors.km.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="percentage">{t('dailylogs:form.fields.percentage')}</Label>
-          <Input
-            id="percentage"
-            type="number"
-            min={0}
-            step={0.1}
-            value={percentage}
-            onChange={(e) => setPercentage(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('dailylogs:form.placeholders.percentage')}
+          <Controller
+            name="percentage"
+            control={control}
+            rules={{
+              validate: (v) => {
+                if (v === '') return true
+                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (countDecimals(v) > 2) return t('dailylogs:form.errors.percentagePrecision')
+                return true
+              },
+            }}
+            render={({ field }) => (
+              <Input id="percentage" type="number" min={0} step={0.01} {...field} placeholder={t('dailylogs:form.placeholders.percentage')} />
+            )}
           />
+          {errors.percentage && <p className="text-sm text-destructive">{errors.percentage.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="toll">{t('dailylogs:form.fields.toll')}</Label>
-          <Input
-            id="toll"
-            type="number"
-            min={0}
-            step={0.01}
-            value={toll}
-            onChange={(e) => setToll(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('dailylogs:form.placeholders.toll')}
+          <Controller
+            name="toll"
+            control={control}
+            rules={{
+              validate: (v) => {
+                if (v === '') return true
+                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (countDecimals(v) > 2) return t('dailylogs:form.errors.tollPrecision')
+                return true
+              },
+            }}
+            render={({ field }) => (
+              <Input id="toll" type="number" min={0} step={0.01} {...field} placeholder={t('dailylogs:form.placeholders.toll')} />
+            )}
           />
+          {errors.toll && <p className="text-sm text-destructive">{errors.toll.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="tonnage">{t('dailylogs:form.fields.tonnage')}</Label>
-          <Input
-            id="tonnage"
-            type="number"
-            min={0}
-            step={0.1}
-            value={tonnage}
-            onChange={(e) => setTonnage(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('dailylogs:form.placeholders.tonnage')}
+          <Controller
+            name="tonnage"
+            control={control}
+            rules={{
+              validate: (v) => {
+                if (v === '') return true
+                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (countDecimals(v) > 4) return t('dailylogs:form.errors.tonnagePrecision')
+                return true
+              },
+            }}
+            render={({ field }) => (
+              <Input id="tonnage" type="number" min={0} step={0.0001} {...field} placeholder={t('dailylogs:form.placeholders.tonnage')} />
+            )}
           />
+          {errors.tonnage && <p className="text-sm text-destructive">{errors.tonnage.message}</p>}
         </div>
       </div>
 
@@ -285,31 +347,34 @@ export function DailyLogFormPage(): JSX.Element {
 
       <div className="space-y-2">
         <Label htmlFor="workDescription">{t('dailylogs:form.fields.workDescription')}</Label>
-        <Textarea
-          id="workDescription"
-          value={workDescription}
-          onChange={(e) => setWorkDescription(e.target.value)}
-          placeholder={t('dailylogs:form.placeholders.workDescription')}
+        <Controller
+          name="workDescription"
+          control={control}
+          render={({ field }) => (
+            <Textarea id="workDescription" {...field} placeholder={t('dailylogs:form.placeholders.workDescription')} />
+          )}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="downtimeNotes">{t('dailylogs:form.fields.downtimeNotes')}</Label>
-          <Textarea
-            id="downtimeNotes"
-            value={downtimeNotes}
-            onChange={(e) => setDowntimeNotes(e.target.value)}
-            placeholder={t('dailylogs:form.placeholders.downtimeNotes')}
+          <Controller
+            name="downtimeNotes"
+            control={control}
+            render={({ field }) => (
+              <Textarea id="downtimeNotes" {...field} placeholder={t('dailylogs:form.placeholders.downtimeNotes')} />
+            )}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="notes">{t('dailylogs:form.fields.notes')}</Label>
-          <Textarea
-            id="notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder={t('dailylogs:form.placeholders.notes')}
+          <Controller
+            name="notes"
+            control={control}
+            render={({ field }) => (
+              <Textarea id="notes" {...field} placeholder={t('dailylogs:form.placeholders.notes')} />
+            )}
           />
         </div>
       </div>

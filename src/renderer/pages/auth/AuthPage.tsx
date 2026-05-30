@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import type { TFunction } from 'i18next'
 import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
@@ -67,8 +68,7 @@ function AuthFormBody({ mode }: AuthFormBodyProps): JSX.Element {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<AuthFormValues>({ resolver: zodResolver(schema as any) })
+  } = useForm<AuthFormValues>({ resolver: zodResolver(schema as z.ZodType<AuthFormValues>) })
 
   const needsPassword = mode === 'signIn' || mode === 'signUp' || mode === 'resetPassword'
 

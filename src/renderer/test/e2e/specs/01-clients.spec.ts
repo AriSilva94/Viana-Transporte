@@ -1,4 +1,3 @@
-// src/renderer/test/e2e/specs/01-clients.spec.ts
 import path from 'path'
 import { test, expect, goTo, ensureScreenshotDir, confirmDialog } from '../fixtures/electron'
 
@@ -20,7 +19,6 @@ test.describe.serial('Clients — Automated', () => {
 
     await page.click('button[type="submit"]')
 
-    // Should redirect to /clients list
     await page.waitForSelector('table')
 
     const row = page.locator('tr', { hasText: UNIQUE_NAME })
@@ -39,7 +37,6 @@ test.describe.serial('Clients — Automated', () => {
     await goTo(page, '#/clients')
     await page.waitForSelector('table')
 
-    // Click Edit on the row with UNIQUE_NAME
     const row = page.locator('tr', { hasText: UNIQUE_NAME })
     await row.locator('button').nth(1).click() // 0=View, 1=Edit, 2=Delete
 

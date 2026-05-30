@@ -58,7 +58,6 @@ export function initUpdater(mainWindow: BrowserWindow | null): void {
     })
   })
 
-  // Check for updates 3 seconds after app loads
   setTimeout(() => {
     log.info('Checking for updates...')
     autoUpdater.checkForUpdates().catch((err) => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useForm, Controller } from 'react-hook-form'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -10,55 +11,52 @@ import { Label } from '@renderer/components/ui/label'
 import { useToast } from '@renderer/context/ToastContext'
 import type { Machine } from '../../../shared/types'
 
+type FormValues = {
+  name: string
+  type: string
+  identifier: string
+  brandModel: string
+  status: Machine['status']
+  notes: string
+}
+
 export function MachineFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { t } = useTranslation(['machines', 'common'])
   const { id } = useParams<{ id: string }>()
   const isEdit = id !== undefined
   const { showToast } = useToast()
-
-  const [name, setName] = useState('')
-  const [type, setType] = useState('')
-  const [identifier, setIdentifier] = useState('')
-  const [brandModel, setBrandModel] = useState('')
-  const [status, setStatus] = useState<Machine['status']>('available')
-  const [notes, setNotes] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+    defaultValues: { name: '', type: '', identifier: '', brandModel: '', status: 'available', notes: '' },
+  })
 
   useEffect(() => {
     if (!isEdit) return
     api.machines.get(Number(id)).then((machine: Machine | null) => {
       if (!machine) return
-      setName(machine.name)
-      setType(machine.type)
-      setIdentifier(machine.identifier ?? '')
-      setBrandModel(machine.brandModel ?? '')
-      setStatus(machine.status)
-      setNotes(machine.notes ?? '')
+      reset({
+        name: machine.name,
+        type: machine.type,
+        identifier: machine.identifier ?? '',
+        brandModel: machine.brandModel ?? '',
+        status: machine.status,
+        notes: machine.notes ?? '',
+      })
     })
-  }, [id, isEdit])
+  }, [id, isEdit, reset])
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
-    e.preventDefault()
-    if (!name.trim()) {
-      setError(t('machines:form.errors.requiredName'))
-      return
-    }
-    if (!type.trim()) {
-      setError(t('machines:form.errors.requiredType'))
-      return
-    }
+  async function onSubmit(values: FormValues): Promise<void> {
     setIsLoading(true)
-    setError('')
     try {
       const data = {
-        name: name.trim(),
-        type: type.trim(),
-        identifier: identifier.trim() || null,
-        brandModel: brandModel.trim() || null,
-        status,
-        notes: notes.trim() || null,
+        name: values.name.trim(),
+        type: values.type.trim(),
+        identifier: values.identifier.trim() || null,
+        brandModel: values.brandModel.trim() || null,
+        status: values.status,
+        notes: values.notes.trim() || null,
       }
       if (isEdit) {
         await api.machines.update(Number(id), data)
@@ -69,7 +67,6 @@ export function MachineFormPage(): JSX.Element {
       navigate('/machines')
     } catch {
       showToast(t('machines:form.toasts.error'), 'error')
-      setError(t('machines:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -79,63 +76,77 @@ export function MachineFormPage(): JSX.Element {
     <FormCard
       title={isEdit ? t('machines:form.editTitle') : t('machines:form.newTitle')}
       description={t('machines:form.description')}
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       onCancel={() => navigate('/machines')}
       isLoading={isLoading}
     >
-      {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="space-y-2">
         <Label htmlFor="name">{t('machines:form.fields.name')}</Label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t('machines:form.placeholders.name')}
+        <Controller
+          name="name"
+          control={control}
+          rules={{ required: t('machines:form.errors.requiredName'), validate: (v) => v.trim() !== '' || t('machines:form.errors.requiredName') }}
+          render={({ field }) => (
+            <Input id="name" {...field} placeholder={t('machines:form.placeholders.name')} />
+          )}
         />
+        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="type">{t('machines:form.fields.type')}</Label>
-        <Input
-          id="type"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          placeholder={t('machines:form.placeholders.type')}
+        <Controller
+          name="type"
+          control={control}
+          rules={{ required: t('machines:form.errors.requiredType'), validate: (v) => v.trim() !== '' || t('machines:form.errors.requiredType') }}
+          render={({ field }) => (
+            <Input id="type" {...field} placeholder={t('machines:form.placeholders.type')} />
+          )}
         />
+        {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="identifier">{t('machines:form.fields.identifier')}</Label>
-        <Input
-          id="identifier"
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-          placeholder={t('machines:form.placeholders.identifier')}
+        <Controller
+          name="identifier"
+          control={control}
+          render={({ field }) => (
+            <Input id="identifier" {...field} placeholder={t('machines:form.placeholders.identifier')} />
+          )}
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="brandModel">{t('machines:form.fields.brandModel')}</Label>
-        <Input
-          id="brandModel"
-          value={brandModel}
-          onChange={(e) => setBrandModel(e.target.value)}
-          placeholder={t('machines:form.placeholders.brandModel')}
+        <Controller
+          name="brandModel"
+          control={control}
+          render={({ field }) => (
+            <Input id="brandModel" {...field} placeholder={t('machines:form.placeholders.brandModel')} />
+          )}
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="status">{t('machines:form.fields.status')}</Label>
-        <Select id="status" value={status} onChange={(e) => setStatus(e.target.value as Machine['status'])}>
-          <option value="available">{t('common:status.available')}</option>
-          <option value="allocated">{t('common:status.allocated')}</option>
-          <option value="under_maintenance">{t('common:status.under_maintenance')}</option>
-          <option value="inactive">{t('common:status.inactive')}</option>
-        </Select>
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <Select id="status" value={field.value} onChange={(e) => field.onChange(e.target.value as Machine['status'])}>
+              <option value="available">{t('common:status.available')}</option>
+              <option value="allocated">{t('common:status.allocated')}</option>
+              <option value="under_maintenance">{t('common:status.under_maintenance')}</option>
+              <option value="inactive">{t('common:status.inactive')}</option>
+            </Select>
+          )}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="notes">{t('machines:form.fields.notes')}</Label>
-        <Textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={t('machines:form.placeholders.notes')}
+        <Controller
+          name="notes"
+          control={control}
+          render={({ field }) => (
+            <Textarea id="notes" {...field} placeholder={t('machines:form.placeholders.notes')} />
+          )}
         />
       </div>
     </FormCard>

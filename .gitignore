@@ -1,6 +1,15 @@
 dev.db
 out/
 
+# Local AI tooling (não subir no repo)
+.omc/
+.agents/
+.superpowers/
+skills-lock.json
+
+# E2e screenshots (podem conter dados reais)
+src/renderer/test/e2e/screenshots/
+
 # Logs
 logs
 *.log
