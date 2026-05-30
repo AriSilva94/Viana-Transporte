@@ -46,9 +46,7 @@ export function createMemoryAuthService(): AuthService {
     async updatePassword() {
       return state
     },
-    async signOut() {
-      // no-op in memory mode
-    },
+    async signOut() {},
     async handleCallbackUrl() {
       return state
     },

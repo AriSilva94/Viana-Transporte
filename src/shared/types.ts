@@ -1,7 +1,5 @@
 import type { LicenseStatus } from './license'
 
-// ─── Entity Types ────────────────────────────────────────────────────────────
-
 export interface Client {
   id: number
   name: string
@@ -119,8 +117,6 @@ export interface ProjectRevenueWithRelations extends ProjectRevenue {
   dailyLogComputedValue: number | null
 }
 
-// ─── Computed Result Types ────────────────────────────────────────────────────
-
 export interface ProjectSummary {
   totalCosts: number
   totalRevenues: number
@@ -185,8 +181,6 @@ export interface UserProfileListItem {
   createdAt: string
 }
 
-// ─── Filter Types ─────────────────────────────────────────────────────────────
-
 export interface ProjectFilters {
   status?: Project['status']
   clientId?: number
@@ -214,8 +208,6 @@ export interface RevenueFilters {
   dateFrom?: string
   dateTo?: string
 }
-
-// ─── ElectronAPI ──────────────────────────────────────────────────────────────
 
 export interface ElectronAPI {
   getVersion: () => Promise<string>

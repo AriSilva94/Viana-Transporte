@@ -96,10 +96,7 @@ describe('App auth flow', () => {
         updatePassword: vi.fn(),
         signOut: vi.fn().mockResolvedValue(undefined),
         onSessionChanged: vi.fn().mockImplementation((callback: () => void) => {
-          // Mock implementation for onSessionChanged
-          return () => {
-            // Return cleanup function
-          }
+          return () => {}
         }),
       },
       users: {
@@ -628,7 +625,6 @@ describe('App auth flow', () => {
       expect(screen.getByTestId('auth-mode-title')).toBeInTheDocument()
     })
 
-    // LocaleFlag renders a flag SVG with data-testid based on the current locale (pt-BR in tests)
     expect(screen.getByTestId('locale-flag-pt-BR')).toBeInTheDocument()
   })
 

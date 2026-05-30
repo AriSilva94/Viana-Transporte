@@ -6,7 +6,6 @@ export function UpdateNotification(): JSX.Element | null {
   const { updateDownloaded, updateAvailable, downloadProgress, error, installUpdate } = useUpdater()
   const [dismissed, setDismissed] = useState(false)
 
-  // Reset dismissed state when update state changes
   useEffect(() => {
     if (updateDownloaded || error) {
       setDismissed(false)
