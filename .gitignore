@@ -1,6 +1,11 @@
 dev.db
 out/
 
+# Local AI tooling (não subir no repo)
+.omc/
+.agents/
+.superpowers/
+
 # Logs
 logs
 *.log
