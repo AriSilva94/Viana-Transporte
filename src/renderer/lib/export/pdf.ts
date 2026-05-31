@@ -25,6 +25,20 @@ export function generatePdf(payload: ExportPayload): Uint8Array {
   doc.text(`Gerado em: ${now}`, margin, y)
   y += 8
 
+  if (payload.filters && payload.filters.length > 0) {
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text('FILTROS APLICADOS', margin, y)
+    y += 5
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    for (const f of payload.filters) {
+      doc.text(`${f.label}: ${f.value}`, margin, y)
+      y += 5
+    }
+    y += 3
+  }
+
   if (payload.summary && payload.summary.length > 0) {
     doc.setFontSize(10)
     doc.setFont('helvetica', 'bold')

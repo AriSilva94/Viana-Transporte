@@ -11,6 +11,14 @@ export function generateExcel(payload: ExportPayload): Uint8Array {
   sheetData.push([`Gerado em: ${now}`])
   sheetData.push([])
 
+  if (payload.filters && payload.filters.length > 0) {
+    sheetData.push(['FILTROS APLICADOS'])
+    for (const f of payload.filters) {
+      sheetData.push([f.label, f.value])
+    }
+    sheetData.push([])
+  }
+
   if (payload.summary && payload.summary.length > 0) {
     sheetData.push(['RESUMO'])
     for (const row of payload.summary) {
