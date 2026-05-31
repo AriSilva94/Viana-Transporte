@@ -342,6 +342,7 @@ export interface SaveFileRequest {
 
 export interface ExportPayload {
   title: string
+  filters?: ExportSummaryRow[]
   summary?: ExportSummaryRow[]
   columns: ExportColumn[]
   rows: ExportRow[]

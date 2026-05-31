@@ -28,6 +28,7 @@ import type {
   DailyLogFilters,
   CostFilters,
   SupportedLocale,
+  ExportSummaryRow,
 } from '../../../shared/types'
 
 const reportCardClass = 'rounded-3xl border border-border/80 bg-white/82 p-4 shadow-sm backdrop-blur-sm'
@@ -175,9 +176,25 @@ function ProjectSummaryTab(): JSX.Element {
   ]
 
   function buildExportPayload() {
+    const activeFilters: ExportSummaryRow[] = []
+    if (filters.status) {
+      activeFilters.push({ label: t('reports:filters.status'), value: t(`common:status.${filters.status}`) })
+    }
+    if (filters.clientId) {
+      const client = clients.find((c) => c.id === filters.clientId)
+      if (client) activeFilters.push({ label: t('reports:filters.client'), value: client.name })
+    }
+    if (filters.dateFrom) {
+      activeFilters.push({ label: t('reports:filters.dateFrom'), value: formatDate(filters.dateFrom, locale) })
+    }
+    if (filters.dateTo) {
+      activeFilters.push({ label: t('reports:filters.dateTo'), value: formatDate(filters.dateTo, locale) })
+    }
+
     return {
       title: t('reports:tabs.projectSummary'),
       orientation: 'landscape' as const,
+      filters: activeFilters.length > 0 ? activeFilters : undefined,
       summary: [
         { label: t('reports:projectSummary.summary.totalCosts'), value: formatCurrency(totalCosts, locale) },
         { label: t('reports:projectSummary.summary.totalRevenues'), value: formatCurrency(totalRevenues, locale) },
@@ -415,9 +432,22 @@ function DailyLogsTab(): JSX.Element {
   ]
 
   function buildExportPayload() {
+    const activeFilters: ExportSummaryRow[] = []
+    if (filters.projectId) {
+      const project = projects.find((p) => p.id === filters.projectId)
+      if (project) activeFilters.push({ label: t('reports:filters.project'), value: project.name })
+    }
+    if (filters.dateFrom) {
+      activeFilters.push({ label: t('reports:filters.dateFrom'), value: formatDate(filters.dateFrom, locale) })
+    }
+    if (filters.dateTo) {
+      activeFilters.push({ label: t('reports:filters.dateTo'), value: formatDate(filters.dateTo, locale) })
+    }
+
     return {
       title: t('reports:tabs.dailyLogs'),
       orientation: 'portrait' as const,
+      filters: activeFilters.length > 0 ? activeFilters : undefined,
       summary: [
         { label: t('reports:dailyLogs.summary.totalRecords'), value: String(logs.length) },
         { label: t('reports:dailyLogs.summary.totalHours'), value: formatDecimal(totalHours, locale) },
@@ -790,9 +820,22 @@ function CostsByCategoryTab(): JSX.Element {
   const grandTotal = costs.reduce((sum, c) => sum + Number(c.amount), 0)
 
   function buildExportPayload() {
+    const activeFilters: ExportSummaryRow[] = []
+    if (filters.projectId) {
+      const project = projects.find((p) => p.id === filters.projectId)
+      if (project) activeFilters.push({ label: t('reports:filters.project'), value: project.name })
+    }
+    if (filters.dateFrom) {
+      activeFilters.push({ label: t('reports:filters.dateFrom'), value: formatDate(filters.dateFrom, locale) })
+    }
+    if (filters.dateTo) {
+      activeFilters.push({ label: t('reports:filters.dateTo'), value: formatDate(filters.dateTo, locale) })
+    }
+
     return {
       title: t('reports:tabs.costsByCategory'),
       orientation: 'landscape' as const,
+      filters: activeFilters.length > 0 ? activeFilters : undefined,
       summary: [
         { label: t('reports:costsByCategory.summary.totalLabel'), value: formatCurrency(grandTotal, locale) },
       ],
