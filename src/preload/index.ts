@@ -83,6 +83,9 @@ const api: ElectronAPI = {
   license: {
     getStatus: () => ipcRenderer.invoke('license:status'),
   },
+  export: {
+    saveFile: (req) => ipcRenderer.invoke('export:save-file', req),
+  },
   updater: {
     checkForUpdates: () => ipcRenderer.invoke('updater:check'),
     installUpdate: () => ipcRenderer.invoke('updater:install'),

@@ -11,6 +11,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/u
 import { Select } from '@renderer/components/ui/select'
 import { Button } from '@renderer/components/ui/button'
 import { DatePicker } from '@renderer/components/ui/date-picker'
+import { ExportMenu } from '@renderer/components/shared/ExportMenu'
+import { generateExcel } from '@renderer/lib/export/excel'
+import { generatePdf } from '@renderer/lib/export/pdf'
+import { useToast } from '@renderer/context/ToastContext'
 import { endOfLocalDay, isLocalDateWithinInclusiveRange, parseLocalDate } from '../../../shared/date'
 import type {
   Client,
@@ -63,9 +67,14 @@ interface CategorySummaryRow {
   count: number
 }
 
+function todaySlug(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
 function ProjectSummaryTab(): JSX.Element {
   const { t, i18n } = useTranslation(['reports', 'common'])
   const locale = i18n.language as SupportedLocale
+  const { showToast } = useToast()
   const [rows, setRows] = useState<ProjectSummaryRow[]>([])
   const [filters, setFilters] = useState<ProjectSummaryFilters>({ status: '', clientId: '', dateFrom: '', dateTo: '' })
   const [clients, setClients] = useState<Client[]>([])
@@ -155,6 +164,59 @@ function ProjectSummaryTab(): JSX.Element {
   const totalRevenues = rows.reduce((sum, r) => sum + r.totalRevenues, 0)
   const totalProfit = totalRevenues - totalCosts
 
+  const exportColumns = [
+    { label: t('reports:projectSummary.columns.project'), key: 'name' },
+    { label: t('reports:projectSummary.columns.client'), key: 'client' },
+    { label: t('reports:projectSummary.columns.status'), key: 'status' },
+    { label: t('reports:projectSummary.columns.totalHours'), key: 'totalHours', align: 'right' as const },
+    { label: t('reports:projectSummary.columns.totalCosts'), key: 'totalCosts', align: 'right' as const },
+    { label: t('reports:projectSummary.columns.totalRevenues'), key: 'totalRevenues', align: 'right' as const },
+    { label: t('reports:projectSummary.columns.profit'), key: 'profit', align: 'right' as const },
+  ]
+
+  function buildExportPayload() {
+    return {
+      title: t('reports:tabs.projectSummary'),
+      orientation: 'landscape' as const,
+      summary: [
+        { label: t('reports:projectSummary.summary.totalCosts'), value: formatCurrency(totalCosts, locale) },
+        { label: t('reports:projectSummary.summary.totalRevenues'), value: formatCurrency(totalRevenues, locale) },
+        { label: t('reports:projectSummary.summary.totalProfit'), value: formatCurrency(totalProfit, locale) },
+        { label: t('reports:projectSummary.summary.projects'), value: String(rows.length) },
+      ],
+      columns: exportColumns,
+      rows: rows.map((r) => ({
+        name: r.name,
+        client: r.clientName ?? '',
+        status: t(`common:status.${r.status}`),
+        totalHours: formatDecimal(r.totalHours, locale),
+        totalCosts: formatCurrency(r.totalCosts, locale),
+        totalRevenues: formatCurrency(r.totalRevenues, locale),
+        profit: formatCurrency(r.profit, locale),
+      })),
+    }
+  }
+
+  async function handleExportExcel(): Promise<void> {
+    try {
+      const buffer = generateExcel(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `resumo-projetos-${todaySlug()}.xlsx`, format: 'xlsx' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
+
+  async function handleExportPdf(): Promise<void> {
+    try {
+      const buffer = generatePdf(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `resumo-projetos-${todaySlug()}.pdf`, format: 'pdf' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
+
   const columns = [
     {
       key: 'name',
@@ -199,7 +261,15 @@ function ProjectSummaryTab(): JSX.Element {
 
   return (
     <div>
-      <FilterPanel>
+      <FilterPanel
+        actions={
+          <ExportMenu
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            disabled={rows.length === 0}
+          />
+        }
+      >
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">{t('reports:filters.status')}</label>
           <Select
@@ -236,24 +306,26 @@ function ProjectSummaryTab(): JSX.Element {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
-          <DatePicker
-            value={filters.dateFrom}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
-        </div>
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
+            <DatePicker
+              value={filters.dateFrom}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
-          <DatePicker
-            value={filters.dateTo}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
+            <DatePicker
+              value={filters.dateTo}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (
@@ -300,6 +372,7 @@ function ProjectSummaryTab(): JSX.Element {
 function DailyLogsTab(): JSX.Element {
   const { t, i18n } = useTranslation(['reports', 'common'])
   const locale = i18n.language as SupportedLocale
+  const { showToast } = useToast()
   const [logs, setLogs] = useState<DailyLogWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<DailyLogFilters>({})
@@ -330,6 +403,57 @@ function DailyLogsTab(): JSX.Element {
   }
 
   const totalHours = logs.reduce((sum, l) => sum + Number(l.hoursWorked), 0)
+
+  const exportColumns = [
+    { label: t('reports:dailyLogs.columns.date'), key: 'date' },
+    { label: t('reports:dailyLogs.columns.project'), key: 'project' },
+    { label: t('reports:dailyLogs.columns.machine'), key: 'machine' },
+    { label: t('reports:dailyLogs.columns.operator'), key: 'operator' },
+    { label: t('reports:dailyLogs.columns.hours'), key: 'hours', align: 'right' as const },
+    { label: t('reports:dailyLogs.columns.fuel'), key: 'fuel', align: 'right' as const },
+    { label: t('reports:dailyLogs.columns.workDescription'), key: 'description' },
+  ]
+
+  function buildExportPayload() {
+    return {
+      title: t('reports:tabs.dailyLogs'),
+      orientation: 'portrait' as const,
+      summary: [
+        { label: t('reports:dailyLogs.summary.totalRecords'), value: String(logs.length) },
+        { label: t('reports:dailyLogs.summary.totalHours'), value: formatDecimal(totalHours, locale) },
+      ],
+      columns: exportColumns,
+      rows: logs.map((l) => ({
+        date: formatDate(l.date, locale),
+        project: l.projectName ?? '',
+        machine: l.machineName ?? '',
+        operator: l.operatorName ?? '',
+        hours: formatDecimal(Number(l.hoursWorked), locale),
+        fuel: l.fuelQuantity != null ? formatDecimal(Number(l.fuelQuantity), locale) : '',
+        description: l.workDescription ?? '',
+      })),
+    }
+  }
+
+  async function handleExportExcel(): Promise<void> {
+    try {
+      const buffer = generateExcel(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `diarios-${todaySlug()}.xlsx`, format: 'xlsx' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
+
+  async function handleExportPdf(): Promise<void> {
+    try {
+      const buffer = generatePdf(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `diarios-${todaySlug()}.pdf`, format: 'pdf' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
 
   const columns = [
     {
@@ -374,7 +498,15 @@ function DailyLogsTab(): JSX.Element {
 
   return (
     <div>
-      <FilterPanel>
+      <FilterPanel
+        actions={
+          <ExportMenu
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            disabled={logs.length === 0}
+          />
+        }
+      >
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">{t('reports:filters.project')}</label>
           <Select
@@ -396,24 +528,26 @@ function DailyLogsTab(): JSX.Element {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
-          <DatePicker
-            value={filters.dateFrom ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
-        </div>
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
+            <DatePicker
+              value={filters.dateFrom ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
-          <DatePicker
-            value={filters.dateTo ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
+            <DatePicker
+              value={filters.dateTo ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (
@@ -450,6 +584,7 @@ function DailyLogsTab(): JSX.Element {
 function MachineUsageTab(): JSX.Element {
   const { t, i18n } = useTranslation(['reports', 'common'])
   const locale = i18n.language as SupportedLocale
+  const { showToast } = useToast()
   const [rows, setRows] = useState<MachineUsageRow[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -483,6 +618,55 @@ function MachineUsageTab(): JSX.Element {
     load()
   }, [])
 
+  const totalHours = rows.reduce((sum, r) => sum + r.totalHours, 0)
+  const activeMachines = rows.filter((r) => r.totalHours > 0).length
+
+  const exportColumns = [
+    { label: t('reports:machineUsage.columns.machine'), key: 'name' },
+    { label: t('reports:machineUsage.columns.type'), key: 'type' },
+    { label: t('reports:machineUsage.columns.totalHours'), key: 'totalHours', align: 'right' as const },
+    { label: t('reports:machineUsage.columns.logCount'), key: 'logCount', align: 'right' as const },
+  ]
+
+  function buildExportPayload() {
+    return {
+      title: t('reports:tabs.machineUsage'),
+      orientation: 'portrait' as const,
+      summary: [
+        { label: t('reports:machineUsage.summary.totalMachines'), value: String(rows.length) },
+        { label: t('reports:machineUsage.summary.activeMachines'), value: String(activeMachines) },
+        { label: t('reports:machineUsage.summary.totalHours'), value: formatDecimal(totalHours, locale) },
+      ],
+      columns: exportColumns,
+      rows: rows.map((r) => ({
+        name: r.name,
+        type: r.type,
+        totalHours: formatDecimal(r.totalHours, locale),
+        logCount: r.logCount,
+      })),
+    }
+  }
+
+  async function handleExportExcel(): Promise<void> {
+    try {
+      const buffer = generateExcel(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `uso-maquinas-${todaySlug()}.xlsx`, format: 'xlsx' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
+
+  async function handleExportPdf(): Promise<void> {
+    try {
+      const buffer = generatePdf(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `uso-maquinas-${todaySlug()}.pdf`, format: 'pdf' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
+
   const columns = [
     {
       key: 'name',
@@ -510,11 +694,16 @@ function MachineUsageTab(): JSX.Element {
     },
   ]
 
-  const totalHours = rows.reduce((sum, r) => sum + r.totalHours, 0)
-  const activeMachines = rows.filter((r) => r.totalHours > 0).length
-
   return (
     <div>
+      <div className="mb-4 flex justify-end">
+        <ExportMenu
+          onExportExcel={handleExportExcel}
+          onExportPdf={handleExportPdf}
+          disabled={rows.length === 0}
+        />
+      </div>
+
       {!loading && rows.length > 0 && (
         <div className="mb-4 flex gap-4">
           <div className={reportCardClass}>
@@ -546,6 +735,7 @@ function MachineUsageTab(): JSX.Element {
 function CostsByCategoryTab(): JSX.Element {
   const { t, i18n } = useTranslation(['reports', 'common'])
   const locale = i18n.language as SupportedLocale
+  const { showToast } = useToast()
   const [costs, setCosts] = useState<ProjectCostWithRelations[]>([])
   const [projects, setProjects] = useState<ProjectWithClient[]>([])
   const [filters, setFilters] = useState<CostFilters>({})
@@ -598,6 +788,72 @@ function CostsByCategoryTab(): JSX.Element {
     .sort((a, b) => b.total - a.total)
 
   const grandTotal = costs.reduce((sum, c) => sum + Number(c.amount), 0)
+
+  function buildExportPayload() {
+    return {
+      title: t('reports:tabs.costsByCategory'),
+      orientation: 'landscape' as const,
+      summary: [
+        { label: t('reports:costsByCategory.summary.totalLabel'), value: formatCurrency(grandTotal, locale) },
+      ],
+      columns: [],
+      rows: [],
+      sections: [
+        {
+          subtitle: t('reports:costsByCategory.summary.title'),
+          columns: [
+            { label: t('reports:costsByCategory.columns.category'), key: 'category' },
+            { label: t('reports:costsByCategory.columns.entries'), key: 'count', align: 'right' as const },
+            { label: t('reports:costsByCategory.columns.total'), key: 'total', align: 'right' as const },
+            { label: t('reports:costsByCategory.columns.share'), key: 'share', align: 'right' as const },
+          ],
+          rows: categorySummary.map((r) => ({
+            category: r.label,
+            count: r.count,
+            total: formatCurrency(r.total, locale),
+            share: `${formatDecimal(grandTotal > 0 ? (r.total / grandTotal) * 100 : 0, locale)}%`,
+          })),
+        },
+        {
+          subtitle: t('reports:costsByCategory.detail.title'),
+          columns: [
+            { label: t('reports:costsByCategory.detailColumns.date'), key: 'date' },
+            { label: t('reports:costsByCategory.detailColumns.project'), key: 'project' },
+            { label: t('reports:costsByCategory.detailColumns.category'), key: 'category' },
+            { label: t('reports:costsByCategory.detailColumns.description'), key: 'description' },
+            { label: t('reports:costsByCategory.detailColumns.amount'), key: 'amount', align: 'right' as const },
+          ],
+          rows: costs.map((c) => ({
+            date: formatDate(c.date, locale),
+            project: c.projectName ?? '',
+            category: t(`reports:categories.${c.category}`, { defaultValue: c.category }),
+            description: c.description,
+            amount: formatCurrency(Number(c.amount), locale),
+          })),
+        },
+      ],
+    }
+  }
+
+  async function handleExportExcel(): Promise<void> {
+    try {
+      const buffer = generateExcel(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `custos-categoria-${todaySlug()}.xlsx`, format: 'xlsx' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
+
+  async function handleExportPdf(): Promise<void> {
+    try {
+      const buffer = generatePdf(buildExportPayload())
+      const result = await api.export.saveFile({ buffer, defaultFileName: `custos-categoria-${todaySlug()}.pdf`, format: 'pdf' })
+      if (result.success) showToast('Relatório exportado com sucesso')
+    } catch {
+      showToast('Erro ao exportar relatório', 'error')
+    }
+  }
 
   const summaryColumns = [
     {
@@ -658,7 +914,15 @@ function CostsByCategoryTab(): JSX.Element {
 
   return (
     <div>
-      <FilterPanel>
+      <FilterPanel
+        actions={
+          <ExportMenu
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            disabled={costs.length === 0}
+          />
+        }
+      >
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">{t('reports:filters.project')}</label>
           <Select
@@ -680,24 +944,26 @@ function CostsByCategoryTab(): JSX.Element {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
-          <DatePicker
-            value={filters.dateFrom ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
-        </div>
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
+            <DatePicker
+              value={filters.dateFrom ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
-          <DatePicker
-            value={filters.dateTo ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
+            <DatePicker
+              value={filters.dateTo ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (

@@ -75,6 +75,7 @@
     },
     "empty": "No hay máquinas registradas."
   },
+  "export": { "button": "Exportar", "loading": "Exportando...", "excel": "Excel (.xlsx)", "pdf": "PDF (.pdf)" },
   "costsByCategory": {
     "summary": {
       "totalLabel": "Total General",
