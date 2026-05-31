@@ -261,7 +261,15 @@ function ProjectSummaryTab(): JSX.Element {
 
   return (
     <div>
-      <FilterPanel>
+      <FilterPanel
+        actions={
+          <ExportMenu
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            disabled={rows.length === 0}
+          />
+        }
+      >
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">{t('reports:filters.status')}</label>
           <Select
@@ -298,24 +306,26 @@ function ProjectSummaryTab(): JSX.Element {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
-          <DatePicker
-            value={filters.dateFrom}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
-        </div>
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
+            <DatePicker
+              value={filters.dateFrom}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
-          <DatePicker
-            value={filters.dateTo}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
+            <DatePicker
+              value={filters.dateTo}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (
@@ -324,13 +334,6 @@ function ProjectSummaryTab(): JSX.Element {
           </Button>
         )}
       </FilterPanel>
-      <div className="-mt-3 mb-4 flex justify-end">
-        <ExportMenu
-          onExportExcel={handleExportExcel}
-          onExportPdf={handleExportPdf}
-          disabled={rows.length === 0}
-        />
-      </div>
 
       {!loading && rows.length > 0 && (
         <div className="mb-4 flex gap-4">
@@ -495,7 +498,15 @@ function DailyLogsTab(): JSX.Element {
 
   return (
     <div>
-      <FilterPanel>
+      <FilterPanel
+        actions={
+          <ExportMenu
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            disabled={logs.length === 0}
+          />
+        }
+      >
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">{t('reports:filters.project')}</label>
           <Select
@@ -517,24 +528,26 @@ function DailyLogsTab(): JSX.Element {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
-          <DatePicker
-            value={filters.dateFrom ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
-        </div>
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
+            <DatePicker
+              value={filters.dateFrom ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
-          <DatePicker
-            value={filters.dateTo ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
+            <DatePicker
+              value={filters.dateTo ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (
@@ -543,13 +556,6 @@ function DailyLogsTab(): JSX.Element {
           </Button>
         )}
       </FilterPanel>
-      <div className="-mt-3 mb-4 flex justify-end">
-        <ExportMenu
-          onExportExcel={handleExportExcel}
-          onExportPdf={handleExportPdf}
-          disabled={logs.length === 0}
-        />
-      </div>
 
       {!loading && logs.length > 0 && (
         <div className="mb-4 flex gap-4">
@@ -908,7 +914,15 @@ function CostsByCategoryTab(): JSX.Element {
 
   return (
     <div>
-      <FilterPanel>
+      <FilterPanel
+        actions={
+          <ExportMenu
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            disabled={costs.length === 0}
+          />
+        }
+      >
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">{t('reports:filters.project')}</label>
           <Select
@@ -930,24 +944,26 @@ function CostsByCategoryTab(): JSX.Element {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
-          <DatePicker
-            value={filters.dateFrom ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
-        </div>
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateFrom')}</label>
+            <DatePicker
+              value={filters.dateFrom ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
-          <DatePicker
-            value={filters.dateTo ?? ''}
-            onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
-            className="min-w-[12rem] text-[15px]"
-            allowClear
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">{t('reports:filters.dateTo')}</label>
+            <DatePicker
+              value={filters.dateTo ?? ''}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value || undefined }))}
+              className="min-w-[12rem] text-[15px]"
+              allowClear
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (
@@ -956,13 +972,6 @@ function CostsByCategoryTab(): JSX.Element {
           </Button>
         )}
       </FilterPanel>
-      <div className="-mt-3 mb-4 flex justify-end">
-        <ExportMenu
-          onExportExcel={handleExportExcel}
-          onExportPdf={handleExportPdf}
-          disabled={costs.length === 0}
-        />
-      </div>
 
       {loading ? (
         <TableSkeleton columns={4} />
