@@ -31,7 +31,7 @@ function FormCard({
           {description ?? t('formDescription')}
         </p>
       </div>
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} noValidate className="space-y-4">
         {children}
         <div className="flex gap-3 pt-3">
           <Button type="submit" disabled={isLoading}>

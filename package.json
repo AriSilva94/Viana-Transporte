@@ -25,7 +25,10 @@
     "@supabase/supabase-js": "^2.49.0",
     "dotenv": "^16.6.1",
     "electron-log": "^5.2.0",
-    "electron-updater": "^6.3.0"
+    "electron-updater": "^6.3.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -61,7 +64,6 @@
     "tsx": "^4.19.2",
     "typescript": "^5.4.3",
     "vitest": "^2.1.9",
-    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "build": {

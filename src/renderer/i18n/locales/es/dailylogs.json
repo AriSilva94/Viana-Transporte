@@ -71,6 +71,12 @@
       "requiredDate": "La fecha es obligatoria",
       "requiredProject": "El proyecto es obligatorio",
       "requiredHours": "Las horas trabajadas deben ser mayores que cero",
+      "negativeNotAllowed": "Los valores numéricos no pueden ser negativos",
+      "tonnagePrecision": "Toneladas acepta como máximo 4 decimales",
+      "fuelQuantityPrecision": "Combustible acepta como máximo 2 decimales",
+      "kmPrecision": "KM acepta como máximo 2 decimales",
+      "percentagePrecision": "Porcentaje acepta como máximo 2 decimales",
+      "tollPrecision": "Peaje acepta como máximo 2 decimales",
       "save": "Error al guardar el diario. Intenta de nuevo."
     },
     "toasts": {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useForm, Controller } from 'react-hook-form'
 import { api } from '@renderer/lib/api'
 import { FormCard } from '@renderer/components/shared/FormCard'
 import { Input } from '@renderer/components/ui/input'
@@ -23,6 +24,18 @@ import type {
 
 type CostCategory = ProjectCost['category']
 
+type FormValues = {
+  date: string
+  projectId: string
+  category: CostCategory | ''
+  description: string
+  amount: string
+  machineId: string
+  operatorId: string
+  notes: string
+  dailyLogId: string
+}
+
 export function CostFormPage(): JSX.Element {
   const navigate = useNavigate()
   const { t } = useTranslation(['costs', 'common'])
@@ -34,18 +47,24 @@ export function CostFormPage(): JSX.Element {
   const [machines, setMachines] = useState<Machine[]>([])
   const [operators, setOperators] = useState<Operator[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  const [date, setDate] = useState(formatLocalDate(new Date()))
-  const [projectId, setProjectId] = useState<number | ''>('')
-  const [category, setCategory] = useState<CostCategory | ''>('')
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState<number | ''>('')
-  const [machineId, setMachineId] = useState<number | ''>('')
-  const [operatorId, setOperatorId] = useState<number | ''>('')
-  const [notes, setNotes] = useState('')
-  const [dailyLogId, setDailyLogId] = useState<number | ''>('')
   const [projectDailyLogs, setProjectDailyLogs] = useState<DailyLogWithRelations[]>([])
+
+  const { control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormValues>({
+    defaultValues: {
+      date: formatLocalDate(new Date()),
+      projectId: '',
+      category: '',
+      description: '',
+      amount: '',
+      machineId: '',
+      operatorId: '',
+      notes: '',
+      dailyLogId: '',
+    },
+  })
+
+  const watchedProjectId = watch('projectId')
+  const watchedDailyLogId = watch('dailyLogId')
 
   const categoryOptions: { value: CostCategory; label: string }[] = [
     { value: 'fuel', label: t('costs:categories.fuel') },
@@ -64,30 +83,32 @@ export function CostFormPage(): JSX.Element {
     if (!isEdit) return
     api.costs.get(Number(id)).then((cost: ProjectCostWithRelations | null) => {
       if (!cost) return
-      setDate(formatLocalDate(cost.date))
-      setProjectId(cost.projectId)
-      setCategory(cost.category)
-      setDescription(cost.description)
-      setAmount(cost.amount)
-      setMachineId(cost.machineId ?? '')
-      setOperatorId(cost.operatorId ?? '')
-      setNotes(cost.notes ?? '')
-      setDailyLogId(cost.dailyLogId ?? '')
+      reset({
+        date: formatLocalDate(cost.date),
+        projectId: String(cost.projectId),
+        category: cost.category,
+        description: cost.description,
+        amount: String(cost.amount),
+        machineId: cost.machineId != null ? String(cost.machineId) : '',
+        operatorId: cost.operatorId != null ? String(cost.operatorId) : '',
+        notes: cost.notes ?? '',
+        dailyLogId: cost.dailyLogId != null ? String(cost.dailyLogId) : '',
+      })
     })
-  }, [id, isEdit])
+  }, [id, isEdit, reset])
 
   useEffect(() => {
-    if (projectId === '') {
+    if (!watchedProjectId) {
       setProjectDailyLogs([])
       return
     }
-    api.dailylogs.list({ projectId: Number(projectId) }).then(setProjectDailyLogs)
-  }, [projectId])
+    api.dailylogs.list({ projectId: Number(watchedProjectId) }).then(setProjectDailyLogs)
+  }, [watchedProjectId])
 
   const selectedDailyLog =
-    dailyLogId === ''
+    watchedDailyLogId === ''
       ? null
-      : projectDailyLogs.find((log) => log.id === Number(dailyLogId)) ?? null
+      : projectDailyLogs.find((log) => log.id === Number(watchedDailyLogId)) ?? null
 
   const computedValue = selectedDailyLog
     ? computeDailyLogValue({
@@ -102,41 +123,19 @@ export function CostFormPage(): JSX.Element {
     currency: 'BRL',
   })
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
-    e.preventDefault()
-    if (!date) {
-      setError(t('costs:form.errors.requiredDate'))
-      return
-    }
-    if (!projectId) {
-      setError(t('costs:form.errors.requiredProject'))
-      return
-    }
-    if (!category) {
-      setError(t('costs:form.errors.requiredCategory'))
-      return
-    }
-    if (!description.trim()) {
-      setError(t('costs:form.errors.requiredDescription'))
-      return
-    }
-    if (amount === '' || Number(amount) <= 0) {
-      setError(t('costs:form.errors.requiredAmount'))
-      return
-    }
+  async function onSubmit(values: FormValues): Promise<void> {
     setIsLoading(true)
-    setError('')
     try {
       const data = {
-        date: parseLocalDate(date),
-        projectId: Number(projectId),
-        category: category as CostCategory,
-        description: description.trim(),
-        amount: Number(amount),
-        machineId: machineId !== '' ? Number(machineId) : null,
-        operatorId: operatorId !== '' ? Number(operatorId) : null,
-        dailyLogId: dailyLogId !== '' ? Number(dailyLogId) : null,
-        notes: notes.trim() || null,
+        date: parseLocalDate(values.date),
+        projectId: Number(values.projectId),
+        category: values.category as CostCategory,
+        description: values.description.trim(),
+        amount: Number(values.amount),
+        machineId: values.machineId !== '' ? Number(values.machineId) : null,
+        operatorId: values.operatorId !== '' ? Number(values.operatorId) : null,
+        dailyLogId: values.dailyLogId !== '' ? Number(values.dailyLogId) : null,
+        notes: values.notes.trim() || null,
       }
       if (isEdit) {
         await api.costs.update(Number(id), data)
@@ -147,7 +146,6 @@ export function CostFormPage(): JSX.Element {
       navigate('/costs')
     } catch {
       showToast(t('costs:form.toasts.error'), 'error')
-      setError(t('costs:form.errors.save'))
     } finally {
       setIsLoading(false)
     }
@@ -157,126 +155,144 @@ export function CostFormPage(): JSX.Element {
     <FormCard
       title={isEdit ? t('costs:form.editTitle') : t('costs:form.newTitle')}
       description={t('costs:form.description')}
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       onCancel={() => navigate('/costs')}
       isLoading={isLoading}
     >
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="date">{t('costs:form.fields.date')}</Label>
-          <DatePicker id="date" value={date} onChange={setDate} />
+          <Controller
+            name="date"
+            control={control}
+            rules={{ required: t('costs:form.errors.requiredDate') }}
+            render={({ field }) => (
+              <DatePicker id="date" value={field.value} onChange={field.onChange} />
+            )}
+          />
+          {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="projectId">{t('costs:form.fields.project')}</Label>
-          <Select
-            id="projectId"
-            value={projectId === '' ? '' : String(projectId)}
-            onChange={(e) => setProjectId(e.target.value === '' ? '' : Number(e.target.value))}
-          >
-            <option value="">{t('costs:form.placeholders.select')}</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} — {p.clientName ?? t('common:emptyValue')}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="projectId"
+            control={control}
+            rules={{ required: t('costs:form.errors.requiredProject') }}
+            render={({ field }) => (
+              <Select id="projectId" value={field.value} onChange={(e) => field.onChange(e.target.value)}>
+                <option value="">{t('costs:form.placeholders.select')}</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — {p.clientName ?? t('common:emptyValue')}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
+          {errors.projectId && <p className="text-sm text-destructive">{errors.projectId.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="category">{t('costs:form.fields.category')}</Label>
-          <Select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value as CostCategory | '')}
-          >
-            <option value="">{t('costs:form.placeholders.select')}</option>
-            {categoryOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="category"
+            control={control}
+            rules={{ required: t('costs:form.errors.requiredCategory') }}
+            render={({ field }) => (
+              <Select id="category" value={field.value} onChange={(e) => field.onChange(e.target.value as CostCategory | '')}>
+                <option value="">{t('costs:form.placeholders.select')}</option>
+                {categoryOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            )}
+          />
+          {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">{t('costs:form.fields.description')}</Label>
-          <Input
-            id="description"
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t('costs:form.placeholders.description')}
+          <Controller
+            name="description"
+            control={control}
+            rules={{ required: t('costs:form.errors.requiredDescription'), validate: (v) => v.trim() !== '' || t('costs:form.errors.requiredDescription') }}
+            render={({ field }) => (
+              <Input id="description" type="text" {...field} placeholder={t('costs:form.placeholders.description')} />
+            )}
           />
+          {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="amount">{t('costs:form.fields.amount')}</Label>
-          <Input
-            id="amount"
-            type="number"
-            min={0}
-            step={0.01}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder={t('costs:form.placeholders.amount')}
+          <Controller
+            name="amount"
+            control={control}
+            rules={{
+              required: t('costs:form.errors.requiredAmount'),
+              validate: (v) => (v !== '' && Number(v) > 0) || t('costs:form.errors.requiredAmount'),
+            }}
+            render={({ field }) => (
+              <Input id="amount" type="number" min={0} step={0.01} {...field} placeholder={t('costs:form.placeholders.amount')} />
+            )}
           />
+          {errors.amount && <p className="text-sm text-destructive">{errors.amount.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="machineId">{t('costs:form.fields.machine')}</Label>
-          <Select
-            id="machineId"
-            value={machineId === '' ? '' : String(machineId)}
-            onChange={(e) => setMachineId(e.target.value === '' ? '' : Number(e.target.value))}
-          >
-            <option value="">{t('costs:form.placeholders.none')}</option>
-            {machines.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name} ({m.type})
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="machineId"
+            control={control}
+            render={({ field }) => (
+              <Select id="machineId" value={field.value} onChange={(e) => field.onChange(e.target.value)}>
+                <option value="">{t('costs:form.placeholders.none')}</option>
+                {machines.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name} ({m.type})</option>
+                ))}
+              </Select>
+            )}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="operatorId">{t('costs:form.fields.operator')}</Label>
-          <Select
-            id="operatorId"
-            value={operatorId === '' ? '' : String(operatorId)}
-            onChange={(e) => setOperatorId(e.target.value === '' ? '' : Number(e.target.value))}
-          >
-            <option value="">{t('costs:form.placeholders.none')}</option>
-            {operators.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.name}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="operatorId"
+            control={control}
+            render={({ field }) => (
+              <Select id="operatorId" value={field.value} onChange={(e) => field.onChange(e.target.value)}>
+                <option value="">{t('costs:form.placeholders.none')}</option>
+                {operators.map((o) => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </Select>
+            )}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="dailyLogId">{t('costs:form.fields.dailyLog')}</Label>
-          <Select
-            id="dailyLogId"
-            value={dailyLogId === '' ? '' : String(dailyLogId)}
-            onChange={(e) => setDailyLogId(e.target.value === '' ? '' : Number(e.target.value))}
-            disabled={projectId === ''}
-          >
-            <option value="">{t('costs:form.placeholders.dailyLogNone')}</option>
-            {projectDailyLogs.map((log) => (
-              <option key={log.id} value={log.id}>
-                {formatLocalDate(log.date)} — {log.workDescription ?? t('common:emptyValue')}
-              </option>
-            ))}
-          </Select>
+          <Controller
+            name="dailyLogId"
+            control={control}
+            render={({ field }) => (
+              <Select id="dailyLogId" value={field.value} onChange={(e) => field.onChange(e.target.value)} disabled={!watchedProjectId}>
+                <option value="">{t('costs:form.placeholders.dailyLogNone')}</option>
+                {projectDailyLogs.map((log) => (
+                  <option key={log.id} value={log.id}>
+                    {formatLocalDate(log.date)} — {log.workDescription ?? t('common:emptyValue')}
+                  </option>
+                ))}
+              </Select>
+            )}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="computedValue">{t('costs:form.fields.computedValue')}</Label>
@@ -294,7 +310,7 @@ export function CostFormPage(): JSX.Element {
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setAmount(computedValue)}
+                onClick={() => setValue('amount', String(computedValue))}
               >
                 {t('costs:form.actions.useComputedValue')}
               </Button>
@@ -308,11 +324,12 @@ export function CostFormPage(): JSX.Element {
 
       <div className="space-y-2">
         <Label htmlFor="notes">{t('costs:form.fields.notes')}</Label>
-        <Textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={t('costs:form.placeholders.notes')}
+        <Controller
+          name="notes"
+          control={control}
+          render={({ field }) => (
+            <Textarea id="notes" {...field} placeholder={t('costs:form.placeholders.notes')} />
+          )}
         />
       </div>
     </FormCard>

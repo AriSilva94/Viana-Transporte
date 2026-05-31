@@ -19,7 +19,6 @@ test.describe.serial('Projects — Automated', () => {
     await selectCustom(page, 'clientId', clientId)
     await page.fill('#location', 'Rodovia SP-123, km 45')
 
-    // DatePicker customizado: abre e escolhe "Hoje/Today"
     await page.click('#startDate')
     const todayBtn = page.getByRole('button', { name: /hoje|today/i }).first()
     await todayBtn.scrollIntoViewIfNeeded()

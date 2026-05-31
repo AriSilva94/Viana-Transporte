@@ -11,6 +11,7 @@ import { registerLicenseHandlers } from './license'
 import { registerAuthHandlers } from './auth'
 import { registerUpdaterHandlers } from './updater'
 import { registerUsersHandlers } from './users'
+import { registerExportHandlers } from './export'
 
 export function registerAllHandlers(): void {
   registerClientsHandlers()
@@ -26,4 +27,5 @@ export function registerAllHandlers(): void {
   registerAuthHandlers()
   registerUsersHandlers()
   registerUpdaterHandlers()
+  registerExportHandlers()
 }

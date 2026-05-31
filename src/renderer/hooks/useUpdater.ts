@@ -58,7 +58,6 @@ export function useUpdater(): UpdaterState & {
     }
   }, [])
 
-  // Listen to update events
   useEffect(() => {
     const unsubscribeAvailable = api.updater.onUpdateAvailable((info: unknown) => {
       setState((prev) => ({
