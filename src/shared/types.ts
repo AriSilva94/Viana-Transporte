@@ -287,6 +287,9 @@ export interface ElectronAPI {
   license: {
     getStatus: () => Promise<LicenseStatus>
   }
+  export: {
+    saveFile: (req: SaveFileRequest) => Promise<{ success: boolean; filePath?: string }>
+  }
   updater: {
     checkForUpdates: () => Promise<{ success: boolean; updateAvailable: boolean }>
     installUpdate: () => Promise<{ success: boolean }>
@@ -313,4 +316,39 @@ export interface DownloadProgress {
 
 export interface UpdateError {
   message: string
+}
+
+export interface ExportSummaryRow {
+  label: string
+  value: string
+}
+
+export interface ExportColumn {
+  label: string
+  key: string
+  width?: number
+  align?: 'left' | 'right' | 'center'
+}
+
+export interface ExportRow {
+  [key: string]: string | number
+}
+
+export interface SaveFileRequest {
+  buffer: Uint8Array
+  defaultFileName: string
+  format: 'xlsx' | 'pdf'
+}
+
+export interface ExportPayload {
+  title: string
+  summary?: ExportSummaryRow[]
+  columns: ExportColumn[]
+  rows: ExportRow[]
+  orientation?: 'portrait' | 'landscape'
+  sections?: Array<{
+    subtitle: string
+    columns: ExportColumn[]
+    rows: ExportRow[]
+  }>
 }

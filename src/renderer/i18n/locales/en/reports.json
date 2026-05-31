@@ -75,6 +75,7 @@
     },
     "empty": "No machine registered."
   },
+  "export": { "button": "Export ▾", "loading": "Exporting...", "excel": "Excel (.xlsx)", "pdf": "PDF (.pdf)" },
   "costsByCategory": {
     "summary": {
       "totalLabel": "Grand Total",
