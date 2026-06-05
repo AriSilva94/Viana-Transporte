@@ -34,7 +34,7 @@ interface AuthFormValues {
   password: string
 }
 
-function mapSupabaseError(message: string, t: TFunction): string {
+function mapAuthError(message: string, t: TFunction): string {
   const lower = message.toLowerCase()
   if (lower.includes('invalid login credentials')) return t('errors.invalidCredentials')
   if (lower.includes('user already registered')) return t('errors.emailAlreadyRegistered')
@@ -62,13 +62,13 @@ function AuthFormBody({ mode }: AuthFormBodyProps): JSX.Element {
     if (mode === 'forgotPassword') return forgotPasswordSchema(t)
     return resetPasswordSchema(t)
   }, [mode, t])
-
-
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AuthFormValues>({ resolver: zodResolver(schema as z.ZodType<AuthFormValues>) })
+  } = useForm<AuthFormValues>({
+    resolver: zodResolver(schema as never),
+  })
 
   const needsPassword = mode === 'signIn' || mode === 'signUp' || mode === 'resetPassword'
 
@@ -112,7 +112,7 @@ function AuthFormBody({ mode }: AuthFormBodyProps): JSX.Element {
       setMessage(t('messages.updatePasswordSuccess'))
     } catch (error) {
       const raw = error instanceof Error && error.message.trim() ? error.message : ''
-      const mapped = mapSupabaseError(raw, t)
+      const mapped = mapAuthError(raw, t)
 
       setErrorMessage(mapped)
     }

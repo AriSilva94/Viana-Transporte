@@ -16,7 +16,7 @@ export function loadMainEnv(mode: 'development' | 'production' = 'development'):
       continue
     }
 
-    loadDotenv({ path, override: false })
+    loadDotenv({ path, override: true })
   }
 
   loaded = true

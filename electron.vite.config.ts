@@ -7,10 +7,10 @@ const distProfile = process.env.DIST_PROFILE === 'trial' ? 'trial' : 'full'
 
 export default defineConfig(({ command, mode }) => {
   const buildMode: BuildMode =
-    mode === 'test' ? 'test' : command === 'build' ? 'production' : 'development'
+    mode === 'test' ? 'test' : mode === 'e2e' ? 'e2e' : command === 'build' ? 'production' : 'development'
   const isTestBuild = buildMode === 'test'
 
-  const envKeys = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ANON_KEY', 'SUPABASE_AUTH_REDIRECT_URL']
+  const envKeys = ['VIANA_API_BASE_URL']
   const buildEnv = loadBuildEnv({
     cwd: process.cwd(),
     mode: buildMode,
@@ -22,10 +22,7 @@ export default defineConfig(({ command, mode }) => {
     main: {
       define: {
         __DIST_PROFILE__: JSON.stringify(distProfile),
-        'process.env.SUPABASE_URL': JSON.stringify(buildEnv.SUPABASE_URL ?? ''),
-        'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(buildEnv.SUPABASE_SERVICE_ROLE_KEY ?? ''),
-        'process.env.SUPABASE_ANON_KEY': JSON.stringify(buildEnv.SUPABASE_ANON_KEY ?? ''),
-        'process.env.SUPABASE_AUTH_REDIRECT_URL': JSON.stringify(buildEnv.SUPABASE_AUTH_REDIRECT_URL ?? ''),
+        'process.env.VIANA_API_BASE_URL': JSON.stringify(buildEnv.VIANA_API_BASE_URL ?? ''),
         'process.env.VIANA_E2E': JSON.stringify(isTestBuild ? '1' : ''),
       },
       plugins: [externalizeDepsPlugin()]
