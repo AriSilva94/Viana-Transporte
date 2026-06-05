@@ -34,6 +34,7 @@ function DataTable<T extends object>({
     <div className="space-y-4">
       {onSearch && (
         <Input
+          data-testid="datatable-search"
           placeholder={searchPlaceholder ?? t('search')}
           value={search}
           onChange={handleSearch}

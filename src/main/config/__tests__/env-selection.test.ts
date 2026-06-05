@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 import { getEnvFilesForMode, loadBuildEnv } from '../env-selection'
 
 describe('getEnvFilesForMode', () => {
-  it('returns .env when mode is development', () => {
-    expect(getEnvFilesForMode('development')).toEqual(['.env'])
+  it('returns .env and .env.local when mode is development', () => {
+    expect(getEnvFilesForMode('development')).toEqual(['.env', '.env.local'])
   })
 
   it('uses production env files when mode is production', () => {
@@ -23,7 +23,7 @@ describe('loadBuildEnv', () => {
     try {
       writeFileSync(
         join(tempDir, '.env.production'),
-        ['SUPABASE_URL=https://self-hosted.example.com', 'SUPABASE_ANON_KEY=file-anon-key'].join('\n'),
+        ['VIANA_API_BASE_URL=https://api.production.example.com'].join('\n'),
         'utf-8'
       )
 
@@ -31,17 +31,13 @@ describe('loadBuildEnv', () => {
         cwd: tempDir,
         mode: 'production',
         processEnv: {
-          SUPABASE_URL: 'https://cloud.example.com',
-          SUPABASE_ANON_KEY: 'cloud-anon-key',
-          SUPABASE_SERVICE_ROLE_KEY: 'process-service-role-key',
+          VIANA_API_BASE_URL: 'https://api.process.example.com',
         },
-        envKeys: ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY'],
+        envKeys: ['VIANA_API_BASE_URL'],
       })
 
       expect(env).toEqual({
-        SUPABASE_URL: 'https://self-hosted.example.com',
-        SUPABASE_ANON_KEY: 'file-anon-key',
-        SUPABASE_SERVICE_ROLE_KEY: 'process-service-role-key',
+        VIANA_API_BASE_URL: 'https://api.production.example.com',
       })
     } finally {
       rmSync(tempDir, { recursive: true, force: true })

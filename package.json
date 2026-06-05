@@ -16,13 +16,13 @@
     "dist:win:all": "npm run dist:win:full && npm run dist:win:trial",
     "preview": "electron-vite preview",
     "test": "vitest run",
-    "build:e2e": "electron-vite build --mode test",
-    "test:e2e": "npm run build:e2e && cross-env VIANA_E2E=1 E2E_ACKNOWLEDGE_BACKEND_ISOLATED=YES playwright test",
+    "build:e2e:api": "electron-vite build --mode e2e",
+    "test:e2e:api": "npm run build:e2e:api && xvfb-run -a playwright test --config playwright.e2e.config.ts",
+    "test:e2e:api:headed": "npm run build:e2e:api && playwright test --config playwright.e2e.config.ts",
     "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
-    "db:bootstrap-admin-ownership": "tsx src/main/db/scripts/run-bootstrap.ts"
+    "api:health": "node -e \"fetch(process.env.VIANA_API_BASE_URL + '/health').then(r=>r.json()).then(console.log)\""
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.0",
     "dotenv": "^16.6.1",
     "electron-log": "^5.2.0",
     "electron-updater": "^6.3.0",

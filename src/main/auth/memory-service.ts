@@ -31,6 +31,9 @@ export function createMemoryAuthService(): AuthService {
   const state = memorySessionState()
 
   return {
+    async getCurrentState() {
+      return state
+    },
     async getState() {
       return state
     },

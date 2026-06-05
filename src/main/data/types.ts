@@ -17,7 +17,7 @@ import type {
   ProjectWithClient,
 } from '../../shared/types'
 
-export type DataProvider = 'supabase'
+export type DataProvider = 'api'
 
 export interface ClientRepository {
   list(filters?: { search?: string }): Promise<Client[]>

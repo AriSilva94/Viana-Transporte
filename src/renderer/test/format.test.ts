@@ -27,6 +27,10 @@ describe('formatCurrency', () => {
     expect(formattedEn).not.toContain('$99.90')
     expect(formattedEs).not.toContain('€')
   })
+
+  it('normaliza valores invalidos para zero', () => {
+    expect(formatCurrency(Number.NaN, 'pt-BR')).toContain('0,00')
+  })
 })
 
 describe('formatDate', () => {
