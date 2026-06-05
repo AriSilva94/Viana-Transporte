@@ -589,7 +589,7 @@ describe('App auth flow', () => {
     expect(window.api.auth.signIn).not.toHaveBeenCalled()
   })
 
-  it('maps known Supabase error to a friendly message', async () => {
+  it('maps known auth error to a friendly message', async () => {
     const user = userEvent.setup()
     window.api.auth.signIn = vi
       .fn()

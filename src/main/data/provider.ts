@@ -1,11 +1,10 @@
 import type { DataProvider, DomainRepository } from './types'
-import { createSupabaseRepository } from './supabase/repository'
-import { getAuthService } from '../auth/runtime'
+import { createApiRepository } from './api/repository'
 
 let repository: DomainRepository | null = null
 
 export function resolveDataProviderFromEnv(): DataProvider {
-  return 'supabase'
+  return 'api'
 }
 
 export function setRepository(instance: DomainRepository): void {
@@ -13,30 +12,12 @@ export function setRepository(instance: DomainRepository): void {
 }
 
 export async function initDataProvider(provider: DataProvider): Promise<DataProvider> {
-  if (provider !== 'supabase') {
-    throw new Error('This build supports only Supabase as data provider.')
+  if (provider !== 'api') {
+    throw new Error('This build supports only the NestJS API data provider.')
   }
 
-  repository = null
-
-  try {
-    const nextRepository = await createSupabaseRepository({
-      getCurrentUserId: async () => {
-        const state = await getAuthService().getState()
-        const userId = state.session?.userId
-        if (!userId) {
-          throw new Error('No authenticated user for protected data access')
-        }
-        return userId
-      },
-    })
-    repository = nextRepository
-    return 'supabase'
-  } catch (error) {
-    repository = null
-    const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Failed to initialize Supabase data provider: ${message}`)
-  }
+  repository = createApiRepository()
+  return 'api'
 }
 
 export function getRepository(): DomainRepository {

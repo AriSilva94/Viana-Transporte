@@ -1,5 +1,5 @@
 import { getAuthService } from '../auth/runtime'
-import { createUserManagementServiceFromEnv } from '../auth/user-management-service'
+import { ApiHttpClient } from '../api/http'
 import { handleRead, handleWrite } from './guarded'
 import type { AuthRole, UserProfileListItem } from '../../shared/types'
 
@@ -8,36 +8,32 @@ interface UpdateUserRolePayload {
   role: AuthRole
 }
 
-let userManagementServicePromise:
-  | Promise<Awaited<ReturnType<typeof createUserManagementServiceFromEnv>>>
-  | null = null
+let usersClient: ApiHttpClient | null = null
 
-async function getUserManagementService() {
-  if (!userManagementServicePromise) {
-    userManagementServicePromise = createUserManagementServiceFromEnv(getAuthService())
+function getUsersClient() {
+  if (!usersClient) {
+    usersClient = new ApiHttpClient({
+      getAuthState: () => getAuthService().getCurrentState(),
+    })
   }
 
-  return userManagementServicePromise
+  return usersClient
 }
 
 export function registerUsersHandlers(): void {
   handleRead('users:list', async (): Promise<UserProfileListItem[]> => {
-    const service = await getUserManagementService()
-    return service.listProfiles()
+    return getUsersClient().get<UserProfileListItem[]>('/users')
   })
 
   handleWrite('users:updateRole', async (_, payload: UpdateUserRolePayload): Promise<void> => {
-    const service = await getUserManagementService()
-    await service.updateRole(payload.userId, payload.role)
+    await getUsersClient().patch(`/users/${payload.userId}/role`, { role: payload.role })
   })
 
   handleWrite('users:revokeAccess', async (_, userId: string): Promise<void> => {
-    const service = await getUserManagementService()
-    await service.revokeAccess(userId)
+    await getUsersClient().patch(`/users/${userId}/revoke`)
   })
 
   handleWrite('users:reactivateAccess', async (_, userId: string): Promise<void> => {
-    const service = await getUserManagementService()
-    await service.reactivateAccess(userId)
+    await getUsersClient().patch(`/users/${userId}/reactivate`)
   })
 }

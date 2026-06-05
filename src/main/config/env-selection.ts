@@ -3,7 +3,7 @@ import { resolve } from 'path'
 
 import { config as loadDotenv } from 'dotenv'
 
-export type BuildMode = 'development' | 'production' | 'test'
+export type BuildMode = 'development' | 'production' | 'test' | 'e2e'
 
 export interface LoadBuildEnvOptions {
   cwd: string
@@ -21,7 +21,11 @@ export function getEnvFilesForMode(mode: BuildMode): string[] {
     return ['.env.test']
   }
 
-  return ['.env']
+  if (mode === 'e2e') {
+    return ['.env.e2e']
+  }
+
+  return ['.env', '.env.local']
 }
 
 export function loadBuildEnv({

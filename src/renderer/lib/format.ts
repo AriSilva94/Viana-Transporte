@@ -6,13 +6,14 @@ export const BUSINESS_CURRENCY_LOCALE: SupportedLocale = 'pt-BR'
 
 export function formatCurrency(value: number, locale: SupportedLocale): string {
   void locale
+  const numericValue = Number(value)
 
   return new Intl.NumberFormat(BUSINESS_CURRENCY_LOCALE, {
     style: 'currency',
     currency: BUSINESS_CURRENCY,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value)
+  }).format(Number.isFinite(numericValue) ? numericValue : 0)
 }
 
 export function formatDate(
