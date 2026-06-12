@@ -163,6 +163,7 @@ export interface AuthState {
   session: AuthSession | null
   profile: AuthProfile | null
   pendingPasswordReset: boolean
+  pendingPasswordResetToken: string | null
 }
 
 export interface AuthSignUpResult {

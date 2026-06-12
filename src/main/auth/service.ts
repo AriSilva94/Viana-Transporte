@@ -15,6 +15,7 @@ export interface AuthEmailRequest {
 
 export interface AuthPasswordUpdate {
   password: string
+  currentPassword?: string
 }
 
 export interface AuthService {

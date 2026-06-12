@@ -403,6 +403,92 @@ describe('App auth flow', () => {
     })
   })
 
+  it('does not show a cancel button during a pending password reset', async () => {
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: null,
+      profile: null,
+      pendingPasswordReset: true,
+      pendingPasswordResetToken: 'reset-token',
+    })
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-input-password')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByTestId('auth-cancel-reset')).not.toBeInTheDocument()
+  })
+
+  it('clears a pending password reset when using the sign-in link', async () => {
+    const user = userEvent.setup()
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: null,
+      profile: null,
+      pendingPasswordReset: true,
+      pendingPasswordResetToken: 'reset-token',
+    })
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-input-password')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByTestId('auth-link-to-sign-in'))
+
+    await waitFor(() => {
+      expect(window.api.auth.signOut).toHaveBeenCalledTimes(1)
+      expect(screen.getByTestId('auth-input-email')).toBeInTheDocument()
+    })
+  })
+
+  it('returns to login after successfully updating a recovered password', async () => {
+    const user = userEvent.setup()
+    window.api.auth.getSession = vi.fn().mockResolvedValue({
+      session: null,
+      profile: null,
+      pendingPasswordReset: true,
+      pendingPasswordResetToken: 'reset-token',
+    })
+    window.api.auth.updatePassword = vi.fn().mockResolvedValue({
+      session: null,
+      profile: null,
+      pendingPasswordReset: false,
+      pendingPasswordResetToken: null,
+    })
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-input-password')).toBeInTheDocument()
+    })
+
+    await user.type(screen.getByTestId('auth-input-password'), 'new-password')
+    await user.click(screen.getByTestId('auth-submit'))
+
+    await waitFor(() => {
+      expect(window.api.auth.updatePassword).toHaveBeenCalledWith('new-password')
+      expect(screen.getByTestId('auth-input-email')).toBeInTheDocument()
+      expect(screen.getByTestId('auth-input-password')).toHaveAttribute(
+        'autocomplete',
+        'current-password'
+      )
+    })
+  })
+
   it('applies forward and backward transition directions when switching modes', async () => {
     const user = userEvent.setup()
 
