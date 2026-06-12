@@ -10,7 +10,7 @@ import { _electron as electron, ElectronApplication, Page } from 'playwright'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import { getAuthStateFilePath } from '../../../../main/auth/session-store'
+import { getAuthStateFilePath } from '../../../../shared/auth-paths'
 import { e2eApi } from './api'
 
 // ─── Security guard ───────────────────────────────────────────────────────────

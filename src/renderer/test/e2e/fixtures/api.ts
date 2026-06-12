@@ -113,6 +113,7 @@ export const e2eApi = {
       },
       profile,
       pendingPasswordReset: false,
+      pendingPasswordResetToken: null,
     }
   },
 

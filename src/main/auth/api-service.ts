@@ -12,6 +12,7 @@ import type { AuthCredentials, AuthEmailRequest, AuthPasswordUpdate, AuthService
 interface ApiAuthResponse {
   accessToken: string
   refreshToken: string
+  accessExpiresAt?: string | number
   user?: AuthProfile
 }
 
@@ -27,6 +28,7 @@ function createSignedOutState(): AuthState {
     session: null,
     profile: null,
     pendingPasswordReset: false,
+    pendingPasswordResetToken: null,
   }
 }
 
@@ -40,11 +42,12 @@ function createStateFromApiResponse(response: ApiAuthResponse): AuthState {
           refreshToken: response.refreshToken,
           userId: user.id,
           email: user.email,
-          expiresAt: null,
+          expiresAt: response.accessExpiresAt ? new Date(response.accessExpiresAt).getTime() : null,
         }
       : null,
     profile: user,
     pendingPasswordReset: false,
+    pendingPasswordResetToken: null,
   }
 }
 
@@ -87,6 +90,7 @@ export function createApiAuthService({
               ...currentState.session,
               accessToken: response.accessToken,
               refreshToken: response.refreshToken,
+              expiresAt: response.accessExpiresAt ? new Date(response.accessExpiresAt).getTime() : null,
             }
           : null,
       }
@@ -130,23 +134,25 @@ export function createApiAuthService({
 
     async requestPasswordReset(input: AuthEmailRequest): Promise<AuthPasswordResetResult> {
       await anonymousClient.post('/auth/password/forgot', input)
-      const currentState = await sessionStore.readState()
-      await writeState({ ...currentState, pendingPasswordReset: true })
       return { emailSent: true }
     },
 
     async updatePassword(input: AuthPasswordUpdate) {
       const currentState = await sessionStore.readState()
 
-      if (currentState.pendingPasswordReset) {
-        throw new Error('Password reset deep links are not available in the NestJS API yet')
+      if (currentState.pendingPasswordReset && currentState.pendingPasswordResetToken) {
+        await anonymousClient.post('/auth/password/reset', {
+          token: currentState.pendingPasswordResetToken,
+          password: input.password,
+        })
+        return writeState(createSignedOutState())
       }
 
       await authClient.post('/auth/password/change', {
-        currentPassword: input.password,
+        currentPassword: input.currentPassword,
         newPassword: input.password,
       })
-      return writeState({ ...currentState, pendingPasswordReset: false })
+      return writeState({ ...currentState, pendingPasswordReset: false, pendingPasswordResetToken: null })
     },
 
     async signOut() {
@@ -163,8 +169,20 @@ export function createApiAuthService({
       await clearLocalAccess()
     },
 
-    async handleCallbackUrl() {
-      return sessionStore.readState()
+    async handleCallbackUrl(url: string) {
+      const parsed = new URL(url)
+      const token = parsed.searchParams.get('token')
+
+      if (!token) {
+        return sessionStore.readState()
+      }
+
+      const currentState = await sessionStore.readState()
+      return writeState({
+        ...currentState,
+        pendingPasswordReset: true,
+        pendingPasswordResetToken: token,
+      })
     },
   }
 }

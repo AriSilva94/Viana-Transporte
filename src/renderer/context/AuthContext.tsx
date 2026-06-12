@@ -2,6 +2,7 @@ import * as React from 'react'
 import type { AuthState } from '../../shared/types'
 
 const AUTH_SESSION_REFRESH_INTERVAL_MS = 30_000
+const AUTH_SESSION_REFRESH_BEFORE_EXPIRY_MS = 60_000
 
 interface AuthContextValue {
   state: AuthState | null
@@ -35,7 +36,7 @@ function AuthProvider({ children }: { children: React.ReactNode }): JSX.Element 
       setState(nextState)
       return nextState
     } catch {
-      const safeState: AuthState = { session: null, profile: null, pendingPasswordReset: false }
+      const safeState: AuthState = { session: null, profile: null, pendingPasswordReset: false, pendingPasswordResetToken: null }
       setState(safeState)
       return safeState
     } finally {
@@ -66,6 +67,27 @@ function AuthProvider({ children }: { children: React.ReactNode }): JSX.Element 
       window.clearInterval(intervalId)
     }
   }, [refresh, state?.session])
+
+  React.useEffect(() => {
+    const expiresAt = state?.session?.expiresAt
+    if (!expiresAt) {
+      return
+    }
+
+    const msUntilRefresh = expiresAt - Date.now() - AUTH_SESSION_REFRESH_BEFORE_EXPIRY_MS
+    if (msUntilRefresh <= 0) {
+      void refresh()
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void refresh()
+    }, msUntilRefresh)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [refresh, state?.session?.expiresAt])
 
   const signIn = React.useCallback(async (email: string, password: string): Promise<AuthState> => {
     const nextState = await window.api.auth.signIn(email, password)
@@ -101,7 +123,7 @@ function AuthProvider({ children }: { children: React.ReactNode }): JSX.Element 
 
   const signOut = React.useCallback(async (): Promise<void> => {
     await window.api.auth.signOut()
-    const nextState: AuthState = { session: null, profile: null, pendingPasswordReset: false }
+    const nextState: AuthState = { session: null, profile: null, pendingPasswordReset: false, pendingPasswordResetToken: null }
     setState(nextState)
   }, [])
 

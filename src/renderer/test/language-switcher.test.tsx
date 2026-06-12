@@ -20,6 +20,7 @@ function createAuthState(role: AuthRole): AuthState {
       status: 'active',
     },
     pendingPasswordReset: false,
+    pendingPasswordResetToken: null,
   }
 }
 
