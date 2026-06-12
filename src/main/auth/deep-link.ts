@@ -14,6 +14,12 @@ export function extractDeepLinkUrlFromArgv(argv: string[], protocol = 'viana-tra
 function notifyRenderer(): void {
   BrowserWindow.getAllWindows().forEach((win) => {
     win.webContents.send('auth:sessionChanged')
+    if (win.isMinimized()) {
+      win.restore()
+    }
+    win.show()
+    win.focus()
+    win.moveTop()
   })
 }
 

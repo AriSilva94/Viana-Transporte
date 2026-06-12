@@ -44,6 +44,7 @@ test.describe.serial('Dashboard', () => {
       document: '12.345.678/0001-99',
       phone: '(11) 99999-0001',
       email: `e2e-dashboard-${suffix}@viana.local`,
+      notes: null,
     })
     clientId = client.id
 
@@ -52,8 +53,9 @@ test.describe.serial('Dashboard', () => {
       name: projectName,
       location: 'Dashboard E2E',
       status: 'active',
-      startDate: '2026-01-01',
+      startDate: new Date('2026-01-01'),
       endDate: null,
+      contractAmount: null,
       description: 'Seed criado por API para validar dashboard',
     })
     projectId = project.id

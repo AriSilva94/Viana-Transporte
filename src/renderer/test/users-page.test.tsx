@@ -41,6 +41,7 @@ function createAdminState(userId = 'admin-user'): AuthState {
       status: 'active',
     },
     pendingPasswordReset: false,
+    pendingPasswordResetToken: null,
   }
 }
 

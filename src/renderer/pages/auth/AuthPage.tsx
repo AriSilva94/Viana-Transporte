@@ -47,9 +47,10 @@ function mapAuthError(message: string, t: TFunction): string {
 
 interface AuthFormBodyProps {
   mode: AuthMode
+  onPasswordResetCompleted: () => void
 }
 
-function AuthFormBody({ mode }: AuthFormBodyProps): JSX.Element {
+function AuthFormBody({ mode, onPasswordResetCompleted }: AuthFormBodyProps): JSX.Element {
   const { t } = useTranslation('auth')
   const { signIn, signUp, requestPasswordReset, updatePassword } = useAuth()
   const [message, setMessage] = React.useState<string | null>(null)
@@ -109,7 +110,7 @@ function AuthFormBody({ mode }: AuthFormBodyProps): JSX.Element {
       }
 
       await updatePassword(data.password)
-      setMessage(t('messages.updatePasswordSuccess'))
+      onPasswordResetCompleted()
     } catch (error) {
       const raw = error instanceof Error && error.message.trim() ? error.message : ''
       const mapped = mapAuthError(raw, t)
@@ -205,7 +206,7 @@ function AuthFormBody({ mode }: AuthFormBodyProps): JSX.Element {
 }
 
 function AuthPage(): JSX.Element {
-  const { state, loading } = useAuth()
+  const { state, loading, signOut } = useAuth()
   const { t } = useTranslation('auth')
   const [mode, setMode] = React.useState<AuthMode>('signIn')
   const [transitionDirection, setTransitionDirection] = React.useState<TransitionDirection>('forward')
@@ -242,6 +243,15 @@ function AuthPage(): JSX.Element {
       AUTH_MODE_ORDER[nextMode] >= AUTH_MODE_ORDER[mode] ? 'forward' : 'backward'
     )
     setMode(nextMode)
+  }
+
+  async function cancelPasswordReset(): Promise<void> {
+    await signOut()
+    switchMode('signIn')
+  }
+
+  function completePasswordReset(): void {
+    switchMode('signIn')
   }
 
   const footerByMode: Record<AuthMode, React.ReactNode> = {
@@ -310,7 +320,7 @@ function AuthPage(): JSX.Element {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => switchMode('signIn')}
+          onClick={() => void cancelPasswordReset()}
           data-testid="auth-link-to-sign-in"
         >
           {t('buttons.signIn')}
@@ -336,7 +346,7 @@ function AuthPage(): JSX.Element {
           data-testid="auth-transition-layer"
           data-direction={transitionDirection}
         >
-          <AuthFormBody mode={mode} />
+          <AuthFormBody mode={mode} onPasswordResetCompleted={completePasswordReset} />
 
           {state?.pendingPasswordReset ? (
             <p className="mt-4 text-sm text-secondary">{t('messages.pendingRecovery')}</p>

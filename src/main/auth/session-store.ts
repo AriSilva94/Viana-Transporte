@@ -1,14 +1,14 @@
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
-import { dirname, join } from 'path'
+import { dirname } from 'path'
 import type { AuthState } from '../../shared/types'
-
-const AUTH_STATE_FILE = 'auth-session.json'
+import { getAuthStateFilePath } from '../../shared/auth-paths'
 
 function createDefaultAuthState(): AuthState {
   return {
     session: null,
     profile: null,
     pendingPasswordReset: false,
+    pendingPasswordResetToken: null,
   }
 }
 
@@ -18,9 +18,7 @@ export interface AuthSessionStore {
   clearState: () => Promise<void>
 }
 
-export function getAuthStateFilePath(userDataPath: string): string {
-  return join(userDataPath, AUTH_STATE_FILE)
-}
+export { getAuthStateFilePath } from '../../shared/auth-paths'
 
 export function createAuthSessionStore(userDataPath: string): AuthSessionStore {
   const stateFilePath = getAuthStateFilePath(userDataPath)
@@ -34,6 +32,7 @@ export function createAuthSessionStore(userDataPath: string): AuthSessionStore {
           session: parsed?.session ?? null,
           profile: parsed?.profile ?? null,
           pendingPasswordReset: parsed?.pendingPasswordReset ?? false,
+          pendingPasswordResetToken: parsed?.pendingPasswordResetToken ?? null,
         }
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT' || error instanceof SyntaxError) {

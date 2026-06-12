@@ -24,6 +24,7 @@ function memorySessionState(): AuthState {
       status: 'active',
     },
     pendingPasswordReset: false,
+    pendingPasswordResetToken: null,
   }
 }
 
