@@ -20,7 +20,7 @@ export interface AuthPasswordUpdate {
 
 export interface AuthService {
   getCurrentState: () => Promise<AuthState>
-  getState: () => Promise<AuthState>
+  getState: (options?: { slide?: boolean }) => Promise<AuthState>
   signIn: (input: AuthCredentials) => Promise<AuthState>
   signUp: (input: AuthCredentials) => Promise<AuthSignUpResult>
   requestPasswordReset: (input: AuthEmailRequest) => Promise<AuthPasswordResetResult>

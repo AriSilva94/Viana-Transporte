@@ -2,6 +2,16 @@ import { formatLocalDate } from '../../shared/date'
 import type { AuthState } from '../../shared/types'
 import { getApiBaseUrl } from './config'
 
+export class ApiHttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number | null,
+  ) {
+    super(message)
+    this.name = 'ApiHttpError'
+  }
+}
+
 export interface ApiHttpOptions {
   getAuthState?: () => Promise<AuthState>
   onUnauthorized?: () => Promise<AuthState | null>
@@ -33,11 +43,18 @@ export class ApiHttpClient {
     query?: Record<string, unknown>,
     retry = true
   ): Promise<T> {
-    const response = await fetch(this.url(path, query), {
-      method,
-      headers: await this.headers(body !== undefined),
-      body: body === undefined ? undefined : JSON.stringify(serializeBody(body)),
-    })
+    const requestUrl = this.url(path, query)
+    const requestHeaders = await this.headers(body !== undefined)
+    const requestBody = body === undefined ? undefined : JSON.stringify(serializeBody(body))
+
+    let response: Response
+    try {
+      response = await fetch(requestUrl, { method, headers: requestHeaders, body: requestBody })
+    } catch (error) {
+      // fetch only rejects on transport failure (offline, DNS, refused, aborted):
+      // the request never reached the server, so the status is unknown (null).
+      throw new ApiHttpError(error instanceof Error ? error.message : 'network_error', null)
+    }
 
     if (response.status === 401 && retry && this.options.onUnauthorized) {
       const nextState = await this.options.onUnauthorized()
@@ -47,7 +64,7 @@ export class ApiHttpClient {
     }
 
     if (!response.ok) {
-      throw new Error(await readErrorMessage(response))
+      throw new ApiHttpError(await readErrorMessage(response), response.status)
     }
 
     if (response.status === 204) {

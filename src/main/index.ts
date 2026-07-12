@@ -69,7 +69,7 @@ async function bootstrap(): Promise<void> {
     setAuthService(authService)
     authDeepLinkRuntime.attachAuthService(authService)
     await initDataProvider(resolveDataProviderFromEnv())
-    await authService.getState()
+    await authService.getState({ slide: true })
   }
 
   registerAllHandlers()
