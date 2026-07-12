@@ -5,7 +5,7 @@ import type {
   AuthSignUpResult,
   AuthState,
 } from '../../shared/types'
-import { ApiHttpClient } from '../api/http'
+import { ApiHttpClient, ApiHttpError } from '../api/http'
 import { createAuthSessionStore, type AuthSessionStore } from './session-store'
 import type { AuthCredentials, AuthEmailRequest, AuthPasswordUpdate, AuthService } from './service'
 
@@ -17,6 +17,11 @@ interface ApiAuthResponse {
 }
 
 interface ApiUserResponse extends AuthProfile {}
+
+type RefreshOutcome =
+  | { status: 'refreshed'; state: AuthState }
+  | { status: 'unauthorized' }
+  | { status: 'unavailable' }
 
 export interface ApiAuthServiceDependencies {
   userDataPath: string
@@ -58,8 +63,14 @@ export function createApiAuthService({
   const anonymousClient = new ApiHttpClient()
   const authClient = new ApiHttpClient({
     getAuthState: () => sessionStore.readState(),
-    onUnauthorized: refreshSession,
+    onUnauthorized: handleUnauthorized,
   })
+
+  // Dedupes concurrent refreshes. The API rotates and revokes the refresh token
+  // on every /auth/refresh, so two parallel refreshes with the same token would
+  // make the second fail and revoke the whole token family — logging the user
+  // out. Single-flight guarantees only one rotation runs at a time.
+  let refreshInFlight: Promise<RefreshOutcome> | null = null
 
   async function writeState(state: AuthState): Promise<AuthState> {
     await sessionStore.writeState(state)
@@ -71,12 +82,12 @@ export function createApiAuthService({
     return createSignedOutState()
   }
 
-  async function refreshSession(): Promise<AuthState | null> {
+  async function doRefreshSession(): Promise<RefreshOutcome> {
     const currentState = await sessionStore.readState()
     const refreshToken = currentState.session?.refreshToken
 
     if (!refreshToken) {
-      return null
+      return { status: 'unauthorized' }
     }
 
     try {
@@ -94,11 +105,55 @@ export function createApiAuthService({
             }
           : null,
       }
-      return writeState(nextState)
-    } catch {
-      await clearLocalAccess()
-      return null
+      return { status: 'refreshed', state: await writeState(nextState) }
+    } catch (error) {
+      // Only a 401 means the refresh token is genuinely invalid/expired/revoked
+      // and the user must re-authenticate. Network/transport or 5xx failures are
+      // transient — keep the stored session so the user stays logged in offline.
+      if (error instanceof ApiHttpError && error.status === 401) {
+        return { status: 'unauthorized' }
+      }
+
+      return { status: 'unavailable' }
     }
+  }
+
+  function refreshSession(): Promise<RefreshOutcome> {
+    if (!refreshInFlight) {
+      refreshInFlight = doRefreshSession().finally(() => {
+        refreshInFlight = null
+      })
+    }
+
+    return refreshInFlight
+  }
+
+  // Adapts the rich refresh outcome to the HTTP client's retry contract: a 401
+  // clears local credentials; transient failures keep the session for a retry.
+  async function handleUnauthorized(): Promise<AuthState | null> {
+    const outcome = await refreshSession()
+
+    if (outcome.status === 'refreshed') {
+      return outcome.state
+    }
+
+    if (outcome.status === 'unauthorized') {
+      await clearLocalAccess()
+    }
+
+    return null
+  }
+
+  // Persists a freshly fetched profile WITHOUT clobbering tokens. A refresh may
+  // have rotated the tokens during the /auth/me round-trip, so we re-read the
+  // latest persisted state instead of reusing a stale pre-request snapshot.
+  async function persistProfile(profile: AuthProfile): Promise<AuthState> {
+    const latestState = await sessionStore.readState()
+    if (!latestState.session) {
+      return latestState
+    }
+
+    return writeState({ ...latestState, profile })
   }
 
   return {
@@ -106,18 +161,38 @@ export function createApiAuthService({
       return sessionStore.readState()
     },
 
-    async getState() {
+    async getState(options?: { slide?: boolean }) {
       const currentState = await sessionStore.readState()
 
       if (!currentState.session) {
         return currentState
       }
 
+      // Option A: proactively rotate on app open so the 30-day refresh window
+      // slides forward every launch, even when the access token is still valid.
+      if (options?.slide) {
+        const outcome = await refreshSession()
+        if (outcome.status === 'unauthorized') {
+          await clearLocalAccess()
+          return createSignedOutState()
+        }
+        if (outcome.status === 'unavailable') {
+          // Offline/server down at launch: keep the user logged in locally.
+          return currentState
+        }
+      }
+
       try {
         const profile = await authClient.get<ApiUserResponse>('/auth/me')
-        return writeState({ ...currentState, profile })
-      } catch {
-        return clearLocalAccess()
+        return persistProfile(profile)
+      } catch (error) {
+        // A 401 means the session is truly invalid → sign out. Transient errors
+        // (offline/server) must not destroy a valid session.
+        if (error instanceof ApiHttpError && error.status === 401) {
+          return clearLocalAccess()
+        }
+
+        return sessionStore.readState()
       }
     },
 
