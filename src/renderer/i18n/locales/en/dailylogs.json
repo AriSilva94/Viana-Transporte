@@ -46,7 +46,7 @@
       "percentage": "Percentage (%)",
       "toll": "Toll ($)",
       "tonnage": "Tonnage",
-      "computedValue": "Computed Value ($)",
+      "valuePerTon": "Value per ton ($)",
       "workDescription": "Work Description",
       "downtimeNotes": "Downtime Notes",
       "notes": "General Notes"
@@ -60,23 +60,39 @@
       "percentage": "0.0",
       "toll": "0.00",
       "tonnage": "0.0",
+      "valuePerTon": "0.0000",
       "workDescription": "Describe the work performed...",
       "downtimeNotes": "Record incidents or downtime...",
       "notes": "Additional notes..."
     },
-    "helpers": {
-      "computedValue": "Tonnage × Percentage × KM + Toll"
+    "calculation": {
+      "result": "Result",
+      "legacyTitle": "Calculation: tonnage × percentage × kilometers + toll",
+      "perTonTitle": "Calculation: tonnage × value per ton",
+      "noneTitle": "No calculation selected",
+      "invalidTitle": "Complete a valid calculation",
+      "legacy": "{{tonnage}} tons × {{percentage}} percentage × {{km}} kilometers + $ {{toll}} toll = {{value}}",
+      "perTon": "{{tonnage}} tons × $ {{valuePerTon}} per ton = {{value}}",
+      "none": "Fill only the fields for the calculation you want to use.",
+      "errors": {
+        "calculation_fields_must_be_positive": "Calculation values must be greater than zero.",
+        "incomplete_calculation_fields": "Complete every field for one calculation.",
+        "mixed_calculation_fields": "Choose per-ton or existing calculation; do not mix fields.",
+        "invalid_calculation_fields": "Review the calculation values."
+      }
     },
     "errors": {
       "requiredDate": "Date is required",
       "requiredProject": "Project is required",
       "requiredHours": "Worked hours must be greater than zero",
       "negativeNotAllowed": "Numeric values cannot be negative",
+      "positiveRequired": "Value must be greater than zero",
       "tonnagePrecision": "Tonnage accepts at most 4 decimal places",
       "fuelQuantityPrecision": "Fuel accepts at most 2 decimal places",
       "kmPrecision": "KM accepts at most 2 decimal places",
       "percentagePrecision": "Percentage accepts at most 2 decimal places",
       "tollPrecision": "Toll accepts at most 2 decimal places",
+      "valuePerTonPrecision": "Value per ton accepts at most 4 decimal places",
       "save": "Error saving daily log. Please try again."
     },
     "toasts": {

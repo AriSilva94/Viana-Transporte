@@ -3,7 +3,7 @@
 // Starts the full e2e infrastructure before the Playwright test suite runs:
 //   1. Docker Compose (e2e project, port 5433) — brings up a DEDICATED Postgres
 //      that is completely separate from dev (5432). NEVER touches dev data.
-//   2. Prisma migrate deploy + generate — against the e2e DB (5433).
+//   2. Prisma migrate deploy — against the e2e DB.
 //   3. Creates the dedicated e2e admin user (idempotent upsert) in the e2e DB.
 //   4. Clears port 3000 (kills any leftover process) then starts the NestJS API
 //      pointed at the e2e DB.
@@ -19,15 +19,16 @@ import { E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD } from './fixtures/credentials'
 const API_DIR = path.resolve(__dirname, '../../../../../viana-transportes-api')
 const PID_DIR = path.resolve(__dirname, '../../../../../test-results/e2e')
 const PID_FILE = path.join(PID_DIR, 'api.pid')
-const API_PORT = 3000
+const API_PORT = Number(process.env.VIANA_E2E_API_PORT ?? 3000)
 
 // ─── E2E database (dedicated, isolated from dev) ──────────────────────────────
 // Dev uses localhost:5432/viana_transportes.
-// E2E uses localhost:5433/viana_transportes_e2e — different port, different DB,
+// E2E uses a dedicated host port/viana_transportes_e2e — different port, different DB,
 // different Docker volume (viana_e2e_pgdata). teardown runs `down -v` only on
 // the viana-e2e compose project, so dev data is NEVER touched.
 
-const E2E_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5433/viana_transportes_e2e'
+const E2E_DB_PORT = process.env.VIANA_E2E_DB_PORT ?? '5433'
+const E2E_DATABASE_URL = `postgresql://postgres:postgres@localhost:${E2E_DB_PORT}/viana_transportes_e2e`
 const E2E_COMPOSE_FILE = path.join(API_DIR, 'docker-compose.e2e.yml')
 const E2E_COMPOSE_PROJECT = 'viana-e2e'
 const E2E_COMPOSE_CMD = `docker compose -p ${E2E_COMPOSE_PROJECT} -f ${E2E_COMPOSE_FILE}`
@@ -58,11 +59,11 @@ function assertLocalhostOnly(): void {
 function assertE2EDatabase(): void {
   const url = E2E_DATABASE_URL
   const hasE2ESuffix = url.includes('_e2e')
-  const hasE2EPort = url.includes(':5433/')
+  const hasE2EPort = url.includes(`:${E2E_DB_PORT}/`)
   if (!hasE2ESuffix || !hasE2EPort) {
     throw new Error(
       `global-setup refused: E2E_DATABASE_URL="${url}" does not look like a safe e2e ` +
-      'database (must contain "_e2e" in the DB name and use port 5433). ' +
+      `database (must contain "_e2e" in the DB name and use port ${E2E_DB_PORT}). ` +
       'Refusing to run migrations/seed against what might be a dev or production database.'
     )
   }
@@ -121,7 +122,7 @@ async function waitForPostgresHealthy(timeoutMs = 60_000): Promise<void> {
       for (const line of lines) {
         const svc = JSON.parse(line)
         if (svc.Health === 'healthy') {
-          console.log('[global-setup] E2E Postgres healthy (port 5433)')
+          console.log(`[global-setup] E2E Postgres healthy (port ${E2E_DB_PORT})`)
           return
         }
       }
@@ -131,7 +132,7 @@ async function waitForPostgresHealthy(timeoutMs = 60_000): Promise<void> {
     await new Promise((r) => setTimeout(r, 2000))
   }
   throw new Error(
-    `[global-setup] Timed out waiting for E2E Postgres (port 5433) to become healthy (${timeoutMs}ms)`
+    `[global-setup] Timed out waiting for E2E Postgres (port ${E2E_DB_PORT}) to become healthy (${timeoutMs}ms)`
   )
 }
 
@@ -141,17 +142,15 @@ export default async function globalSetup(): Promise<void> {
   assertLocalhostOnly()
   assertE2EDatabase()
 
-  // 1. Start dedicated E2E Postgres (port 5433, DB viana_transportes_e2e)
-  //    Dev Postgres (port 5432) is NEVER touched.
-  console.log('[global-setup] Starting E2E Postgres via docker compose (viana-e2e project)...')
+  // 1. Start dedicated E2E Postgres (DB viana_transportes_e2e)
+  //    Dev Postgres is NEVER touched.
+  console.log(`[global-setup] Starting E2E Postgres via docker compose (viana-e2e project, port ${E2E_DB_PORT})...`)
   run(`${E2E_COMPOSE_CMD} up -d`, API_DIR)
   await waitForPostgresHealthy()
 
-  // 2. Apply migrations and generate Prisma client — E2E DB only
+  // 2. Apply migrations — E2E DB only
   console.log('[global-setup] Running prisma migrate deploy (e2e DB)...')
   run('npx prisma migrate deploy', API_DIR, { DATABASE_URL: E2E_DATABASE_URL })
-  console.log('[global-setup] Running prisma generate...')
-  run('npx prisma generate', API_DIR, { DATABASE_URL: E2E_DATABASE_URL })
 
   // 3. Seed dedicated e2e admin user (idempotent upsert) — E2E DB only
   console.log(`[global-setup] Seeding e2e admin user: ${E2E_ADMIN_EMAIL}`)
@@ -176,8 +175,8 @@ export default async function globalSetup(): Promise<void> {
     )
   }
 
-  // 6. Start the API — pointed at the e2e DB (5433), not dev (5432)
-  console.log('[global-setup] Starting NestJS API on port 3000 (e2e DB: port 5433)...')
+  // 6. Start the API pointed at the e2e DB, not dev.
+  console.log(`[global-setup] Starting NestJS API on port ${API_PORT} (e2e DB: port ${E2E_DB_PORT})...`)
 
   let setupFailed = false
   let setupFailReason = ''
@@ -260,7 +259,7 @@ export default async function globalSetup(): Promise<void> {
     try {
       const res = await fetch(HEALTH_URL)
       if (res.ok) {
-        console.log(`[global-setup] API healthy at ${HEALTH_URL} (PID ${apiProcess.pid}, DB: e2e port 5433)`)
+        console.log(`[global-setup] API healthy at ${HEALTH_URL} (PID ${apiProcess.pid}, DB: e2e port ${E2E_DB_PORT})`)
         break
       }
     } catch {
@@ -276,5 +275,5 @@ export default async function globalSetup(): Promise<void> {
     )
   }
 
-  console.log('[global-setup] Infrastructure ready. E2E DB: viana_transportes_e2e @ localhost:5433')
+  console.log(`[global-setup] Infrastructure ready. E2E DB: viana_transportes_e2e @ localhost:${E2E_DB_PORT}`)
 }

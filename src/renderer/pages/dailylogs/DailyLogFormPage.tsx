@@ -11,7 +11,7 @@ import { DatePicker } from '@renderer/components/ui/date-picker'
 import { Label } from '@renderer/components/ui/label'
 import { useToast } from '@renderer/context/ToastContext'
 import { formatLocalDate, parseLocalDate } from '../../../shared/date'
-import { computeDailyLogValue } from '../../../shared/dailyLogValue'
+import { resolveDailyLogCalculation } from '../../../shared/dailyLogValue'
 import type { DailyLogWithRelations, Machine, Operator, ProjectWithClient } from '../../../shared/types'
 
 type FormValues = {
@@ -28,6 +28,7 @@ type FormValues = {
   percentage: string
   toll: string
   tonnage: string
+  valuePerTon: string
 }
 
 const countDecimals = (v: string): number => {
@@ -62,17 +63,26 @@ export function DailyLogFormPage(): JSX.Element {
       percentage: '',
       toll: '',
       tonnage: '',
+      valuePerTon: '',
     },
   })
 
-  const [tonnage, km, percentage, toll] = watch(['tonnage', 'km', 'percentage', 'toll'])
+  const [tonnage, km, percentage, toll, valuePerTon] = watch([
+    'tonnage',
+    'km',
+    'percentage',
+    'toll',
+    'valuePerTon',
+  ])
 
-  const computedValue = computeDailyLogValue({
+  const calculation = resolveDailyLogCalculation({
     tonnage: tonnage === '' ? null : Number(tonnage),
     percentage: percentage === '' ? null : Number(percentage),
     km: km === '' ? null : Number(km),
     toll: toll === '' ? null : Number(toll),
+    valuePerTon: valuePerTon === '' ? null : Number(valuePerTon),
   })
+  const computedValue = calculation.mode === 'invalid' ? 0 : calculation.value
   const computedValueFormatted = computedValue.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -100,11 +110,13 @@ export function DailyLogFormPage(): JSX.Element {
         percentage: log.percentage != null ? String(log.percentage) : '',
         toll: log.toll != null ? String(log.toll) : '',
         tonnage: log.tonnage != null ? String(log.tonnage) : '',
+        valuePerTon: log.valuePerTon != null ? String(log.valuePerTon) : '',
       })
     })
   }, [id, isEdit, reset])
 
   async function onSubmit(values: FormValues): Promise<void> {
+    if (calculation.mode === 'invalid') return
     setIsLoading(true)
     try {
       const data = {
@@ -121,6 +133,7 @@ export function DailyLogFormPage(): JSX.Element {
         percentage: values.percentage !== '' ? Number(values.percentage) : null,
         toll: values.toll !== '' ? Number(values.toll) : null,
         tonnage: values.tonnage !== '' ? Number(values.tonnage) : null,
+        valuePerTon: values.valuePerTon !== '' ? Number(values.valuePerTon) : null,
       }
       if (isEdit) {
         await api.dailylogs.update(Number(id), data)
@@ -143,6 +156,7 @@ export function DailyLogFormPage(): JSX.Element {
       onSubmit={handleSubmit(onSubmit)}
       onCancel={() => navigate('/daily-logs')}
       isLoading={isLoading}
+      isSubmitDisabled={calculation.mode === 'invalid'}
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
@@ -257,7 +271,7 @@ export function DailyLogFormPage(): JSX.Element {
             rules={{
               validate: (v) => {
                 if (v === '') return true
-                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (Number(v) <= 0) return t('dailylogs:form.errors.positiveRequired')
                 if (countDecimals(v) > 2) return t('dailylogs:form.errors.kmPrecision')
                 return true
               },
@@ -276,7 +290,7 @@ export function DailyLogFormPage(): JSX.Element {
             rules={{
               validate: (v) => {
                 if (v === '') return true
-                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (Number(v) <= 0) return t('dailylogs:form.errors.positiveRequired')
                 if (countDecimals(v) > 2) return t('dailylogs:form.errors.percentagePrecision')
                 return true
               },
@@ -298,7 +312,7 @@ export function DailyLogFormPage(): JSX.Element {
             rules={{
               validate: (v) => {
                 if (v === '') return true
-                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (Number(v) <= 0) return t('dailylogs:form.errors.positiveRequired')
                 if (countDecimals(v) > 2) return t('dailylogs:form.errors.tollPrecision')
                 return true
               },
@@ -317,7 +331,7 @@ export function DailyLogFormPage(): JSX.Element {
             rules={{
               validate: (v) => {
                 if (v === '') return true
-                if (Number(v) < 0) return t('dailylogs:form.errors.negativeNotAllowed')
+                if (Number(v) <= 0) return t('dailylogs:form.errors.positiveRequired')
                 if (countDecimals(v) > 4) return t('dailylogs:form.errors.tonnagePrecision')
                 return true
               },
@@ -331,17 +345,53 @@ export function DailyLogFormPage(): JSX.Element {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="computedValue">{t('dailylogs:form.fields.computedValue')}</Label>
-        <Input
-          id="computedValue"
-          type="text"
-          value={computedValueFormatted}
-          readOnly
-          tabIndex={-1}
-          className="bg-muted/40 font-medium text-brand-ink"
+        <Label htmlFor="valuePerTon">{t('dailylogs:form.fields.valuePerTon')}</Label>
+        <Controller
+          name="valuePerTon"
+          control={control}
+          rules={{
+            validate: (v) => {
+              if (v === '') return true
+              if (Number(v) <= 0) return t('dailylogs:form.errors.positiveRequired')
+              if (countDecimals(v) > 4) return t('dailylogs:form.errors.valuePerTonPrecision')
+              return true
+            },
+          }}
+          render={({ field }) => (
+            <Input id="valuePerTon" type="number" min={0} step={0.0001} {...field} placeholder={t('dailylogs:form.placeholders.valuePerTon')} />
+          )}
         />
-        <p className="text-xs text-muted-foreground">
-          {t('dailylogs:form.helpers.computedValue')}
+        {errors.valuePerTon && <p className="text-sm text-destructive">{errors.valuePerTon.message}</p>}
+      </div>
+
+      <div className="rounded-xl border border-primary/25 bg-primary/5 p-5" data-testid="calculation-summary" aria-live="polite">
+        <p className="text-base font-semibold leading-snug text-foreground">
+          {calculation.mode === 'legacy' && t('dailylogs:form.calculation.legacyTitle')}
+          {calculation.mode === 'perTon' && t('dailylogs:form.calculation.perTonTitle')}
+          {calculation.mode === 'none' && t('dailylogs:form.calculation.noneTitle')}
+          {calculation.mode === 'invalid' && t('dailylogs:form.calculation.invalidTitle')}
+        </p>
+        <p className="mt-3 text-4xl font-bold tracking-tight text-primary">
+          {calculation.mode === 'invalid' ? '—' : computedValueFormatted}
+        </p>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-secondary">
+          {t('dailylogs:form.calculation.result')}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {calculation.mode === 'legacy' && t('dailylogs:form.calculation.legacy', {
+            tonnage,
+            percentage,
+            km,
+            toll,
+            value: computedValueFormatted,
+          })}
+          {calculation.mode === 'perTon' && t('dailylogs:form.calculation.perTon', {
+            tonnage,
+            valuePerTon,
+            value: computedValueFormatted,
+          })}
+          {calculation.mode === 'none' && t('dailylogs:form.calculation.none')}
+          {calculation.mode === 'invalid' && t(`dailylogs:form.calculation.errors.${calculation.error}`)}
         </p>
       </div>
 

@@ -46,7 +46,7 @@
       "percentage": "Porcentaje (%)",
       "toll": "Peaje ($)",
       "tonnage": "Toneladas",
-      "computedValue": "Valor Calculado ($)",
+      "valuePerTon": "Valor por tonelada ($)",
       "workDescription": "Descripción del Servicio",
       "downtimeNotes": "Observaciones de Parada",
       "notes": "Observaciones Generales"
@@ -60,23 +60,39 @@
       "percentage": "0,0",
       "toll": "0,00",
       "tonnage": "0,0",
+      "valuePerTon": "0,0000",
       "workDescription": "Describe el trabajo realizado...",
       "downtimeNotes": "Registra incidencias o paradas...",
       "notes": "Observaciones adicionales..."
     },
-    "helpers": {
-      "computedValue": "Toneladas × Porcentaje × KM + Peaje"
+    "calculation": {
+      "result": "Resultado",
+      "legacyTitle": "Cálculo: toneladas × porcentaje × kilómetros + peaje",
+      "perTonTitle": "Cálculo: toneladas × valor por tonelada",
+      "noneTitle": "Ningún cálculo seleccionado",
+      "invalidTitle": "Completa un cálculo válido",
+      "legacy": "{{tonnage}} toneladas × {{percentage}} de porcentaje × {{km}} kilómetros + $ {{toll}} de peaje = {{value}}",
+      "perTon": "{{tonnage}} toneladas × $ {{valuePerTon}} por tonelada = {{value}}",
+      "none": "Completa solo los campos del cálculo que deseas usar.",
+      "errors": {
+        "calculation_fields_must_be_positive": "Los valores deben ser mayores que cero.",
+        "incomplete_calculation_fields": "Completa todos los campos de un solo cálculo.",
+        "mixed_calculation_fields": "Elige el cálculo por tonelada o el existente; no mezcles campos.",
+        "invalid_calculation_fields": "Revisa los valores del cálculo."
+      }
     },
     "errors": {
       "requiredDate": "La fecha es obligatoria",
       "requiredProject": "El proyecto es obligatorio",
       "requiredHours": "Las horas trabajadas deben ser mayores que cero",
       "negativeNotAllowed": "Los valores numéricos no pueden ser negativos",
+      "positiveRequired": "El valor debe ser mayor que cero",
       "tonnagePrecision": "Toneladas acepta como máximo 4 decimales",
       "fuelQuantityPrecision": "Combustible acepta como máximo 2 decimales",
       "kmPrecision": "KM acepta como máximo 2 decimales",
       "percentagePrecision": "Porcentaje acepta como máximo 2 decimales",
       "tollPrecision": "Peaje acepta como máximo 2 decimales",
+      "valuePerTonPrecision": "El valor por tonelada acepta como máximo 4 decimales",
       "save": "Error al guardar el diario. Intenta de nuevo."
     },
     "toasts": {

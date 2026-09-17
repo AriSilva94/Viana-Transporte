@@ -37,7 +37,9 @@ function mapDateFields<T extends ApiEntity>(row: T, fields: string[]): T {
   for (const field of fields) {
     const value = next[field]
     if (typeof value === 'string') {
-      next[field] = field === 'date' || field.endsWith('Date') ? parseLocalDate(value) : new Date(value)
+      const isCalendarDate = field === 'date' || field.endsWith('Date')
+      const dateOnlyValue = value.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? value
+      next[field] = isCalendarDate ? parseLocalDate(dateOnlyValue) : new Date(value)
     }
   }
 
@@ -91,6 +93,7 @@ function mapDailyLog(row: DailyLogWithRelations & ApiEntity): DailyLogWithRelati
     'percentage',
     'toll',
     'tonnage',
+    'valuePerTon',
   ]) as DailyLogWithRelations
 }
 

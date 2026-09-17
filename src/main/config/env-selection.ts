@@ -54,5 +54,13 @@ export function loadBuildEnv({
     }
   }
 
+  if (mode === 'e2e') {
+    for (const key of envKeys) {
+      if (processEnv[key]) {
+        buildEnv[key] = processEnv[key]!
+      }
+    }
+  }
+
   return buildEnv
 }

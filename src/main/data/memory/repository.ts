@@ -113,6 +113,7 @@ export function createMemoryRepository(): DomainRepository {
       percentage: log.percentage,
       km: log.km,
       toll: log.toll,
+      valuePerTon: log.valuePerTon,
     })
   }
 
