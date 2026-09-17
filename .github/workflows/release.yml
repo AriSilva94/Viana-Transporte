@@ -4,10 +4,16 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: windows-latest
+    timeout-minutes: 45
 
     permissions:
       contents: write
@@ -20,18 +26,50 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and publish full version
-        run: npm run build:full && npx electron-builder --win --x64 --publish always
+      - name: Build full version
+        timeout-minutes: 20
+        run: npm run build:full && npx electron-builder --win --x64 --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VIANA_API_BASE_URL: ${{ secrets.VIANA_API_BASE_URL }}
 
-      - name: Build and publish trial version
-        run: npm run build:trial && npx electron-builder --win --x64 --config electron-builder.trial.json --publish always
+      - name: Build trial version
+        timeout-minutes: 20
+        run: npm run build:trial && npx electron-builder --win --x64 --config electron-builder.trial.json --publish never
+        env:
+          VIANA_API_BASE_URL: ${{ secrets.VIANA_API_BASE_URL }}
+
+      - name: Collect release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          cp dist/full/*.exe dist/full/*.exe.blockmap dist/full/latest.yml release-assets/
+          cp dist/trial/*.exe dist/trial/*.exe.blockmap dist/trial/trial.yml release-assets/
+          ls -l release-assets
+          count=$(ls -1 release-assets | wc -l)
+          test "$count" -eq 6 || { echo "expected 6 assets, got $count"; exit 1; }
+
+      - name: Publish GitHub release
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VIANA_API_BASE_URL: ${{ secrets.VIANA_API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          if [ "$GITHUB_REF_TYPE" != "tag" ]; then
+            tag="v$(node -p "require('./package.json').version")"
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" release-assets/* --clobber
+          else
+            gh release create "$tag" release-assets/* \
+              --title "${tag#v}" \
+              --generate-notes \
+              --latest
+          fi
+          gh release view "$tag" --json assets --jq '.assets[].name'
