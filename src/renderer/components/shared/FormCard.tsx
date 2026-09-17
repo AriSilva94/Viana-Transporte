@@ -7,6 +7,7 @@ interface FormCardProps {
   onSubmit: (e: React.FormEvent) => void
   onCancel: () => void
   isLoading: boolean
+  isSubmitDisabled?: boolean
   children: React.ReactNode
 }
 
@@ -16,6 +17,7 @@ function FormCard({
   onSubmit,
   onCancel,
   isLoading,
+  isSubmitDisabled = false,
   children,
 }: FormCardProps): JSX.Element {
   const { t } = useTranslation('common')
@@ -34,7 +36,7 @@ function FormCard({
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         {children}
         <div className="flex gap-3 pt-3">
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || isSubmitDisabled}>
             {isLoading ? t('saving') : t('save')}
           </Button>
           <Button

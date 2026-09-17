@@ -82,9 +82,32 @@ test.describe.serial('DailyLogs', () => {
     await row.getByRole('button', { name: /editar|edit/i }).click()
 
     await page.locator('#workDescription').fill(workDescEdited)
+    await page.locator('#tonnage').fill('10.5')
+    await page.locator('#valuePerTon').fill('25.5')
+    await expect(page.getByTestId('calculation-summary')).toContainText(/267,75|267\.75/)
+    await expect(page.getByTestId('calculation-summary')).toContainText(/toneladas.*valor por tonelada/i)
+    await expect(page.locator('#computedValue')).toHaveCount(0)
     await page.getByRole('button', { name: /salvar|save/i }).click()
 
     await expect(page.locator(`tr:has-text("${projectName}")`)).toBeVisible({ timeout: 8000 })
+
+    const [updatedLog] = await e2eApi.listDailyLogs({ projectId })
+    expect(updatedLog.valuePerTon).toBe(25.5)
+    expect(updatedLog.tonnage).toBe(10.5)
+  })
+
+  test('bloqueia a mistura dos cálculos', async ({ page }) => {
+    await goTo(page, '#/daily-logs', 'button')
+    await page.getByRole('button', { name: /novo|new/i }).click()
+
+    await selectCustom(page, 'projectId', projectId)
+    await page.locator('#hoursWorked').fill('8')
+    await page.locator('#tonnage').fill('10')
+    await page.locator('#valuePerTon').fill('25.5')
+    await page.locator('#km').fill('100')
+
+    await expect(page.getByTestId('calculation-summary')).toContainText(/não misture|do not mix|no mezcles/i)
+    await expect(page.getByRole('button', { name: /salvar|save/i })).toBeDisabled()
   })
 
   test('exclui o diário', async ({ page }) => {

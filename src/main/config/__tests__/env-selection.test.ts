@@ -17,6 +17,33 @@ describe('getEnvFilesForMode', () => {
 })
 
 describe('loadBuildEnv', () => {
+  it('allows an explicit process environment override for the API base URL', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'env-selection-'))
+
+    try {
+      writeFileSync(
+        join(tempDir, '.env.e2e'),
+        ['VIANA_API_BASE_URL=http://localhost:3000/api'].join('\n'),
+        'utf-8'
+      )
+
+      const env = loadBuildEnv({
+        cwd: tempDir,
+        mode: 'e2e',
+        processEnv: {
+          VIANA_API_BASE_URL: 'http://localhost:43128/api',
+        },
+        envKeys: ['VIANA_API_BASE_URL'],
+      })
+
+      expect(env).toEqual({
+        VIANA_API_BASE_URL: 'http://localhost:43128/api',
+      })
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true })
+    }
+  })
+
   it('loads production values from .env.production before falling back to process env', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'env-selection-'))
 

@@ -3,6 +3,7 @@
 // (projeto/categoria) e DatePicker. O spec cria dado único e valida diretamente na tabela.
 import { test, expect, goTo, selectCustom, uniqueSuffix } from '../fixtures/electron'
 import { e2eApi } from '../fixtures/api'
+import { formatLocalDate } from '../../../../shared/date'
 
 test.describe.serial('Costs', () => {
   const suffix = uniqueSuffix()
@@ -58,7 +59,13 @@ test.describe.serial('Costs', () => {
     await goTo(page, '#/costs', 'button')
     await page.getByRole('button', { name: /novo|new/i }).click()
 
-    // date já tem default = hoje
+    const expectedDate = formatLocalDate(new Date())
+    await page.locator('#date').click()
+    await page.getByRole('button', { name: /hoje|today/i }).click()
+    const expectedDateLabel = new Intl.DateTimeFormat('pt-BR').format(new Date())
+    await expect(page.locator('#date')).toContainText(
+      expectedDateLabel,
+    )
     await selectCustom(page, 'projectId', projectId)
     await selectCustom(page, 'category', 'fuel')
     await page.locator('#description').fill(costDesc)
@@ -67,7 +74,13 @@ test.describe.serial('Costs', () => {
     await page.getByRole('button', { name: /salvar|save/i }).click()
 
     // A lista não tem busca por texto — valida presença direta na tabela
-    await expect(page.locator(`tr:has-text("${costDesc}")`)).toBeVisible({ timeout: 8000 })
+    const costRow = page.locator(`tr:has-text("${costDesc}")`)
+    await expect(costRow).toBeVisible({ timeout: 8000 })
+    await expect(costRow).toContainText(expectedDateLabel)
+
+    const savedCosts = await e2eApi.listCosts({ projectId })
+    const savedCost = savedCosts.find((cost) => cost.description === costDesc)
+    expect(savedCost?.date).toEqual(expect.stringContaining(expectedDate))
   })
 
   test('verifica que o custo criado aparece na listagem', async ({ page }) => {

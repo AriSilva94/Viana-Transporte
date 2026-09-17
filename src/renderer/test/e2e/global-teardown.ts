@@ -13,7 +13,7 @@ import fs from 'fs'
 
 const API_DIR = path.resolve(__dirname, '../../../../../viana-transportes-api')
 const PID_FILE = path.resolve(__dirname, '../../../../../test-results/e2e/api.pid')
-const API_PORT = 3000
+const API_PORT = Number(process.env.VIANA_E2E_API_PORT ?? 3000)
 
 const E2E_COMPOSE_FILE = path.join(API_DIR, 'docker-compose.e2e.yml')
 const E2E_COMPOSE_PROJECT = 'viana-e2e'
@@ -101,7 +101,7 @@ export default async function globalTeardown(): Promise<void> {
   // 2. Bring down ONLY the e2e Postgres project and remove its dedicated volume.
   //    Dev Postgres (docker-compose.yml, port 5432, volume postgres_data) is
   //    NEVER touched by this command.
-  console.log('[global-teardown] Bringing down E2E Postgres (viana-e2e project, port 5433)...')
+  console.log(`[global-teardown] Bringing down E2E Postgres (viana-e2e project, port ${process.env.VIANA_E2E_DB_PORT ?? 5433})...`)
   runAlways(`${E2E_COMPOSE_CMD} down -v`, API_DIR)
 
   console.log('[global-teardown] Infrastructure torn down. Dev DB untouched.')

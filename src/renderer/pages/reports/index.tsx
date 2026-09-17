@@ -15,7 +15,7 @@ import { ExportMenu } from '@renderer/components/shared/ExportMenu'
 import { generateExcel } from '@renderer/lib/export/excel'
 import { generatePdf } from '@renderer/lib/export/pdf'
 import { useToast } from '@renderer/context/ToastContext'
-import { endOfLocalDay, isLocalDateWithinInclusiveRange, parseLocalDate } from '../../../shared/date'
+import { endOfLocalDay, formatLocalDate, isLocalDateWithinInclusiveRange, parseLocalDate } from '../../../shared/date'
 import type {
   Client,
   ProjectWithClient,
@@ -68,8 +68,8 @@ interface CategorySummaryRow {
   count: number
 }
 
-function todaySlug(): string {
-  return new Date().toISOString().slice(0, 10)
+export function todaySlug(): string {
+  return formatLocalDate(new Date())
 }
 
 function ProjectSummaryTab(): JSX.Element {

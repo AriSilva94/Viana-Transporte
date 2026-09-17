@@ -67,6 +67,7 @@ export interface DailyLog {
   percentage: number | null
   toll: number | null
   tonnage: number | null
+  valuePerTon: number | null
   createdAt: Date
   updatedAt: Date
 }

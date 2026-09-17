@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createApiRepository, loadDashboardStats } from '../api/repository'
 import type { ApiHttpClient } from '../../api/http'
+import { formatLocalDate } from '../../../shared/date'
 
 function createClient(responses: Record<string, unknown>): ApiHttpClient {
   return {
@@ -18,6 +19,37 @@ function createClient(responses: Record<string, unknown>): ApiHttpClient {
 }
 
 describe('createApiRepository', () => {
+  it('preserva a data do custo quando a API retorna meia-noite UTC', async () => {
+    const repository = createApiRepository(
+      createClient({
+        '/costs': [
+          {
+            id: 1,
+            date: '2026-06-04T00:00:00.000Z',
+            projectId: 1,
+            machineId: null,
+            operatorId: null,
+            dailyLogId: null,
+            category: 'fuel',
+            description: 'Diesel',
+            amount: '720.45',
+            notes: null,
+            projectName: 'Financeiro',
+            machineName: null,
+            operatorName: null,
+            dailyLogComputedValue: null,
+            createdAt: '2026-06-04T12:00:00.000Z',
+            updatedAt: '2026-06-04T12:00:00.000Z',
+          },
+        ],
+      })
+    )
+
+    const [cost] = await repository.costs.list()
+
+    expect(formatLocalDate(cost.date)).toBe('2026-06-04')
+  })
+
   it('converte decimais serializados pela API para number', async () => {
     const repository = createApiRepository(
       createClient({
@@ -71,8 +103,9 @@ describe('createApiRepository', () => {
             notes: null,
             km: '120',
             percentage: null,
-            toll: '97.80',
+            toll: null,
             tonnage: '22.6',
+            valuePerTon: '25.50',
             projectName: 'Financeiro',
             machineName: null,
             operatorName: null,
@@ -92,7 +125,7 @@ describe('createApiRepository', () => {
     expect(revenue.amount).toBe(1800.99)
     expect(dailyLog.hoursWorked).toBe(8.5)
     expect(dailyLog.fuelQuantity).toBe(20.25)
-    expect(dailyLog.toll).toBe(97.8)
+    expect(dailyLog.valuePerTon).toBe(25.5)
   })
 })
 
