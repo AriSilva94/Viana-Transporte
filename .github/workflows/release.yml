@@ -4,12 +4,6 @@ on:
   push:
     tags:
       - 'v*.*.*'
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: 'Release tag to build'
-        required: true
-        default: 'v2.0.3'
 
 jobs:
   build:
@@ -29,13 +23,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Prepare GitHub release
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
-        run: gh release create "$env:RELEASE_TAG" --draft --title "$env:RELEASE_TAG" --notes "Release $env:RELEASE_TAG"
 
       - name: Build and publish full version
         run: npm run build:full && npx electron-builder --win --x64 --publish always
