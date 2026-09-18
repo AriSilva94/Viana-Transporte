@@ -25,6 +25,7 @@ function getStatusBadgeClass(status: UserAccessStatus): string {
 function mapUsersErrorMessage(error: unknown, t: (key: string) => string): string {
   const message = error instanceof Error ? error.message.toLowerCase() : ''
 
+  if (message.includes('admin_account_protected')) return t('adminProtected')
   if (message.includes('own role')) return t('cannotChangeSelf')
   if (message.includes('own access')) return t('cannotChangeOwnAccess')
   if (message.includes('at least one admin')) return t('lastAdminError')

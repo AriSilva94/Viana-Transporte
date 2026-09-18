@@ -57,7 +57,7 @@ export function UserDetailPage(): JSX.Element {
     <div className="space-y-6">
       <PageHeader
         title={t('viewDialogTitle')}
-        action={{
+        action={user.role === 'admin' ? undefined : {
           label: t('common:edit'),
           onClick: () => navigate(`/users/${user.id}/edit`),
         }}
