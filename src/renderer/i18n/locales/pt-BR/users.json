@@ -15,6 +15,7 @@
   "statusRevoked": "Revogado",
   "updateSuccess": "Perfil atualizado com sucesso",
   "actionError": "Erro ao atualizar acesso do usuário",
+  "adminProtected": "Contas admin não podem ser editadas nem ter seu acesso alterado",
   "cannotChangeSelf": "Você não pode alterar seu próprio perfil",
   "cannotChangeOwnAccess": "Você não pode alterar o acesso da sua própria conta",
   "lastAdminError": "Deve existir pelo menos um administrador",

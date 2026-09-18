@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -125,6 +125,46 @@ describe('UsersPage', () => {
     expect(await screen.findByText('Ativo')).toBeInTheDocument()
     expect(screen.getByText('Revogado')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Reativar acesso' })).toBeInTheDocument()
+  })
+
+  describe.each(['owner', 'admin'] as const)('admin protection for %s actors', (role) => {
+    function actorState(): AuthState {
+      const state = createAdminState('another-user')
+      state.profile!.role = role
+      return state
+    }
+
+    it.each(['active', 'revoked'] as const)('blocks all actions for a %s admin', async (status) => {
+      const user = userEvent.setup()
+      usersApi.list.mockResolvedValue([{ ...mockUsers[0], status }, mockUsers[1]])
+      await renderUsersRoutes('/users', actorState())
+      const row = (await screen.findByText('admin@test.com')).closest('tr')!
+      const edit = within(row).getByRole('button', { name: 'Editar' })
+      const access = within(row).getByRole('button', {
+        name: status === 'active' ? 'Revogar acesso' : 'Reativar acesso',
+      })
+      expect(edit).toBeDisabled()
+      expect(access).toBeDisabled()
+      await user.click(edit)
+      await user.click(access)
+      expect(usersApi.updateRole).not.toHaveBeenCalled()
+      expect(usersApi.revokeAccess).not.toHaveBeenCalled()
+      expect(usersApi.reactivateAccess).not.toHaveBeenCalled()
+    })
+
+    it('does not offer editing on admin details', async () => {
+      await renderUsersRoutes('/users/admin-user', actorState())
+      expect(await screen.findByText('Detalhes do Usuário')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
+    })
+
+    it('blocks direct navigation to admin editing', async () => {
+      await renderUsersRoutes('/users/admin-user/edit', actorState())
+      expect(await screen.findByText('Contas admin não podem ser editadas nem ter seu acesso alterado')).toBeInTheDocument()
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Salvar' })).not.toBeInTheDocument()
+      expect(usersApi.updateRole).not.toHaveBeenCalled()
+    })
   })
 
   it('navigates to the user detail page from the list', async () => {

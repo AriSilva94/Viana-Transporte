@@ -7,6 +7,8 @@ import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
 import { Label } from '@renderer/components/ui/label'
 import { AuthCard } from '@renderer/components/auth/AuthCard'
+import { AuthVideoPanel } from '@renderer/components/auth/AuthVideoPanel'
+import logo from '@renderer/assets/img/logo.png'
 import { useAuth } from '@renderer/context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import { FullPageSpinner } from '@renderer/components/shared/FullPageSpinner'
@@ -120,7 +122,7 @@ function AuthFormBody({ mode, onPasswordResetCompleted }: AuthFormBodyProps): JS
   }
 
   return (
-    <form className="space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
       {mode !== 'resetPassword' ? (
         <div className="space-y-2">
           <Label htmlFor="auth-email">{t('fields.email')}</Label>
@@ -128,6 +130,7 @@ function AuthFormBody({ mode, onPasswordResetCompleted }: AuthFormBodyProps): JS
             id="auth-email"
             data-testid="auth-input-email"
             type="email"
+            className="h-12 rounded-lg bg-white"
             autoComplete="email"
             autoFocus
             disabled={isSubmitting}
@@ -156,16 +159,15 @@ function AuthFormBody({ mode, onPasswordResetCompleted }: AuthFormBodyProps): JS
               autoFocus={mode === 'resetPassword'}
               disabled={isSubmitting}
               placeholder={t('placeholders.password')}
-              className="pr-10"
+              className="h-12 rounded-lg bg-white pr-12"
               {...register('password')}
             />
             <button
               type="button"
-              tabIndex={-1}
               data-testid="auth-toggle-password"
               aria-label={showPassword ? t('fields.hidePassword') : t('fields.showPassword')}
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none"
+              className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -195,7 +197,7 @@ function AuthFormBody({ mode, onPasswordResetCompleted }: AuthFormBodyProps): JS
 
       <Button
         type="submit"
-        className="w-full"
+        className="h-12 w-full rounded-lg shadow-none hover:translate-y-0"
         disabled={isSubmitting}
         data-testid="auth-submit"
       >
@@ -209,7 +211,8 @@ function AuthPage(): JSX.Element {
   const { state, loading, signOut } = useAuth()
   const { t } = useTranslation('auth')
   const [mode, setMode] = React.useState<AuthMode>('signIn')
-  const [transitionDirection, setTransitionDirection] = React.useState<TransitionDirection>('forward')
+  const [transitionDirection, setTransitionDirection] =
+    React.useState<TransitionDirection>('forward')
 
   React.useEffect(() => {
     if (state?.pendingPasswordReset && mode !== 'resetPassword') {
@@ -256,10 +259,11 @@ function AuthPage(): JSX.Element {
 
   const footerByMode: Record<AuthMode, React.ReactNode> = {
     signIn: (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
+          className="h-auto min-h-11 whitespace-normal px-0 text-left"
           onClick={() => switchMode('signUp')}
           data-testid="auth-link-to-sign-up"
         >
@@ -267,7 +271,8 @@ function AuthPage(): JSX.Element {
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
+          className="h-auto min-h-11 whitespace-normal px-0 text-left"
           onClick={() => switchMode('forgotPassword')}
           data-testid="auth-link-to-forgot"
         >
@@ -276,10 +281,11 @@ function AuthPage(): JSX.Element {
       </div>
     ),
     signUp: (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
+          className="h-auto min-h-11 whitespace-normal px-0 text-left"
           onClick={() => switchMode('signIn')}
           data-testid="auth-link-to-sign-in"
         >
@@ -287,7 +293,8 @@ function AuthPage(): JSX.Element {
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
+          className="h-auto min-h-11 whitespace-normal px-0 text-left"
           onClick={() => switchMode('forgotPassword')}
           data-testid="auth-link-to-forgot"
         >
@@ -296,10 +303,11 @@ function AuthPage(): JSX.Element {
       </div>
     ),
     forgotPassword: (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
+          className="h-auto min-h-11 whitespace-normal px-0 text-left"
           onClick={() => switchMode('signIn')}
           data-testid="auth-link-to-sign-in"
         >
@@ -307,7 +315,8 @@ function AuthPage(): JSX.Element {
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
+          className="h-auto min-h-11 whitespace-normal px-0 text-left"
           onClick={() => switchMode('signUp')}
           data-testid="auth-link-to-sign-up"
         >
@@ -316,10 +325,11 @@ function AuthPage(): JSX.Element {
       </div>
     ),
     resetPassword: (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
         <Button
           type="button"
-          variant="ghost"
+          variant="link"
+          className="h-auto min-h-11 whitespace-normal px-0 text-left"
           onClick={() => void cancelPasswordReset()}
           data-testid="auth-link-to-sign-in"
         >
@@ -330,30 +340,41 @@ function AuthPage(): JSX.Element {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(14,71,116,0.16),_transparent_45%),linear-gradient(180deg,#f6f3ec_0%,#ece6da_100%)] px-6 py-10">
-      <div className="absolute right-6 top-4">
-        <LanguageSwitcher />
-      </div>
-      <AuthCard
-        title={titleByMode[mode]}
-        titleTestId="auth-mode-title"
-        description={descriptionByMode[mode]}
-        footer={footerByMode[mode]}
-      >
-        <div
-          key={mode}
-          className="auth-transition-layer"
-          data-testid="auth-transition-layer"
-          data-direction={transitionDirection}
-        >
-          <AuthFormBody mode={mode} onPasswordResetCompleted={completePasswordReset} />
+    <main className="min-h-screen bg-white selection:bg-brand-deep/15 md:grid md:grid-cols-2 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="flex min-h-screen min-w-0 flex-col px-6 py-6 md:px-8 xl:px-12">
+        <header className="flex items-center justify-between gap-4">
+          <img src={logo} alt={t('brand')} className="h-12 w-28 object-contain object-left" />
+          <LanguageSwitcher />
+        </header>
+        <div className="my-auto flex justify-center py-6 xl:py-10">
+          <AuthCard
+            title={titleByMode[mode]}
+            titleTestId="auth-mode-title"
+            description={descriptionByMode[mode]}
+            footer={footerByMode[mode]}
+          >
+            <div
+              key={mode}
+              className="auth-transition-layer"
+              data-testid="auth-transition-layer"
+              data-direction={transitionDirection}
+            >
+              <AuthFormBody mode={mode} onPasswordResetCompleted={completePasswordReset} />
 
-          {state?.pendingPasswordReset ? (
-            <p className="mt-4 text-sm text-secondary">{t('messages.pendingRecovery')}</p>
-          ) : null}
+              {state?.pendingPasswordReset ? (
+                <p className="mt-4 text-sm text-secondary">{t('messages.pendingRecovery')}</p>
+              ) : null}
+            </div>
+          </AuthCard>
         </div>
-      </AuthCard>
-    </div>
+      </div>
+      <aside
+        className="sticky top-0 hidden h-screen min-w-0 py-4 pr-4 md:block"
+        aria-label={t('brand')}
+      >
+        <AuthVideoPanel />
+      </aside>
+    </main>
   )
 }
 

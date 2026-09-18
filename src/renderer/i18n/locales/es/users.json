@@ -1,4 +1,5 @@
 {
+  "adminProtected": "Las cuentas admin no se pueden editar ni modificar su acceso",
   "pageTitle": "Gestión de Usuarios",
   "email": "Correo",
   "role": "Perfil",

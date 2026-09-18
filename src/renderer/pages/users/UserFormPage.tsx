@@ -56,7 +56,7 @@ export function UserFormPage(): JSX.Element {
   }, [id, reset])
 
   async function onSubmit(values: FormValues): Promise<void> {
-    if (!user) return
+    if (!user || user.role === 'admin') return
     setIsLoading(true)
     try {
       await api.users.updateRole(user.id, values.role)
@@ -87,6 +87,10 @@ export function UserFormPage(): JSX.Element {
 
   if (!user) {
     return <EmptyState message={t('userNotFound')} />
+  }
+
+  if (user.role === 'admin') {
+    return <EmptyState message={t('adminProtected')} />
   }
 
   return (

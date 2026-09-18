@@ -120,7 +120,7 @@ export function UsersPage(): JSX.Element {
           <Button
             size="sm"
             variant="outline"
-            disabled={row.id === currentUserId}
+            disabled={row.role === 'admin' || row.id === currentUserId}
             onClick={() => navigate(`/users/${row.id}/edit`)}
           >
             {tc('edit')}
@@ -128,7 +128,7 @@ export function UsersPage(): JSX.Element {
           <Button
             size="sm"
             variant={row.status === 'active' ? 'destructive' : 'outline'}
-            disabled={row.id === currentUserId}
+            disabled={row.role === 'admin' || row.id === currentUserId}
             onClick={() =>
               setPendingAccessAction({
                 userId: row.id,
